@@ -18,7 +18,7 @@ public class Attribute: CustomStringConvertible, Equatable, Hashable {
     public let tag: String
     public var value: String
     
-    init(tag: String, value: String) {
+    public init(tag: String, value: String) {
         self.tag = tag        
         self.value = value
     }

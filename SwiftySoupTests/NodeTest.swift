@@ -7,6 +7,7 @@
 //
 
 import XCTest
+@testable import SwiftySoup
 
 class NodeTest: XCTestCase {
     

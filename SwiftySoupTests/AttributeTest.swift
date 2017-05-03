@@ -5,6 +5,7 @@
 
 import Foundation
 import XCTest
+@testable import SwiftySoup
 
 class AttributeTest: XCTestCase {
 
