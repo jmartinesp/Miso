@@ -277,31 +277,61 @@ public class Element: Node {
     public func elements(byValue attrValue: String, key: String) -> Elements {
         let attrValue = attrValue.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
         
-        return Collector.collect(evaluator: Evaluator.HasAttributeWithValue(key: key, value: attrValue), root: self)
+        do {
+            let evaluator = try Evaluator.HasAttributeWithValue(key: key, value: attrValue)
+            return Collector.collect(evaluator: evaluator, root: self)
+        } catch {
+            print(error)
+            return Elements()
+        }
     }
     
     public func elements(byValueNot attrValue: String, key: String) -> Elements {
         let attrValue = attrValue.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
         
-        return Collector.collect(evaluator: Evaluator.HasAttributeWithValueNot(key: key, value: attrValue), root: self)
+        do {
+            let evaluator = try Evaluator.HasAttributeWithValueNot(key: key, value: attrValue)
+            return Collector.collect(evaluator: evaluator, root: self)
+        } catch {
+            print(error)
+            return Elements()
+        }
     }
     
     public func elements(byValueStarting attrValue: String, key: String) -> Elements {
         let attrValue = attrValue.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
         
-        return Collector.collect(evaluator: Evaluator.HasAttributeWithValueStartingWith(key: key, value: attrValue), root: self)
+        do {
+            let evaluator = try Evaluator.HasAttributeWithValueStartingWith(key: key, value: attrValue)
+            return Collector.collect(evaluator: evaluator, root: self)
+        } catch {
+            print(error)
+            return Elements()
+        }
     }
     
     public func elements(byValueEnding attrValue: String, key: String) -> Elements {
         let attrValue = attrValue.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
         
-        return Collector.collect(evaluator: Evaluator.HasAttributeWithValueEndingWith(key: key, value: attrValue), root: self)
+        do {
+            let evaluator = try Evaluator.HasAttributeWithValueEndingWith(key: key, value: attrValue)
+            return Collector.collect(evaluator: evaluator, root: self)
+        } catch {
+            print(error)
+            return Elements()
+        }
     }
     
     public func elements(byValueContaining attrValue: String, key: String) -> Elements {
         let attrValue = attrValue.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
         
-        return Collector.collect(evaluator: Evaluator.HasAttributeWithValueContaining(key: key, value: attrValue), root: self)
+        do {
+            let evaluator = try Evaluator.HasAttributeWithValueContaining(key: key, value: attrValue)
+            return Collector.collect(evaluator: evaluator, root: self)
+        } catch {
+            print(error)
+            return Elements()
+        }
     }
     
     public func elements(byValueMathing pattern: String, key: String) -> Elements {
@@ -455,7 +485,7 @@ public class Element: Node {
     public var classNames: OrderedSet<String> {
         get {
             let set = OrderedSet<String>()
-            (attributes.get(byTag: "class")?.value?
+            (attributes.get(byTag: "class")?.value
                 .normalizedWhitespace(stripLeading: true)
                 .trimmingCharacters(in: .whitespaces)
                 .components(separatedBy: " ") ?? [])
@@ -475,7 +505,11 @@ public class Element: Node {
         
         guard !classAttr.isEmpty && classAttr.unicodeScalars.count >= className.unicodeScalars.count else { return false }
         
-        return classAttr.normalizedWhitespace(stripLeading: true).trimmingCharacters(in: .whitespaces).components(separatedBy: " ").contains(className)
+        return classAttr.lowercased()
+            .normalizedWhitespace(stripLeading: true)
+            .trimmingCharacters(in: .whitespaces)
+            .components(separatedBy: " ")
+            .contains(className.lowercased())
     }
     
     public func addClass(_ className: String) -> Element {

@@ -12,7 +12,7 @@ public class Collector {
     
     public static func collect(evaluator: EvaluatorProtocol, root: Element) -> Elements {
         var elements = Elements()
-        NodeTraversor(visitor: Accumulator(root: root, elements: &elements, evaluator: evaluator)).traverse(root: root)
+        NodeTraversor(visitor: Accumulator(root: root, elements: elements, evaluator: evaluator)).traverse(root: root)
         return elements
     }
     
@@ -22,7 +22,7 @@ public class Collector {
         var elements: Elements
         let evaluator: EvaluatorProtocol
         
-        public init(root: Element, elements: inout Elements, evaluator: EvaluatorProtocol) {
+        public init(root: Element, elements: Elements, evaluator: EvaluatorProtocol) {
             self.root = root
             self.elements = elements
             self.evaluator = evaluator

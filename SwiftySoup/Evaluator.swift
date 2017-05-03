@@ -89,7 +89,15 @@ public class Evaluator {
         var key: String
         var value: String
         
-        init(key: String, value: String) {
+        init(key: String, value: String) throws {
+            guard !key.isEmpty else {
+                throw SelectorParseException(message: "Attribute selector key cannot be empty")
+            }
+            
+            guard !value.isEmpty else {
+                throw SelectorParseException(message: "Attribute selector value cannot be empty")
+            }
+            
             self.key = key.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
             self.value = value
             
@@ -139,7 +147,7 @@ public class Evaluator {
     class HasAttributeWithValue: AttributeKeyPair {
         
         override func matches(root: Element?, and element: Element) -> Bool {
-            return element.attributes.get(byTag: key)?.value?.lowercased() == self.value
+            return element.attributes.get(byTag: key)?.value.lowercased() == self.value
         }
         
         override var description: String {
@@ -150,7 +158,7 @@ public class Evaluator {
     class HasAttributeWithValueNot: AttributeKeyPair {
         
         override func matches(root: Element?, and element: Element) -> Bool {
-            return element.attributes.get(byTag: key)?.value?.lowercased() != self.value
+            return element.attributes.get(byTag: key)?.value.lowercased() != self.value
         }
         
         override var description: String {
@@ -162,7 +170,7 @@ public class Evaluator {
     class HasAttributeWithValueStartingWith: AttributeKeyPair {
         
         override func matches(root: Element?, and element: Element) -> Bool {
-            if let value = element.attributes.get(byTag: key)?.value?.lowercased() {
+            if let value = element.attributes.get(byTag: key)?.value.lowercased() {
                 return value.hasPrefix(self.value)
             }
             return false
@@ -177,7 +185,7 @@ public class Evaluator {
     class HasAttributeWithValueEndingWith: AttributeKeyPair {
         
         override func matches(root: Element?, and element: Element) -> Bool {
-            if let value = element.attributes.get(byTag: key)?.value?.lowercased() {
+            if let value = element.attributes.get(byTag: key)?.value.lowercased() {
                 return value.hasSuffix(self.value.lowercased())
             }
             return false
@@ -192,7 +200,7 @@ public class Evaluator {
     class HasAttributeWithValueContaining: AttributeKeyPair {
         
         override func matches(root: Element?, and element: Element) -> Bool {
-            if let value = element.attributes.get(byTag: key)?.value?.lowercased() {
+            if let value = element.attributes.get(byTag: key)?.value.lowercased() {
                 return value.contains(self.value)
             }
             return false
@@ -215,7 +223,7 @@ public class Evaluator {
             }
             
             if let value = element.attributes.get(byTag: key.trimmingCharacters(in: .whitespacesAndNewlines).lowercased())?.value {
-                return regex.numberOfMatches(in: value, options: .anchored, range: NSRange(location: 0, length: value.unicodeScalars.count)) > 0
+                return regex.numberOfMatches(in: value, options: [], range: NSRange(location: 0, length: value.unicodeScalars.count)) > 0
             }
             
             return false
@@ -291,7 +299,7 @@ public class Evaluator {
     struct IsLastChild: EvaluatorProtocol {
         
         func matches(root: Element?, and element: Element) -> Bool {
-            return element.parentElement?.children.last == element
+            return !(element.parentElement is Document) && element.parentElement?.children.last == element
         }
         
         var description: String {
@@ -302,7 +310,7 @@ public class Evaluator {
     struct IsFirstChild: EvaluatorProtocol {
         
         func matches(root: Element?, and element: Element) -> Bool {
-            return element.parentElement?.children.first == element
+            return !(element.parentElement is Document) && element.parentElement?.children.first == element
         }
         
         var description: String {
@@ -411,7 +419,7 @@ public class Evaluator {
         override func calculatePosition(root: Element?, and element: Element) -> Int {
             return element.parentElement!.children.filter {
                 $0.tagName == element.tagName
-            }.index(of: element)!
+            }.index(of: element)! + 1
         }
         
         override var pseudoClass: String { return "nth-of-type" }
@@ -425,8 +433,8 @@ public class Evaluator {
         
         override func calculatePosition(root: Element?, and element: Element) -> Int {
             return element.parentElement!.children.filter {
-                $0.tagName == element.tagName && ($0.elementSiblingIndex ?? -1) > (element.elementSiblingIndex ?? -1)
-                }.count
+                $0.tagName == element.tagName
+                }.reverse().index(of: element)! + 1
         }
         
         override var pseudoClass: String { return "nth-last-of-type" }
@@ -466,6 +474,7 @@ public class Evaluator {
     struct IsOnlyOfType: EvaluatorProtocol {
         
         func matches(root: Element?, and element: Element) -> Bool {
+            guard element.parentNode != nil && !(element.parentNode! is Document) else { return false }
             return element.siblingElements.filter { $0.tagName == element.tagName }.isEmpty
         }
         
@@ -478,7 +487,7 @@ public class Evaluator {
         
         func matches(root: Element?, and element: Element) -> Bool {
             for child in element.childNodes {
-                if child is Comment || child is XmlDeclaration || child is DocumentType {
+                if !(child is Comment || child is XmlDeclaration || child is DocumentType) {
                     return false
                 }
             }
@@ -557,7 +566,7 @@ public class Evaluator {
             guard let regex = try? NSRegularExpression(pattern: pattern, options: [.dotMatchesLineSeparators]) else {
                 return false
             }
-            return regex.numberOfMatches(in: element.text, options: [.anchored], range:
+            return regex.numberOfMatches(in: element.text, options: [], range:
                 NSRange(location: 0, length: element.text.unicodeScalars.count)) > 0
         }
         

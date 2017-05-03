@@ -116,7 +116,7 @@ public class SwiftySoup {
      @return safe HTML (body fragment)
      @see Cleaner#clean(Document)
      */
-    public static func clean(bodyHtml: String, whitelist: Whitelist, baseUri: String?) -> String {
+    public static func clean(bodyHtml: String, whitelist: Whitelist, baseUri: String? = nil) -> String {
         let dirty = parse(bodyFragment: bodyHtml, baseUri: baseUri)
         let cleaner = Cleaner(whitelist: whitelist)
         let clean = cleaner.clean(document: dirty)
@@ -137,7 +137,7 @@ public class SwiftySoup {
     * @return safe HTML (body fragment)
     * @see Cleaner#clean(Document)
     */
-    public static func clean(bodyHtml: String, whitelist: Whitelist, outputSettings: OutputSettings, baseUri: String?) -> String {
+    public static func clean(bodyHtml: String, whitelist: Whitelist, outputSettings: OutputSettings, baseUri: String? = nil) -> String {
         let dirty = parse(bodyFragment: bodyHtml, baseUri: baseUri)
         let cleaner = Cleaner(whitelist: whitelist)
         let clean = cleaner.clean(document: dirty)

@@ -78,9 +78,9 @@ class Token: CustomStringConvertible {
                     let attribute: Attribute
                     
                     if hasPendingAttributeValue {
-                        attribute = Attribute(tag: trimmedName, value: pendingAttributeValue)
+                        attribute = Attribute(tag: trimmedName, value: pendingAttributeValue!.trimmingCharacters(in: .whitespaces))
                     } else if hasEmptyAttributeValue {
-                        attribute = Attribute(tag: trimmedName, value: nil)
+                        attribute = Attribute(tag: trimmedName, value: "")
                     } else {
                         attribute = BooleanAttribute(tag: trimmedName)
                     }

@@ -94,7 +94,7 @@ public class Cleaner {
         let sourceAttrs = element.attributes
         for (key, attribute) in sourceAttrs {
             if whitelist.isSafeAttribute(attribute, in: element, forTag: sourceTag) {
-                destAttrs.put(string: attribute.value!, forKey: key)
+                destAttrs.put(string: attribute.value, forKey: key)
             } else {
                 numDiscarded += 1
             }

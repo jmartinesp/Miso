@@ -16,7 +16,6 @@ public class QueryParser {
     var tokenQueue: TokenQueue
     var query: String
     var evaluators = [EvaluatorProtocol]()
-    var errors = ParseErrorList.tracking()
     
     private init(query: String) {
         self.query = query
@@ -34,20 +33,20 @@ public class QueryParser {
         
         if tokenQueue.matches(any: QueryParser.combinators) { // if starts with a combinator, use root as elements
             evaluators.append(StructuralEvaluator.Root())
-            combinator(tokenQueue.consume())
+            try combinator(tokenQueue.consume())
         } else {
-            findElements()
+            try findElements()
         }
         
         while !tokenQueue.isEmpty {
             let foundWhite = tokenQueue.consumeWhitespace()
             
             if tokenQueue.matches(any: QueryParser.combinators) {
-                combinator(tokenQueue.consume())
+                try combinator(tokenQueue.consume())
             } else if foundWhite {
-                combinator(" ")
+                try combinator(" ")
             } else { // E.class, E#id, E[attr] etc. AND
-                findElements()
+                try findElements()
             }
         }
         
@@ -58,16 +57,14 @@ public class QueryParser {
         return CombiningEvaluator.And(evaluators)
     }
     
-    private func combinator(_ combinator: UnicodeScalar) {
+    private func combinator(_ combinator: UnicodeScalar) throws {
         tokenQueue.consumeWhitespace()
         
-        let subQuery = consumeSubQuery()
+        let subQuery = try consumeSubQuery()
         
         var rootEvaluator: EvaluatorProtocol // the topmost evaluator
         var currentEvaluator: EvaluatorProtocol // the evaluator the eval will be combined to. could be root, or rightmost or.
-        var newEvaluator = try? QueryParser.parse(query: subQuery) // the evaluator to add into target evaluator
-
-        guard newEvaluator != nil else { return }
+        var newEvaluator = try QueryParser.parse(query: subQuery) // the evaluator to add into target evaluator
         
         var replaceRightMost = false
         
@@ -89,33 +86,33 @@ public class QueryParser {
         // for most combinators: change the current eval into an AND of the current eval and the eval
         switch combinator {
         case ">":
-            currentEvaluator = CombiningEvaluator.And(newEvaluator!, StructuralEvaluator.ImmediateParent(currentEvaluator))
+            currentEvaluator = CombiningEvaluator.And(newEvaluator, StructuralEvaluator.ImmediateParent(currentEvaluator))
             break
         case " ":
-            currentEvaluator = CombiningEvaluator.And(newEvaluator!, StructuralEvaluator.Parent(currentEvaluator))
+            currentEvaluator = CombiningEvaluator.And(newEvaluator, StructuralEvaluator.Parent(currentEvaluator))
             break
         case "+":
-            currentEvaluator = CombiningEvaluator.And(newEvaluator!, StructuralEvaluator.ImmediatePreviousSibling(currentEvaluator))
+            currentEvaluator = CombiningEvaluator.And(newEvaluator, StructuralEvaluator.ImmediatePreviousSibling(currentEvaluator))
             break
         case "~":
-            currentEvaluator = CombiningEvaluator.And(newEvaluator!, StructuralEvaluator.PreviousSibling(currentEvaluator))
+            currentEvaluator = CombiningEvaluator.And(newEvaluator, StructuralEvaluator.PreviousSibling(currentEvaluator))
             break
         case ",": // group or
             var or: CombiningEvaluator.Or
             
             if let orEval = currentEvaluator as? CombiningEvaluator.Or {
                 or = orEval
-                or.add(newEvaluator!)
+                or.add(newEvaluator)
             } else {
                 or = CombiningEvaluator.Or()
                 or.add(currentEvaluator)
-                or.add(newEvaluator!)
+                or.add(newEvaluator)
             }
             
             currentEvaluator = or
             break
         default:
-            errors.append(SelectorParseException(message: "Unknown combinator: " + combinator))
+            throw SelectorParseException(message: "Unknown combinator: " + combinator)
         }
         
         if replaceRightMost {
@@ -127,14 +124,14 @@ public class QueryParser {
         evaluators.append(rootEvaluator)
     }
     
-    private func consumeSubQuery() -> String {
+    private func consumeSubQuery() throws -> String {
         let accum = StringBuilder()
         
         while !tokenQueue.isEmpty {
             if tokenQueue.matches(text: "(") {
-                accum += "(" + tokenQueue.chompBalanced(open: "(", close: ")") + ")"
+                accum += "(" + (try tokenQueue.chompBalanced(open: "(", close: ")")) + ")"
             } else if tokenQueue.matches(text: "[") {
-                accum += "[" + tokenQueue.chompBalanced(open: "[", close: "]") + "]"
+                accum += "[" + (try tokenQueue.chompBalanced(open: "[", close: "]")) + "]"
             } else if tokenQueue.matches(any: QueryParser.combinators) {
                 break
             } else {
@@ -145,69 +142,67 @@ public class QueryParser {
         return accum.stringValue
     }
     
-    private func findElements() {
-        do {
-            if tokenQueue.matchAndChomp(text: "#") {
-                byId()
-            } else if tokenQueue.matchAndChomp(text: ".") {
-                byClass()
-            } else if tokenQueue.matchesWord() || tokenQueue.matches(text: "*|") {
-                byTag()
-            } else if tokenQueue.matches(text: "[") {
-                try byAttribute()
-            } else if tokenQueue.matchAndChomp(text: "*") {
-                allElements()
-            } else if tokenQueue.matchAndChomp(text: ":lt(") {
-                indexLessThan()
-            } else if tokenQueue.matchAndChomp(text: ":gt(") {
-                indexGreaterThan()
-            } else if tokenQueue.matchAndChomp(text: ":eq(") {
-                indexEquals()
-            } else if tokenQueue.matches(text: ":has(") {
-                has()
-            } else if tokenQueue.matches(text: ":contains(") {
-                contains(own: false)
-            } else if tokenQueue.matches(text: ":containsOwn(") {
-                contains(own: true)
-            } else if tokenQueue.matches(text: ":containsData(") {
-                containsData()
-            } else if tokenQueue.matches(text: ":matches(text: ") {
-                matches(own: false)
-            } else if tokenQueue.matches(text: ":matchesOwn(") {
-                matches(own: true)
-            } else if tokenQueue.matches(text: ":not(") {
-                not()
-            } else if tokenQueue.matchAndChomp(text: ":nth-child(") {
-                try cssNthChild(backwards: false, ofType: false)
-            } else if tokenQueue.matchAndChomp(text: ":nth-last-child(") {
-                try cssNthChild(backwards: true, ofType: false)
-            } else if tokenQueue.matchAndChomp(text: ":nth-of-type(") {
-                try cssNthChild(backwards: false, ofType: true)
-            } else if tokenQueue.matchAndChomp(text: ":nth-last-of-type(") {
-                try cssNthChild(backwards: true, ofType: true)
-            } else if tokenQueue.matchAndChomp(text: ":first-child") {
-                evaluators.append(Evaluator.IsFirstChild())
-            } else if tokenQueue.matchAndChomp(text: ":last-child") {
-                evaluators.append(Evaluator.IsLastChild())
-            } else if tokenQueue.matchAndChomp(text: ":first-of-type") {
-                evaluators.append(Evaluator.IsFirstOfType())
-            } else if tokenQueue.matchAndChomp(text: ":last-of-type") {
-                evaluators.append(Evaluator.IsLastOfType())
-            } else if tokenQueue.matchAndChomp(text: ":only-child") {
-                evaluators.append(Evaluator.IsOnlyChild())
-            } else if tokenQueue.matchAndChomp(text: ":only-of-type") {
-                evaluators.append(Evaluator.IsOnlyOfType())
-            } else if tokenQueue.matchAndChomp(text: ":empty") {
-                evaluators.append(Evaluator.IsEmpty())
-            } else if tokenQueue.matchAndChomp(text: ":root") {
-                evaluators.append(Evaluator.IsRoot())
-            } else { // unhandled
-                throw SelectorParseException(message: "Could not parse query \(query): unexpected token at '\(tokenQueue.remainder())'")
-            }
-        } catch {
-            if let localizedError = error as? LocalizedError {
-                errors.append(localizedError)
-            }
+    private func findElements() throws {
+        guard !tokenQueue.isEmpty else {
+            throw SelectorParseException(message: "String must not be empty")
+        }
+        
+        if tokenQueue.matchAndChomp(text: "#") {
+            byId()
+        } else if tokenQueue.matchAndChomp(text: ".") {
+            byClass()
+        } else if tokenQueue.matchesWord() || tokenQueue.matches(text: "*|") {
+            byTag()
+        } else if tokenQueue.matches(text: "[") {
+            try byAttribute()
+        } else if tokenQueue.matchAndChomp(text: "*") {
+            allElements()
+        } else if tokenQueue.matchAndChomp(text: ":lt(") {
+            indexLessThan()
+        } else if tokenQueue.matchAndChomp(text: ":gt(") {
+            indexGreaterThan()
+        } else if tokenQueue.matchAndChomp(text: ":eq(") {
+            indexEquals()
+        } else if tokenQueue.matches(text: ":has(") {
+            try has()
+        } else if tokenQueue.matches(text: ":contains(") {
+            try contains(own: false)
+        } else if tokenQueue.matches(text: ":containsOwn(") {
+            try contains(own: true)
+        } else if tokenQueue.matches(text: ":containsData(") {
+            try containsData()
+        } else if tokenQueue.matches(text: ":matches(") {
+            try matches(own: false)
+        } else if tokenQueue.matches(text: ":matchesOwn(") {
+            try matches(own: true)
+        } else if tokenQueue.matches(text: ":not(") {
+            try not()
+        } else if tokenQueue.matchAndChomp(text: ":nth-child(") {
+            try cssNthChild(backwards: false, ofType: false)
+        } else if tokenQueue.matchAndChomp(text: ":nth-last-child(") {
+            try cssNthChild(backwards: true, ofType: false)
+        } else if tokenQueue.matchAndChomp(text: ":nth-of-type(") {
+            try cssNthChild(backwards: false, ofType: true)
+        } else if tokenQueue.matchAndChomp(text: ":nth-last-of-type(") {
+            try cssNthChild(backwards: true, ofType: true)
+        } else if tokenQueue.matchAndChomp(text: ":first-child") {
+            evaluators.append(Evaluator.IsFirstChild())
+        } else if tokenQueue.matchAndChomp(text: ":last-child") {
+            evaluators.append(Evaluator.IsLastChild())
+        } else if tokenQueue.matchAndChomp(text: ":first-of-type") {
+            evaluators.append(Evaluator.IsFirstOfType())
+        } else if tokenQueue.matchAndChomp(text: ":last-of-type") {
+            evaluators.append(Evaluator.IsLastOfType())
+        } else if tokenQueue.matchAndChomp(text: ":only-child") {
+            evaluators.append(Evaluator.IsOnlyChild())
+        } else if tokenQueue.matchAndChomp(text: ":only-of-type") {
+            evaluators.append(Evaluator.IsOnlyOfType())
+        } else if tokenQueue.matchAndChomp(text: ":empty") {
+            evaluators.append(Evaluator.IsEmpty())
+        } else if tokenQueue.matchAndChomp(text: ":root") {
+            evaluators.append(Evaluator.IsRoot())
+        } else { // unhandled
+            throw SelectorParseException(message: "Could not parse query \(query): unexpected token at '\(tokenQueue.remainder())'")
         }
     }
     
@@ -237,7 +232,7 @@ public class QueryParser {
     }
     
     private func byAttribute() throws {
-        let contentQueue = TokenQueue(query: tokenQueue.chompBalanced(open: "[", close: "]"))
+        let contentQueue = TokenQueue(query: try tokenQueue.chompBalanced(open: "[", close: "]"))
         let key = contentQueue.consume(toAny: QueryParser.AttributeEvals)
         
         contentQueue.consumeWhitespace()
@@ -250,15 +245,15 @@ public class QueryParser {
             }
         } else {
             if contentQueue.matchAndChomp(text: "=") {
-                evaluators.append(Evaluator.HasAttributeWithValue(key: key, value: contentQueue.remainder()))
+                evaluators.append(try Evaluator.HasAttributeWithValue(key: key, value: contentQueue.remainder()))
             } else if contentQueue.matchAndChomp(text: "!=") {
-                evaluators.append(Evaluator.HasAttributeWithValueNot(key: key, value: contentQueue.remainder()))
+                evaluators.append(try Evaluator.HasAttributeWithValueNot(key: key, value: contentQueue.remainder()))
             } else if contentQueue.matchAndChomp(text: "^=") {
-                evaluators.append(Evaluator.HasAttributeWithValueStartingWith(key: key, value: contentQueue.remainder()))
+                evaluators.append(try Evaluator.HasAttributeWithValueStartingWith(key: key, value: contentQueue.remainder()))
             } else if contentQueue.matchAndChomp(text: "$=") {
-                evaluators.append(Evaluator.HasAttributeWithValueEndingWith(key: key, value: contentQueue.remainder()))
+                evaluators.append(try Evaluator.HasAttributeWithValueEndingWith(key: key, value: contentQueue.remainder()))
             } else if contentQueue.matchAndChomp(text: "*=") {
-                evaluators.append(Evaluator.HasAttributeWithValueContaining(key: key, value: contentQueue.remainder()))
+                evaluators.append(try Evaluator.HasAttributeWithValueContaining(key: key, value: contentQueue.remainder()))
             } else if contentQueue.matchAndChomp(text: "~=") {
                 evaluators.append(Evaluator.HasAttributeWithValueMatching(key: key, pattern: contentQueue.remainder()))
             } else {
@@ -304,8 +299,8 @@ public class QueryParser {
             a = 2
             b = 0
         } else if !matchAB.isEmpty {
-            a = !string[matchAB.first!.rangeAt(3)].isEmpty ? Int(string[matchAB.first!.rangeAt(1)].replaceFirst(regex: "^\\+", by: ""))! : 1
-            b = !string[matchAB.first!.rangeAt(4)].isEmpty ? Int(string[matchAB.first!.rangeAt(4)].replaceFirst(regex: "^\\+", by: ""))! : 0
+            a = matchAB.first!.numberOfRanges >= 3 && !string[matchAB.first!.rangeAt(3)].isEmpty ? Int(string[matchAB.first!.rangeAt(1)].replaceFirst(regex: "^\\+", by: ""))! : 1
+            b = matchAB.first!.rangeAt(4).location != Int.max && !string[matchAB.first!.rangeAt(4)].isEmpty ? Int(string[matchAB.first!.rangeAt(4)].replaceFirst(regex: "^\\+", by: ""))! : 0
         } else if !matchB.isEmpty {
             a = 0
             b = Int(string[matchB.first!.range].replaceFirst(regex: "^\\+", by: ""))!
@@ -334,22 +329,17 @@ public class QueryParser {
     }
     
     // pseudo selector :has(el)
-    private func has() {
+    private func has() throws {
         tokenQueue.consume(text: ":has")
-        let subQuery = tokenQueue.chompBalanced(open: "(", close: ")")
-        do {
-            let evaluator = try QueryParser.parse(query: subQuery)
-            evaluators.append(StructuralEvaluator.Has(evaluator))
-        } catch {
-            print(error)
-            return
-        }
+        let subQuery = try tokenQueue.chompBalanced(open: "(", close: ")")
+        let evaluator = try QueryParser.parse(query: subQuery)
+        evaluators.append(StructuralEvaluator.Has(evaluator))
     }
     
     // pseudo selector :contains(text), containsOwn(text)
-    private func contains(own: Bool) {
+    private func contains(own: Bool) throws {
         tokenQueue.consume(text: own ? ":containsOwn" : ":contains")
-        let searchText = TokenQueue.unescape(tokenQueue.chompBalanced(open: "(", close: ")"))
+        let searchText = TokenQueue.unescape(try tokenQueue.chompBalanced(open: "(", close: ")"))
         if own {
             evaluators.append(Evaluator.ContainsOwnText(searchOwnText: searchText))
         } else {
@@ -358,16 +348,16 @@ public class QueryParser {
     }
     
     // pseudo selector :containsData(data)
-    private func containsData() {
+    private func containsData() throws {
         tokenQueue.consume(text: ":containsData")
-        let searchText = TokenQueue.unescape(tokenQueue.chompBalanced(open: "(", close: ")"))
+        let searchText = TokenQueue.unescape(try tokenQueue.chompBalanced(open: "(", close: ")"))
         evaluators.append(Evaluator.ContainsData(searchData: searchText))
     }
     
     // :matches(regex), matchesOwn(regex)
-    private func matches(own: Bool) {
+    private func matches(own: Bool) throws {
         tokenQueue.consume(text: own ? ":matchesOwn" : ":matches")
-        let pattern = tokenQueue.chompBalanced(open: "(", close: ")")
+        let pattern = try tokenQueue.chompBalanced(open: "(", close: ")")
         if own {
             evaluators.append(Evaluator.MatchesOwnText(pattern: pattern))
         } else {
@@ -376,9 +366,9 @@ public class QueryParser {
     }
     
     // :not(selector)
-    private func not() {
+    private func not() throws {
         tokenQueue.consume(text: ":not")
-        let subQuery = tokenQueue.chompBalanced(open: "(", close: ")")
+        let subQuery = try tokenQueue.chompBalanced(open: "(", close: ")")
         do {
             let evaluator = try QueryParser.parse(query: subQuery)
             evaluators.append(StructuralEvaluator.Not(evaluator))

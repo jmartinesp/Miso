@@ -95,7 +95,7 @@ public class Node: Equatable, Hashable, CustomStringConvertible, CustomDebugStri
         
         guard URL.isValidURL(path: baseUri ?? "") || URL.isValidURL(path: relURL) else { return nil }
         
-        let resolved = URL.resolve(basePath: baseUri, relURL: relURL)
+        let resolved = URL.resolve(basePath: baseUri?.lowercased(), relURL: relURL.lowercased())
         
         return resolved
     }

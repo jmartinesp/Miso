@@ -37,8 +37,8 @@ public class TokenQueue {
     }
     
     public func add(first string: String) {
-        queue.append(string).append(queue[pos..<queue.count])
-        pos = 0
+        queue.insert(pos, string)
+        //pos = 0
     }
     
     public func matches(text: String) -> Bool {
@@ -175,7 +175,7 @@ public class TokenQueue {
      * @param close closer
      * @return data matched from the queue
      */
-    public func chompBalanced(open: UnicodeScalar, close: UnicodeScalar) -> String {
+    public func chompBalanced(open: UnicodeScalar, close: UnicodeScalar) throws -> String {
         
         var start = -1
         var end = -1
@@ -215,7 +215,7 @@ public class TokenQueue {
             
         let out = end >= 0 ? queue[start..<end] : ""
         if depth > 0 {
-            print("Did not find balanced maker at " + out)
+            throw SelectorParseException(message: "Did not find balanced maker at " + out)
         }
         return out
     }
@@ -226,7 +226,7 @@ public class TokenQueue {
         
         for scalar in string.unicodeScalars {
             if scalar == TokenQueue.ESC {
-                if last != TokenQueue.zero && last != TokenQueue.ESC {
+                if last != TokenQueue.zero && last == TokenQueue.ESC {
                     accum += scalar.string
                 }
             } else {

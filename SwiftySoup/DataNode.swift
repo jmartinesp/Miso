@@ -20,7 +20,7 @@ public class DataNode: Node {
     public override var nodeName: String { return "#data" }
     
     public var wholeData: String {
-        get { return attributes.get(byTag: DataNode.DATA_KEY)!.value! }
+        get { return attributes.get(byTag: DataNode.DATA_KEY)!.value }
         set { self.attributes.put(string: newValue, forKey: DataNode.DATA_KEY) }
     }
     

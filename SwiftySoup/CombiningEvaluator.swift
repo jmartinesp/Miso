@@ -37,17 +37,6 @@ class CombiningEvaluator: EvaluatorProtocol {
         }
     }
     
-    /*public var leftMostEvaluator: EvaluatorProtocol? {
-        get {
-            return evaluators.first
-        }
-        set {
-            if num > 0 && newValue != nil {
-                evaluators[0] = newValue!
-            }
-        }
-    }*/
-    
     func matches(root: Element?, and element: Element) -> Bool {
         fatalError("Not implemented")
     }

@@ -16,9 +16,9 @@ public class Attribute: CustomStringConvertible, Equatable, Hashable {
                                          "sortable", "truespeed", "typemustmatch"]
     
     public let tag: String
-    public var value: String?
+    public var value: String
     
-    init(tag: String, value: String?) {
+    init(tag: String, value: String) {
         self.tag = tag        
         self.value = value
     }
@@ -34,14 +34,14 @@ public class Attribute: CustomStringConvertible, Equatable, Hashable {
         
         if !shouldCollapseAttribute(settings: outputSettings) {
             accumulated.append("=\"")
-            Entities.escape(accum: accumulated, string: value ?? "", outputSettings: outputSettings,
+            Entities.escape(accum: accumulated, string: value, outputSettings: outputSettings,
                             inAttribute: true, normalizeWhite: false, stripLeadingWhite: false)
             accumulated.append("\"")
         }
     }
     
     private func shouldCollapseAttribute(settings: OutputSettings) -> Bool {
-        return (value == nil || (value != nil && (value!.isEmpty || value!.lowercased() == tag.lowercased())))
+        return (value.isEmpty || value.lowercased() == tag.lowercased())
             && settings.syntax == .html && isBoolAttribute
     }
     
@@ -69,7 +69,7 @@ public class Attribute: CustomStringConvertible, Equatable, Hashable {
 public class BooleanAttribute: Attribute {
     
     init(tag: String) {
-        super.init(tag: tag, value: nil)
+        super.init(tag: tag, value: "")
     }
     
     override var isBoolAttribute: Bool { return true }
@@ -181,7 +181,7 @@ public class Attributes: OrderedDictionary<String, Attribute>, Equatable {
         subscript (key: String) -> String? {
             set {
                 if newValue != nil {
-                    self.attributes?["data-"+key] = Attribute(tag: "data-"+key, value: newValue)
+                    self.attributes?["data-"+key] = Attribute(tag: "data-"+key, value: newValue!)
                 } else {
                     self.attributes?["data-"+key] = nil
                 }

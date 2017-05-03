@@ -89,10 +89,12 @@ public class XMLTreeBuilder: TreeBuilder {
             let data = comment.data
             
             if data.unicodeScalars.count > 1 && (data.hasPrefix("!") || data.hasPrefix("?")) {
-                let document = SwiftySoup.parse(html: "<" + data[1..<data.unicodeScalars.count-1] + ">", baseUri: baseUri, parser: Parser.xmlParser)
-                let element = document.children.first!
-                toInsert = XmlDeclaration(name: settings.normalize(tagName: element.tagName), baseUri: comment.baseUri, isProcessingInstruction: data.hasPrefix("!"))
-                toInsert.attributes.append(dictionary: element.attributes)
+                let validData = data[1..<data.unicodeScalars.count-1]
+                let document = SwiftySoup.parse(html: "<" + validData + ">", baseUri: baseUri, parser: Parser.xmlParser)
+                if let element = document.children.first {
+                    toInsert = XmlDeclaration(name: settings.normalize(tagName: element.tagName), baseUri: comment.baseUri, isProcessingInstruction: data.hasPrefix("!"))
+                    toInsert.attributes.append(dictionary: element.attributes)
+                }
             }
         }
         self.insert(node: toInsert)

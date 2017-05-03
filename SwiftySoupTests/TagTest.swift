@@ -66,8 +66,4 @@ class TagTest: XCTestCase {
         XCTAssert(foo.formatAsBlock)
     }
     
-    /*func testValueOfChecksEmpty() {
-        Tag.valueOf(tagName: " ")
-    }*/
-    
 }

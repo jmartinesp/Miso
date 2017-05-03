@@ -36,7 +36,8 @@ public class StructuralEvaluator: EvaluatorProtocol {
         }
         
         override func matches(root: Element?, and element: Element) -> Bool {
-            for e in element.children {
+            let allElements = Collector.collect(evaluator: Evaluator.AllElements(), root: element)
+            for e in allElements {
                 if e != element && evaluator.matches(root: root, and: e) {
                     return true
                 }
@@ -45,7 +46,7 @@ public class StructuralEvaluator: EvaluatorProtocol {
         }
         
         override var description: String {
-            return ":has(\(evaluator))"
+            return ":has\(evaluator.description)"
         }
     }
     
@@ -60,7 +61,7 @@ public class StructuralEvaluator: EvaluatorProtocol {
         }
         
         override var description: String {
-            return ":not\(evaluator)"
+            return ":not\(evaluator.description)"
         }
     }
     
@@ -71,6 +72,7 @@ public class StructuralEvaluator: EvaluatorProtocol {
         }
         
         override func matches(root: Element?, and element: Element) -> Bool {
+            guard root != element else { return false }
             guard root != nil, element.parentElement != nil else { return false }
             
             var parent: Element? = element.parentElement
@@ -88,7 +90,7 @@ public class StructuralEvaluator: EvaluatorProtocol {
         }
         
         override var description: String {
-            return ":parent(\(evaluator))"
+            return ":parent\(evaluator.description)"
         }
     }
     
@@ -107,7 +109,7 @@ public class StructuralEvaluator: EvaluatorProtocol {
         }
         
         override var description: String {
-            return ":ImmediateParent(\(evaluator))"
+            return ":ImmediateParent\(evaluator.description)"
         }
     }
     
@@ -126,14 +128,14 @@ public class StructuralEvaluator: EvaluatorProtocol {
                 if evaluator.matches(root: root, and: prev!) {
                     return true
                 }
-                prev = element.previousSiblingElement
+                prev = prev?.previousSiblingElement
             }
             
             return false
         }
         
         override var description: String {
-            return ":prev*(\(evaluator))"
+            return ":prev*\(evaluator.description)"
         }
     }
     
@@ -152,7 +154,7 @@ public class StructuralEvaluator: EvaluatorProtocol {
         }
         
         override var description: String {
-            return ":prev(\(evaluator))"
+            return ":prev\(evaluator.description)"
         }
     }
 }

@@ -93,7 +93,7 @@ public class CharacterReader: CustomStringConvertible {
     func nextIndex(ofCharacters characters: String.UnicodeScalarView) -> Int? {
         guard !isEmpty && !characters.isEmpty && pos < (count - characters.count) else { return nil }
         
-        for i in (pos..<(count - characters.count)) {
+        for i in (pos..<(count - characters.count + 1)) {
             if rangeEquals((i..<i+characters.count), scalar: characters) {
                 return i - pos
             }

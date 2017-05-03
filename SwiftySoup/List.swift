@@ -1,11 +1,8 @@
 public protocol ListProtocol {
-    associatedtype Element
 }
 
 public class List<T>: ListProtocol, Sequence {
-    
-    public typealias Element = T
-    
+        
     public final var elements: Array<T>
     
     public func makeIterator() -> ListIterator<T> {
@@ -54,7 +51,7 @@ public class List<T>: ListProtocol, Sequence {
         elements.insert(newElement, at: index)
     }
     
-    public func removeAtIndex(index: Int) -> T {
+    public func remove(at index: Int) -> T {
         return elements.remove(at: index)
     }
     
@@ -117,13 +114,13 @@ public class List<T>: ListProtocol, Sequence {
     }
 }
 
-extension List where Element: Equatable {
+extension List where Iterator.Element: Equatable {
     
-    public static func ==(lhs: List<Element>, rhs: List<Element>) -> Bool {
+    public static func ==(lhs: List, rhs: List) -> Bool {
         return lhs.elements == rhs.elements
     }
     
-    public static func !=(lhs: List<Element>, rhs: List<Element>) -> Bool {
+    public static func !=(lhs: List, rhs: List) -> Bool {
         return lhs.elements != rhs.elements
     }
     
@@ -142,6 +139,9 @@ public func += <T>(lhs: inout List<T>, rhs: Array<T>) {
 }
 
 public struct ListIterator<T> : IteratorProtocol {
+    
+    public typealias Element = T
+    
     public let list : List<T>
     public var index : Int
     

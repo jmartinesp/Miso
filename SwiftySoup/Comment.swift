@@ -32,7 +32,7 @@ public class Comment: Node {
     
     public var data: String {
         get {
-            return attributes.get(byTag: Comment.COMMENT_KEY)!.value!
+            return attributes.get(byTag: Comment.COMMENT_KEY)!.value
         }
         set {
             attributes.put(string: data, forKey: Comment.COMMENT_KEY)

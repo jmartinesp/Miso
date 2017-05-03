@@ -37,7 +37,7 @@ public class Selector {
     }
     
     public static func select(using query: String, fromAny roots: [Element]) -> Elements {
-        var elements = Set<Element>()
+        let elements = OrderedSet<Element>()
 
         do {
             let evaluator = try QueryParser.parse(query: query)
@@ -45,14 +45,14 @@ public class Selector {
                 Selector.select(using: evaluator, from: root).forEach { element in elements.insert(element) }
             }
 
-            return Elements(elements)
+            return Elements(elements.orderedItems)
         } catch {
             print(error)
             return Elements()
         }
     }
     
-    static func filterOut(elements: AnyCollection<Element>, excluded: AnyCollection<Element>) -> Elements {
+    static func filterOut<T>(elements: T, excluded: T) -> Elements where T: Collection, T.Iterator.Element: Element {
         return Elements(elements.filter { !excluded.contains($0) })
     }
 }

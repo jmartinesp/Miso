@@ -115,7 +115,10 @@ extension String {
             let provisionalIndex = i
             correct = true
             for j in (0..<string.unicodeScalars.count) {
-                correct = correct && (unicodeScalars[i] == string.unicodeScalars[j])
+                correct = correct && (unicodeScalars[i + j] == string.unicodeScalars[j])
+                if (!correct) {
+                    break
+                }
             }
             if correct { return provisionalIndex }
         }

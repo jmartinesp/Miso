@@ -374,7 +374,7 @@ enum HTMLTreeBuilderState: String, CustomStringConvertible {
                             let body: Element = stack[1]
                             for attribute: Attribute in startTag.attributes.values {
                                 if (!body.has(attr: attribute.tag)) {
-                                    body.attr(attribute.tag, setValue: attribute.value!)
+                                    body.attr(attribute.tag, setValue: attribute.value)
                                 }
                             }
                         }
@@ -514,7 +514,7 @@ enum HTMLTreeBuilderState: String, CustomStringConvertible {
                         treeBuilder.process(startTag: "form")
                         if (startTag.attributes.keys.contains("action")) {
                             if let form: Element = treeBuilder.formElement {
-                                form.attr("action", setValue: startTag.attributes["action"]!.value!)
+                                form.attr("action", setValue: startTag.attributes["action"]!.value)
                             }
                         }
                         treeBuilder.process(startTag: "hr")
@@ -898,7 +898,7 @@ enum HTMLTreeBuilderState: String, CustomStringConvertible {
                     } else if (["style", "script"].contains(name)) {
                         return treeBuilder.process(token: token, state: .InHead)
                     } else if (name == "input") {
-                        if (startTag.attributes.get(byTag: "type")?.value?.lowercased() != "hidden") {
+                        if (startTag.attributes.get(byTag: "type")?.value.lowercased() != "hidden") {
                             return anythingElse(token, treeBuilder)
                         } else {
                             treeBuilder.insert(empty: startTag)

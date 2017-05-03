@@ -43,5 +43,19 @@ extension Sequence where Iterator.Element: Equatable {
         }
         return nil
     }
+}
+
+extension Sequence where Iterator.Element: Hashable {
     
+    func distinct() -> [Iterator.Element] {
+        var elements: [Iterator.Element] = []
+        var appeared = Set<Iterator.Element>()
+        for element in self {
+            if (!appeared.contains(element)) {
+                elements.append(element)
+                appeared.insert(element)
+            }
+        }
+        return elements
+    }
 }

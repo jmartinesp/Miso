@@ -20,8 +20,8 @@ class AttributeParseText: XCTestCase {
         XCTAssertEqual("123", attributes.get(byTag: "id")?.value)
         XCTAssertEqual("baz = 'bar'", attributes.get(byTag: "class")?.value)
         XCTAssertEqual("border: 2px", attributes.get(byTag: "style")?.value)
-        XCTAssertEqual(nil, attributes.get(byTag: "qux")?.value)
-        XCTAssertEqual(nil, attributes.get(byTag: "zim")?.value)
+        XCTAssertEqual("", attributes.get(byTag: "qux")?.value)
+        XCTAssertEqual("", attributes.get(byTag: "zim")?.value)
         XCTAssertEqual("12", attributes.get(byTag: "foo")?.value)
         XCTAssertEqual("18", attributes.get(byTag: "mux")?.value)
     }
@@ -48,7 +48,7 @@ class AttributeParseText: XCTestCase {
         let attributes = element?.attributes
         XCTAssertEqual(1, attributes?.count)
         XCTAssert(attributes!.hasKeyIgnoreCase(key: "=empty"))
-        XCTAssertEqual(nil, attributes?.get(byTag: "=empty")?.value)
+        XCTAssertEqual("", attributes?.get(byTag: "=empty")?.value)
     }
     
     func testStrictAttributeUnescapes() {
@@ -70,8 +70,8 @@ class AttributeParseText: XCTestCase {
         let attributes = element?.attributes
         
         XCTAssertEqual("123", element?.attr("normal"))
-        XCTAssertEqual(nil, element?.attr("boolean"))
-        XCTAssertEqual(nil, element?.attr("empty"))
+        XCTAssertEqual("", element?.attr("boolean"))
+        XCTAssertEqual("", element?.attr("empty"))
         
         XCTAssertEqual(3, attributes?.count)
         

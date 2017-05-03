@@ -362,7 +362,7 @@ class ElementTest: XCTestCase {
         div.attr("false", setValue: false)
         
         XCTAssert(div.has(attr: "true"))
-        XCTAssertEqual(nil, div.attr("true"))
+        XCTAssertEqual("", div.attr("true"))
         
         let attributes = div.attributes
         XCTAssertEqual(1, attributes.count)

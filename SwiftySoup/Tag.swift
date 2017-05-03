@@ -109,7 +109,7 @@ public class Tag: Equatable, Hashable, CustomStringConvertible {
     public var isFormListed = false        // a control that appears in forms: input, textarea, output etc
     public var isFormSubmittable = false   // a control that can be submitted in a form: input etc
     
-    public init(tagName: String) {
+    init(tagName: String) {
         self.tagName = tagName
     }
     

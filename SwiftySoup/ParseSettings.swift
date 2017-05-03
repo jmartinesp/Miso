@@ -35,7 +35,11 @@ public struct ParseSettings {
         if !preserveAttributesCase {
             attributes.orderedKeys.forEach {
                 let oldAttribute = attributes[$0]!
-                newAttributes[$0.lowercased()] = Attribute(tag: oldAttribute.tag.lowercased(), value: oldAttribute.value)
+                if oldAttribute is BooleanAttribute {
+                    newAttributes[$0.lowercased()] = BooleanAttribute(tag: oldAttribute.tag.lowercased())
+                } else {
+                    newAttributes[$0.lowercased()] = Attribute(tag: oldAttribute.tag.lowercased(), value: oldAttribute.value)
+                }
             }
         } else {
             newAttributes = attributes

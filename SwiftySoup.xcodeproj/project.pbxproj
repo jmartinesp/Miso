@@ -42,6 +42,13 @@
 		4D2EA3FB1EA369F5001678CC /* BuildExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D2EA3FA1EA369F5001678CC /* BuildExtension.swift */; };
 		4D2EA3FD1EA3BCBB001678CC /* XMLTreeBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D2EA3FC1EA3BCBB001678CC /* XMLTreeBuilder.swift */; };
 		4D2EA3FF1EA3C340001678CC /* Comment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D2EA3FE1EA3C340001678CC /* Comment.swift */; };
+		4D720BF31EB1CA2100BEEB37 /* TokenQueueTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D720BF21EB1CA2100BEEB37 /* TokenQueueTest.swift */; };
+		4D720BF51EB1D56800BEEB37 /* XMLTreeBuilderTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D720BF41EB1D56800BEEB37 /* XMLTreeBuilderTest.swift */; };
+		4D720BF81EB36A9700BEEB37 /* CleanerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D720BF71EB36A9700BEEB37 /* CleanerTest.swift */; };
+		4D720BFB1EB5F56500BEEB37 /* CSSTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D720BFA1EB5F56500BEEB37 /* CSSTest.swift */; };
+		4D720BFD1EB85E1D00BEEB37 /* ElementsTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D720BFC1EB85E1D00BEEB37 /* ElementsTest.swift */; };
+		4D720BFF1EB89D7600BEEB37 /* QueryParserTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D720BFE1EB89D7600BEEB37 /* QueryParserTest.swift */; };
+		4D720C011EB8B7FC00BEEB37 /* SelectorTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D720C001EB8B7FC00BEEB37 /* SelectorTest.swift */; };
 		4D7C9AF91EA5FD2B00255951 /* AttributesTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D7C9AF81EA5FD2B00255951 /* AttributesTest.swift */; };
 		4D7C9AFB1EA6076600255951 /* OrderedDictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D7C9AFA1EA6076600255951 /* OrderedDictionary.swift */; };
 		4D7C9AFD1EA60ABD00255951 /* OrderedSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D7C9AFC1EA60ABD00255951 /* OrderedSet.swift */; };
@@ -165,6 +172,13 @@
 		4D2EA3FA1EA369F5001678CC /* BuildExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BuildExtension.swift; sourceTree = "<group>"; };
 		4D2EA3FC1EA3BCBB001678CC /* XMLTreeBuilder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = XMLTreeBuilder.swift; sourceTree = "<group>"; };
 		4D2EA3FE1EA3C340001678CC /* Comment.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Comment.swift; sourceTree = "<group>"; };
+		4D720BF21EB1CA2100BEEB37 /* TokenQueueTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TokenQueueTest.swift; sourceTree = "<group>"; };
+		4D720BF41EB1D56800BEEB37 /* XMLTreeBuilderTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = XMLTreeBuilderTest.swift; sourceTree = "<group>"; };
+		4D720BF71EB36A9700BEEB37 /* CleanerTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CleanerTest.swift; sourceTree = "<group>"; };
+		4D720BFA1EB5F56500BEEB37 /* CSSTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CSSTest.swift; sourceTree = "<group>"; };
+		4D720BFC1EB85E1D00BEEB37 /* ElementsTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ElementsTest.swift; sourceTree = "<group>"; };
+		4D720BFE1EB89D7600BEEB37 /* QueryParserTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QueryParserTest.swift; sourceTree = "<group>"; };
+		4D720C001EB8B7FC00BEEB37 /* SelectorTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SelectorTest.swift; sourceTree = "<group>"; };
 		4D7C9AF81EA5FD2B00255951 /* AttributesTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AttributesTest.swift; sourceTree = "<group>"; };
 		4D7C9AFA1EA6076600255951 /* OrderedDictionary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OrderedDictionary.swift; sourceTree = "<group>"; };
 		4D7C9AFC1EA60ABD00255951 /* OrderedSet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OrderedSet.swift; sourceTree = "<group>"; };
@@ -226,8 +240,29 @@
 				4D0AA78D1EAE232E00D5FB65 /* HTMLParserTest.swift */,
 				4D0AA78F1EAF60C800D5FB65 /* ParserSettingsTest.swift */,
 				4D0AA7911EAF616C00D5FB65 /* TagTest.swift */,
+				4D720BF21EB1CA2100BEEB37 /* TokenQueueTest.swift */,
+				4D720BF41EB1D56800BEEB37 /* XMLTreeBuilderTest.swift */,
 			);
 			name = Parser;
+			sourceTree = "<group>";
+		};
+		4D720BF61EB36A8300BEEB37 /* Safety */ = {
+			isa = PBXGroup;
+			children = (
+				4D720BF71EB36A9700BEEB37 /* CleanerTest.swift */,
+			);
+			name = Safety;
+			sourceTree = "<group>";
+		};
+		4D720BF91EB5F54F00BEEB37 /* Select */ = {
+			isa = PBXGroup;
+			children = (
+				4D720BFA1EB5F56500BEEB37 /* CSSTest.swift */,
+				4D720BFC1EB85E1D00BEEB37 /* ElementsTest.swift */,
+				4D720BFE1EB89D7600BEEB37 /* QueryParserTest.swift */,
+				4D720C001EB8B7FC00BEEB37 /* SelectorTest.swift */,
+			);
+			name = Select;
 			sourceTree = "<group>";
 		};
 		4D7C9AF71EA5FD1F00255951 /* Nodes */ = {
@@ -286,6 +321,8 @@
 				4D89A69F1EA76A16009E7EC8 /* Helpers */,
 				4D7C9AF71EA5FD1F00255951 /* Nodes */,
 				4D0AA7881EADFFBD00D5FB65 /* Parser */,
+				4D720BF61EB36A8300BEEB37 /* Safety */,
+				4D720BF91EB5F54F00BEEB37 /* Select */,
 				4D8059251E9B624300A8DC94 /* Info.plist */,
 			);
 			path = SwiftySoupTests;
@@ -553,6 +590,8 @@
 				9AC3B11B91C3F70E4540350C /* SharedDictionary.swift in Sources */,
 				9AC3B425AD4F14B2213FCF83 /* OptionalExtensions.swift in Sources */,
 				9AC3B6EA8B5C516703D106C6 /* StringBuilder.swift in Sources */,
+				4D720BF31EB1CA2100BEEB37 /* TokenQueueTest.swift in Sources */,
+				4D720C011EB8B7FC00BEEB37 /* SelectorTest.swift in Sources */,
 				4D89A6A51EA7E8DD009E7EC8 /* ElementTest.swift in Sources */,
 				4D7C9B031EA6168500255951 /* BuildEntities.swift in Sources */,
 				9AC3B07FC606FCFBA440FAED /* SequenceExtension.swift in Sources */,
@@ -571,22 +610,27 @@
 				9AC3B97C00B97CE8962ABE7C /* XmlDeclaration.swift in Sources */,
 				4D0AA78A1EADFFCF00D5FB65 /* AttributeParseText.swift in Sources */,
 				9AC3B1667A751ADB7FBF8A86 /* DataNode.swift in Sources */,
+				4D720BF51EB1D56800BEEB37 /* XMLTreeBuilderTest.swift in Sources */,
 				9AC3B164E463873587BD6059 /* Document.swift in Sources */,
 				4D0AA7901EAF60C800D5FB65 /* ParserSettingsTest.swift in Sources */,
 				4D89A6A11EA76A32009E7EC8 /* StringUtils.swift in Sources */,
 				9AC3B75A44B6D9C224D36DF0 /* DocumentType.swift in Sources */,
 				9AC3B8F531BB385B97D252AA /* TokenQueue.swift in Sources */,
+				4D720BFD1EB85E1D00BEEB37 /* ElementsTest.swift in Sources */,
 				4D89A6A31EA7DC14009E7EC8 /* DocumentTypeTest.swift in Sources */,
 				9AC3B7AFD9ADA0A19FD50AEB /* TokeniserState.swift in Sources */,
 				4D0AA7831EAB4A2B00D5FB65 /* FormElementTest.swift in Sources */,
 				4D0AA7871EADE5FA00D5FB65 /* TextNodeTest.swift in Sources */,
 				9AC3BC36140B6EA5490DA0E9 /* Parser.swift in Sources */,
 				9AC3B0D4AD5B89FD54E486A6 /* ParseSettings.swift in Sources */,
+				4D720BFB1EB5F56500BEEB37 /* CSSTest.swift in Sources */,
 				9AC3BB83E5D8253425561C8F /* Token.swift in Sources */,
 				9AC3BB0114CD9E6A927AA03C /* Tokeniser.swift in Sources */,
+				4D720BF81EB36A9700BEEB37 /* CleanerTest.swift in Sources */,
 				9AC3BD51325E9F13C7ED13D7 /* HTMLTreeBuilder.swift in Sources */,
 				9AC3B4366FF370016D26A033 /* ParseError.swift in Sources */,
 				9AC3B46A7587201B937CD71F /* TreeBuilder.swift in Sources */,
+				4D720BFF1EB89D7600BEEB37 /* QueryParserTest.swift in Sources */,
 				9AC3BE426B8DE9283DA8269A /* Tag.swift in Sources */,
 				9AC3BE01A1CB5E345FAA8655 /* XMLTreeBuilder.swift in Sources */,
 				9AC3B7CB834C2E9129B008E0 /* HTMLTreeBuilderState.swift in Sources */,

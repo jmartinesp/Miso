@@ -302,8 +302,8 @@ public class Whitelist {
         let attrKey = AttributeKey.value(of: attr)
 
         protocols.forEach { prot in
-            var protocolSet = protocolMap![attrKey]
-            protocolSet?.insert(Protocol.value(of: prot))
+            var protocolSet = protocolMap![attrKey] ?? Set()
+            protocolSet.insert(Protocol.value(of: prot))
             protocolMap![attrKey] = protocolSet
         }
 
@@ -341,6 +341,18 @@ public class Whitelist {
 
         return self
     }
+    
+    public func remove(tags: String...) -> Whitelist {
+        for tag in tags {
+            let tagName = TagName.value(of: tag)
+            if tagNames.remove(tagName) != nil {
+                attributes.removeValue(forKey: tagName)
+                enforcedAttributes.removeValue(forKey: tagName)
+                protocols.removeValue(forKey: tagName)
+            }
+        }
+        return self
+    }
 
     /**
      * Test if the supplied tag is allowed by this whitelist
@@ -359,13 +371,13 @@ public class Whitelist {
      * @return true if allowed
      */
     func isSafeAttribute(_ attr: Attribute, in element: Element, forTag tag: String) -> Bool {
-        let tagName = TagName.value(of: tag)
-        let key = AttributeKey.value(of: attr.tag)
+        let tagName = TagName.value(of: tag.lowercased())
+        let key = AttributeKey.value(of: attr.tag.lowercased())
 
         if let okSet = self.attributes[tagName], okSet.contains(key) {
             if let attrProts = protocols[tagName] {
                 // ok if not defined protocol; otherwise test
-                return attrProts[key] != nil || testValidProtocol(element: element, attr: attr, protocols: attrProts[key]!)
+                return attrProts[key] == nil || testValidProtocol(element: element, attr: attr, protocols: attrProts[key]!)
             } else {
                 return true
             }
@@ -377,7 +389,7 @@ public class Whitelist {
             let attrKey = attr.tag
 
             if expect.hasKeyIgnoreCase(key: attrKey) {
-                return expect.get(byTag: attrKey, ignoreCase: true) != nil
+                return expect.get(byTag: attrKey, ignoreCase: true)?.value == attr.value
             }
         }
 
@@ -388,13 +400,8 @@ public class Whitelist {
     private func testValidProtocol(element: Element, attr: Attribute, protocols: Set<Protocol>) -> Bool {
         // try to resolve relative urls to abs, and optionally update the attribute so output html has abs.
         // rels without a baseuri get removed
-        var value = element.absUrl(forAttributeKey: attr.tag) ?? ""
-        var attr = attr
-
-        if value.isEmpty {
-            value = attr.value ?? "" // if it could not be made abs, run as-is to allow custom unknown protocols
-        }
-
+        let value = element.absUrl(forAttributeKey: attr.tag) ?? attr.value
+        
         if !preserveRelativeLinks {
             attr.value = value
         }
@@ -423,7 +430,7 @@ public class Whitelist {
     private func isValidAnchor(_ value: String) -> Bool {
         do {
             let match = try NSRegularExpression(pattern: ".*\\s.*").firstMatch(in: value, range: NSRange(location: 0, length: value.unicodeScalars.count))
-            return value.hasPrefix("#") && match != nil
+            return value.hasPrefix("#") && match == nil
         } catch {
             return false
         }
