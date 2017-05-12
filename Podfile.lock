@@ -1,0 +1,16 @@
+PODS:
+  - Embassy (3.1.0)
+  - EnvoyAmbassador (3.0.0):
+    - Embassy (~> 3.0)
+
+DEPENDENCIES:
+  - Embassy (~> 3.1)
+  - EnvoyAmbassador (~> 3.0)
+
+SPEC CHECKSUMS:
+  Embassy: 00408403423e4d9d5f21057bec13b1e96e838a32
+  EnvoyAmbassador: 624f3c5a1ff24b09535180992b0de59f207888a4
+
+PODFILE CHECKSUM: 901d5bccc3d2f470b47024d94a2f543b2277463e
+
+COCOAPODS: 1.1.1
