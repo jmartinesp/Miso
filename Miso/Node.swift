@@ -101,6 +101,10 @@ open class Node: Equatable, Hashable, CustomStringConvertible, CustomDebugString
     }
     
     open var nodeName: String { fatalError("\(#function) in \(self.self) must be overriden") }
+    
+    open func xpath(_ xPathSelector: String) -> Nodes {
+        return XPathSelector.select(using: xPathSelector, from: self)
+    }
 
     open func attr(_ name: String) -> String? {
         
