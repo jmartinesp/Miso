@@ -28,6 +28,8 @@ open class Document: Element {
         }
     }
     
+    public var errors: ParseErrorList = ParseErrorList.noTracking()
+    
     public init(baseUri: String?) {
         super.init(tag: Tag.valueOf(tagName: "#root", settings: ParseSettings.htmlDefault), baseUri: baseUri)
         self.location = baseUri

@@ -72,10 +72,13 @@ open class Cleaner {
         let dirty = Document.createEmpty(baseUri: nil)
 
         let errorList = ParseErrorList.tracking(maxSize: 1)
-        let nodes = Parser.parse(fragmentHTML: bodyHtml, withContext: dirty.body, baseUri: nil, errors: errorList)
-        dirty.body?.insert(children: nodes, at: 0)
-        let numDiscarded = copySafeNodes(from: dirty.body!, to: clean.body!)
-        return numDiscarded == 0 && errorList.isEmpty
+        if let nodes = try? Parser.Safe.parse(fragmentHTML: bodyHtml, withContext: dirty.body, baseUri: nil, errors: errorList) {
+            dirty.body?.insert(children: nodes, at: 0)
+            let numDiscarded = copySafeNodes(from: dirty.body!, to: clean.body!)
+            return numDiscarded == 0 && errorList.isEmpty
+        } else {
+            return false
+        }
     }
 
     private func copySafeNodes(from source: Element, to dest: Element) -> Int {

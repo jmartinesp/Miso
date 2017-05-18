@@ -6,6 +6,53 @@
 import Foundation
 
 public class Miso {
+    
+    public class Safe {
+        
+        public static func parse(html: String, baseUri: String?) throws -> Document {
+            return try Parser.Safe.parse(html: html, baseUri: baseUri)
+        }
+
+        public static func parse(html: String, baseUri: String?, parser: Parser) throws -> Document {
+            return try parser.safe.parseInput(html: html, baseUri: baseUri)
+        }
+        
+        public static func parse(html: String) throws -> Document {
+            return try Parser.Safe.parse(html: html, baseUri: nil)
+        }
+        
+        public static func parse(fromFile filePath: String, encoding: String.Encoding, baseUri: String? = nil) throws -> Document {
+            let contents = try String(contentsOfFile: filePath, encoding: encoding)
+            return try Parser.Safe.parse(html: contents, baseUri: baseUri)
+        }
+        
+        public static func parse(data: Data, encoding: String.Encoding, baseUri: String? = nil) throws -> Document? {
+            if let contents = String(data: data, encoding: encoding) {
+                return try Parser.Safe.parse(html: contents, baseUri: baseUri)
+            } else {
+                return nil
+            }
+        }
+
+        public static func parse(bodyFragment: String, baseUri: String? = nil) throws -> Document {
+            return try Parser.Safe.parse(bodyFragment: bodyFragment, baseUri: baseUri)
+        }
+        
+        public static func clean(bodyHtml: String, whitelist: Whitelist, baseUri: String? = nil) throws -> String {
+            let dirty = try parse(bodyFragment: bodyHtml, baseUri: baseUri)
+            let cleaner = Cleaner(whitelist: whitelist)
+            let clean = cleaner.clean(document: dirty)
+            return clean.body!.html
+        }
+        
+        public static func clean(bodyHtml: String, whitelist: Whitelist, outputSettings: OutputSettings, baseUri: String? = nil) throws -> String {
+            let dirty = try parse(bodyFragment: bodyHtml, baseUri: baseUri)
+            let cleaner = Cleaner(whitelist: whitelist)
+            let clean = cleaner.clean(document: dirty)
+            clean.outputSettings = outputSettings
+            return clean.body!.html
+        }
+    }
 
     /**
      Parse HTML into a Document. The parser will make a sensible, balanced document tree out of any HTML.

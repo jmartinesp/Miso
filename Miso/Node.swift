@@ -9,7 +9,58 @@
 import Foundation
 
 open class Node: Equatable, Hashable, CustomStringConvertible, CustomDebugStringConvertible {
+    
+    open class Safe {
+        let node: Node
+
+        init(node: Node) {
+            self.node = node
+        }
+
+        open func insertBefore(html: String) throws {
+            guard node.siblingIndex != nil else { return }
+            try addSiblingHTML(html: html, index: node.siblingIndex!)
+        }
+        
+        open func insertAfter(html: String) throws {
+            guard node.siblingIndex != nil else { return }
+            try addSiblingHTML(html: html, index: node.siblingIndex!+1)
+        }
+        
+        private func addSiblingHTML(html: String, index: Int) throws {
+            let context = node.parentNode as? Element
+            let nodes = try Parser.Safe.parse(fragmentHTML: html, withContext: context, baseUri: node.baseUri)
+            node.parentNode?.insert(children: nodes, at: index)
+        }
+
+        @discardableResult
+        open func wrap(html: String) throws -> Node? {
+            guard !html.isEmpty else { return nil }
+            
+            let context = node.parentNode as? Element
+            
+            var wrapChildren = try Parser.Safe.parse(fragmentHTML: html, withContext: context, baseUri: node.baseUri)
+            
+            guard let wrapNode = wrapChildren.removeFirst() as? Element else { return nil }
+            
+            let deepest = node.getDeepChild(element: wrapNode)
+            node.parentNode?.replace(child: node, with: wrapNode)
+            deepest.append(childNode: node)
+            
+            // remainder (unbalanced wrap, like <div></div><p></p> -- The <p> is remainder
+            wrapChildren.forEach { remainder in
+                remainder.removeFromParent()
+                wrapNode.append(childNode: remainder)
+            }
+            
+            return node
+        }
+        
+    }
+    
     public static var EMPTY_NODES : [Node] { return [] }
+    
+    public var safe: Safe { return Safe(node: self) }
     
     public var parentNode: Node?
     public var childNodes = [Node]()
@@ -183,7 +234,7 @@ open class Node: Equatable, Hashable, CustomStringConvertible, CustomDebugString
     
     open func insertAfter(html: String) {
         guard siblingIndex != nil else { return }
-        addSiblingHTML(html: html, index: siblingIndex!+1)
+        try addSiblingHTML(html: html, index: siblingIndex!+1)
     }
     
     open func insertAfter(node: Node) {

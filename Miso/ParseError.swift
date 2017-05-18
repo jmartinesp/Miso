@@ -24,7 +24,7 @@ open class ParseError: LocalizedError {
     
 }
 
-public class ParseErrorList: List<LocalizedError> {
+public class ParseErrorList: List<LocalizedError>, LocalizedError {
     
     public static let DEFAULT_MAX_SIZE = 16
     public let maxSize: Int
@@ -59,6 +59,10 @@ public class ParseErrorList: List<LocalizedError> {
     
     public static func tracking() -> ParseErrorList {
         return ParseErrorList()
+    }
+    
+    public var errorDescription: String? {
+        return elements.flatMap { $0.errorDescription }.joined("\n")
     }
     
 }

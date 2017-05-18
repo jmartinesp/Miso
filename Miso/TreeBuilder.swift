@@ -37,6 +37,7 @@ open class TreeBuilder {
     func parse(input: String, baseUri: String?, errors: ParseErrorList, settings: ParseSettings) -> Document {
         initializeParse(input: input, baseUri: baseUri, errors: errors, settings: settings)
         runParser()
+        document.errors = errors
         return document
     }
     

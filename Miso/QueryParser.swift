@@ -64,7 +64,7 @@ public class QueryParser {
         
         var rootEvaluator: EvaluatorProtocol // the topmost evaluator
         var currentEvaluator: EvaluatorProtocol // the evaluator the eval will be combined to. could be root, or rightmost or.
-        var newEvaluator = try QueryParser.parse(query: subQuery) // the evaluator to add into target evaluator
+        let newEvaluator = try QueryParser.parse(query: subQuery) // the evaluator to add into target evaluator
         
         var replaceRightMost = false
         

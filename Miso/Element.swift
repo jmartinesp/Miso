@@ -20,6 +20,39 @@ import Foundation
  */
 open class Element: Node {
     
+    open class ESafe: Node.Safe {
+        
+        let element: Element
+        
+        init(element: Element) {
+            self.element = element
+            super.init(node: element)
+        }
+        
+        @discardableResult
+        open func append(html: String) throws -> [Node] {
+            let nodes = try Parser.Safe.parse(fragmentHTML: html, withContext: element, baseUri: element.baseUri)
+            element.append(children: nodes)
+            return nodes
+        }
+        
+        @discardableResult
+        open func prepend(html: String) throws -> [Node] {
+            let nodes = try Parser.Safe.parse(fragmentHTML: html, withContext: element, baseUri: element.baseUri)
+            element.insert(children: nodes, at: 0)
+            return nodes
+        }
+        
+        @discardableResult
+        open func html(replaceWith newValue: String) throws -> Element {
+            element.removeAll()
+            try self.append(html: newValue)
+            return element
+        }
+    }
+    
+    public override var safe: ESafe { return ESafe(element: self) }
+    
     public private(set) var tag: Tag
     
     public convenience init(tag: String) {

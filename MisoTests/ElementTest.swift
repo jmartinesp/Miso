@@ -793,21 +793,7 @@ class ElementTest: XCTestCase {
         
         let doc = Miso.parse(html: doc1)
         let els = doc.select("p")
-        
-        /*
-         for (Element el : els) {
-         System.out.println(el.hashValue + " - " + el.outerHTML)
-         }
-         
-         0 1534787905 - <p class="one">One</p>
-         1 1534787905 - <p class="one">One</p>
-         2 1539683239 - <p class="one">Two</p>
-         3 1535455211 - <p class="two">One</p>
-         4 1534787905 - <p class="one">One</p>
-         5 1534787905 - <p class="one">One</p>
-         6 1539683239 - <p class="one">Two</p>
-         7 1535455211 - <p class="two">One</p>
-         */
+
         XCTAssertEqual(8, els.count)
         let e0 = els[0]
         let e1 = els[1]

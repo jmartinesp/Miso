@@ -10,6 +10,54 @@ import Foundation
 
 public class Elements: List<Element>, CustomStringConvertible {
     
+    public class Safe {
+        
+        let elements: Elements
+
+        init(elements: Elements) {
+            self.elements = elements
+        }
+        
+        @discardableResult
+        public func html(replaceWith newValue: String) throws -> Elements {
+            try elements.elements.forEach { try $0.safe.html(replaceWith: newValue) }
+            return elements
+        }
+        
+        @discardableResult
+        public func prepend(html: String) throws -> Elements {
+            try elements.elements.forEach { try $0.safe.prepend(html: html) }
+            return elements
+        }
+        
+        @discardableResult
+        public func append(html: String) throws -> Elements {
+            try elements.elements.forEach { try $0.safe.append(html: html) }
+            return elements
+        }
+        
+        @discardableResult
+        public func insertBefore(html: String) throws -> Elements {
+            try elements.elements.forEach { try $0.safe.insertBefore(html: html) }
+            return elements
+        }
+        
+        @discardableResult
+        public func insertAfter(html: String) throws -> Elements {
+            try elements.elements.forEach { try $0.safe.insertAfter(html: html) }
+            return elements
+        }
+        
+        @discardableResult
+        public func wrap(html: String) throws -> Elements {
+            try elements.elements.forEach { try $0.safe.wrap(html: html) }
+            return elements
+        }
+
+    }
+    
+    public var safe: Safe { return Safe(elements: self) }
+    
     public var val: String? {
         return elements.first?.val
     }

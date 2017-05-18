@@ -57,12 +57,20 @@ open class HTTPResponseParser: ResponseParserProtocol {
         
         // Can parse String
         if let htmlData = String(data: data!, encoding: decodingCharset) {
-            let document = request.parser.parseInput(html: htmlData, baseUri: httpResponse!.url!.absoluteString)
-            return HTTPConnection.Response(document: document, error: error, data: htmlData, rawResponse: httpResponse)
+            do {
+                let document = try request.parser.safe.parseInput(html: htmlData, baseUri: httpResponse!.url!.absoluteString)
+                return HTTPConnection.Response(document: document, error: error, data: htmlData, rawResponse: httpResponse)
+            } catch {
+                return HTTPConnection.Response(document: nil, error: error, data: htmlData, rawResponse: httpResponse)
+            }
         } else if let asciiData = String(data: data!, encoding: .ascii) {
             // Fallback for 'exotic' encodings
-            let document = request.parser.parseInput(html: asciiData, baseUri: httpResponse!.url!.absoluteString)
-            return HTTPConnection.Response(document: document, error: error, data: asciiData, rawResponse: httpResponse)
+            do {
+                let document = try request.parser.safe.parseInput(html: asciiData, baseUri: httpResponse!.url!.absoluteString)
+                return HTTPConnection.Response(document: document, error: error, data: asciiData, rawResponse: httpResponse)
+            } catch {
+                return HTTPConnection.Response(document: nil, error: error, data: asciiData, rawResponse: httpResponse)
+            }
         } else {
             error = StringEncodingError(encoding: .utf8)
             return HTTPConnection.Response(document: nil, error: error, data: nil, rawResponse: httpResponse)

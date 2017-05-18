@@ -79,6 +79,11 @@
 		4D89A6A11EA76A32009E7EC8 /* StringUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D89A6A01EA76A32009E7EC8 /* StringUtils.swift */; };
 		4D89A6A31EA7DC14009E7EC8 /* DocumentTypeTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D89A6A21EA7DC14009E7EC8 /* DocumentTypeTest.swift */; };
 		4D89A6A51EA7E8DD009E7EC8 /* ElementTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D89A6A41EA7E8DD009E7EC8 /* ElementTest.swift */; };
+		4DA8C6291ECC3238009BDBDF /* XPathParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DA8C6281ECC3238009BDBDF /* XPathParser.swift */; };
+		4DA8C62D1ECC35D3009BDBDF /* XPathTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DA8C62C1ECC35D3009BDBDF /* XPathTest.swift */; };
+		4DA8C62F1ECC6D84009BDBDF /* XPathSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DA8C62E1ECC6D84009BDBDF /* XPathSelector.swift */; };
+		4DA8C6311ECC6E0A009BDBDF /* XPathEvaluator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DA8C6301ECC6E0A009BDBDF /* XPathEvaluator.swift */; };
+		4DA8C6331ECC6E5F009BDBDF /* Nodes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DA8C6321ECC6E5F009BDBDF /* Nodes.swift */; };
 		52EA2981EAB2A5CF2B4E7BAE /* Pods_MisoTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F8386B1DE4BAF2687DD6C675 /* Pods_MisoTests.framework */; };
 		9AC3B5CC23392E66F8864D98 /* FormElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AC3B49BAA51625FDA491AAA /* FormElement.swift */; };
 		9AC3B939442AEF19B5F72CCC /* Miso.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AC3BFBB7A770D969AE655B4 /* Miso.swift */; };
@@ -173,6 +178,11 @@
 		4D89A6A01EA76A32009E7EC8 /* StringUtils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StringUtils.swift; sourceTree = "<group>"; };
 		4D89A6A21EA7DC14009E7EC8 /* DocumentTypeTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DocumentTypeTest.swift; sourceTree = "<group>"; };
 		4D89A6A41EA7E8DD009E7EC8 /* ElementTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ElementTest.swift; sourceTree = "<group>"; };
+		4DA8C6281ECC3238009BDBDF /* XPathParser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = XPathParser.swift; sourceTree = "<group>"; };
+		4DA8C62C1ECC35D3009BDBDF /* XPathTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = XPathTest.swift; sourceTree = "<group>"; };
+		4DA8C62E1ECC6D84009BDBDF /* XPathSelector.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = XPathSelector.swift; sourceTree = "<group>"; };
+		4DA8C6301ECC6E0A009BDBDF /* XPathEvaluator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = XPathEvaluator.swift; sourceTree = "<group>"; };
+		4DA8C6321ECC6E5F009BDBDF /* Nodes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Nodes.swift; sourceTree = "<group>"; };
 		86A2AECFD582FD9BC9C459F5 /* Pods-MisoTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MisoTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-MisoTests/Pods-MisoTests.debug.xcconfig"; sourceTree = "<group>"; };
 		88407967BD089A406E871DD9 /* Pods_Miso.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Miso.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		9AC3B42481C06C89C25DBD42 /* AttributeTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AttributeTest.swift; sourceTree = "<group>"; };
@@ -244,6 +254,7 @@
 				4D720BFC1EB85E1D00BEEB37 /* ElementsTest.swift */,
 				4D720BFE1EB89D7600BEEB37 /* QueryParserTest.swift */,
 				4D720C001EB8B7FC00BEEB37 /* SelectorTest.swift */,
+				4DA8C62C1ECC35D3009BDBDF /* XPathTest.swift */,
 			);
 			name = Select;
 			sourceTree = "<group>";
@@ -401,6 +412,10 @@
 				4D2DA1471E9E3EC2003A17FA /* QueryParser.swift */,
 				4D2EA3EE1EA0EB4D001678CC /* Selector.swift */,
 				4D2EA3EA1EA0CEFD001678CC /* StructuralEvaluator.swift */,
+				4DA8C6281ECC3238009BDBDF /* XPathParser.swift */,
+				4DA8C62E1ECC6D84009BDBDF /* XPathSelector.swift */,
+				4DA8C6301ECC6E0A009BDBDF /* XPathEvaluator.swift */,
+				4DA8C6321ECC6E5F009BDBDF /* Nodes.swift */,
 			);
 			name = Select;
 			sourceTree = "<group>";
@@ -634,6 +649,8 @@
 				4D2DA1401E9CE766003A17FA /* SequenceExtension.swift in Sources */,
 				4D2DA1381E9CC8A3003A17FA /* TextNode.swift in Sources */,
 				4D80593F1E9B87EA00A8DC94 /* Tokeniser.swift in Sources */,
+				4DA8C62F1ECC6D84009BDBDF /* XPathSelector.swift in Sources */,
+				4DA8C6311ECC6E0A009BDBDF /* XPathEvaluator.swift in Sources */,
 				4D80594D1E9BD31800A8DC94 /* URLExtension.swift in Sources */,
 				4D8059451E9BAC3800A8DC94 /* TreeBuilder.swift in Sources */,
 				4D2DA1421E9CEB97003A17FA /* Evaluator.swift in Sources */,
@@ -647,6 +664,7 @@
 				4D8059511E9BD6CA00A8DC94 /* NodeVisitor.swift in Sources */,
 				4D2DA1481E9E3EC2003A17FA /* QueryParser.swift in Sources */,
 				4D8059471E9BAC7B00A8DC94 /* Document.swift in Sources */,
+				4DA8C6331ECC6E5F009BDBDF /* Nodes.swift in Sources */,
 				4D7A2ADB1EC0B28F001A3AD3 /* HTTPResponseParser.swift in Sources */,
 				4D2DA1301E9CAF2E003A17FA /* StringExtension.swift in Sources */,
 				4D2EA3ED1EA0D25D001678CC /* CombiningEvaluator.swift in Sources */,
@@ -671,6 +689,7 @@
 				4D80593D1E9B74AA00A8DC94 /* Attributes.swift in Sources */,
 				4D2EA3F31EA0F047001678CC /* StringBuilder.swift in Sources */,
 				4D8059391E9B6E5500A8DC94 /* List.swift in Sources */,
+				4DA8C6291ECC3238009BDBDF /* XPathParser.swift in Sources */,
 				4D2EA3FF1EA3C340001678CC /* Comment.swift in Sources */,
 				4D2DA12C1E9BE6DD003A17FA /* Element.swift in Sources */,
 				4D2DA1461E9DFAB0003A17FA /* Entities.swift in Sources */,
@@ -694,6 +713,7 @@
 				4D720BF31EB1CA2100BEEB37 /* TokenQueueTest.swift in Sources */,
 				4D720C011EB8B7FC00BEEB37 /* SelectorTest.swift in Sources */,
 				4D89A6A51EA7E8DD009E7EC8 /* ElementTest.swift in Sources */,
+				4DA8C62D1ECC35D3009BDBDF /* XPathTest.swift in Sources */,
 				4D7C9AF91EA5FD2B00255951 /* AttributesTest.swift in Sources */,
 				4D0AA7851EABB3CC00D5FB65 /* NodeTest.swift in Sources */,
 				4D0AA78A1EADFFCF00D5FB65 /* AttributeParseText.swift in Sources */,

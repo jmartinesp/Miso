@@ -10,6 +10,84 @@ import Foundation
 
 open class Parser {
     
+    open class Safe {
+        
+        let parser: Parser
+        
+        init(parser: Parser) {
+            self.parser = parser
+            self.parser.errors = ParseErrorList.tracking()
+        }
+        
+        static func parse(html: String, baseUri: String?) throws -> Document {
+            let errors = ParseErrorList.tracking()
+            let document = Parser.parse(html: html, baseUri: baseUri, errors: errors)
+            
+            guard errors.isEmpty else {
+                throw errors
+            }
+            
+            return document
+        }
+        
+        static func parse(fragmentHTML: String, withContext context: Element?, baseUri: String?) throws -> [Node] {
+            let errors = ParseErrorList.tracking()
+            let nodes = Parser.parse(fragmentHTML: fragmentHTML, withContext: context, baseUri: baseUri, errors: errors)
+            
+            guard errors.isEmpty else {
+                throw errors
+            }
+            
+            return nodes
+        }
+        
+        static func parse(fragmentHTML: String, withContext context: Element?, baseUri: String?, errors: ParseErrorList) throws -> [Node] {
+            let errors = ParseErrorList.tracking()
+            let nodes = Parser.parse(fragmentHTML: fragmentHTML, withContext: context, baseUri: baseUri, errors: errors)
+            
+            guard errors.isEmpty else {
+                throw errors
+            }
+            
+            return nodes
+        }
+        
+        static func parse(fragmentXML: String, baseUri: String?) throws -> [Node] {
+            let errors = ParseErrorList.tracking()
+            let nodes = Parser.parse(fragmentXML: fragmentXML, baseUri: baseUri, errors: errors)
+            
+            guard errors.isEmpty else {
+                throw errors
+            }
+            
+            return nodes
+        }
+        
+        open static func parse(bodyFragment: String, baseUri: String?) throws -> Document {
+            let errors = ParseErrorList.tracking()
+            let nodeList = Parser.parse(bodyFragment: bodyFragment, baseUri: baseUri, errors: errors)
+            
+            guard errors.isEmpty else {
+                throw errors
+            }
+            
+            return nodeList
+        }
+        
+        func parseInput(html: String, baseUri: String?) throws -> Document {
+            let document = parser.parseInput(html: html, baseUri: baseUri)
+            
+            guard parser.errors.isEmpty else {
+                throw parser.errors
+            }
+            
+            return document
+        }
+        
+    }
+    
+    var safe: Safe { return Safe(parser: self) }
+    
     var treeBuilder: TreeBuilder
     var settings: ParseSettings
     public var errors: ParseErrorList = ParseErrorList.tracking()
@@ -37,9 +115,9 @@ open class Parser {
      *
      * @return parsed Document
      */
-    open static func parse(html: String, baseUri: String?) -> Document {
+    open static func parse(html: String, baseUri: String?, errors: ParseErrorList = ParseErrorList.noTracking()) -> Document {
         let htmlTreeBuilder = HTMLTreeBuilder()
-        return htmlTreeBuilder.parse(input: html, baseUri: baseUri, errors: ParseErrorList.noTracking(), settings: htmlTreeBuilder.defaultSettings)
+        return htmlTreeBuilder.parse(input: html, baseUri: baseUri, errors: errors, settings: htmlTreeBuilder.defaultSettings)
     }
     
     /**
@@ -52,27 +130,12 @@ open class Parser {
      *
      * @return list of nodes parsed from the input HTML. Note that the context element, if supplied, is not modified.
      */
-    open static func parse(fragmentHTML: String, withContext context: Element?, baseUri: String?) -> [Node] {
+    open static func parse(fragmentHTML: String, withContext context: Element?, baseUri: String?, errors: ParseErrorList = ParseErrorList.noTracking()) -> [Node] {
         let htmlTreeBuilder = HTMLTreeBuilder()
-        return htmlTreeBuilder.parse(fragment: fragmentHTML, context: context, baseUri: baseUri, errors: ParseErrorList.noTracking(), settings: htmlTreeBuilder.defaultSettings)
-    }
-
-    /**
-     * Parse a fragment of HTML into a list of nodes. The context element, if supplied, supplies parsing context.
-     *
-     * @param fragmentHtml the fragment of HTML to parse
-     * @param context (optional) the element that this HTML fragment is being parsed for (i.e. for inner HTML). This
-     * provides stack context (for implicit element creation).
-     * @param baseUri base URI of document (i.e. original fetch location), for resolving relative URLs.
-     * @param errorList list to add errors to
-     *
-     * @return list of nodes parsed from the input HTML. Note that the context element, if supplied, is not modified.
-     */
-    open static func parse(fragmentHTML: String, withContext context: Element?, baseUri: String?, errors: ParseErrorList) -> [Node] {
-        let htmlTreeBuilder = HTMLTreeBuilder()
+        
         return htmlTreeBuilder.parse(fragment: fragmentHTML, context: context, baseUri: baseUri, errors: errors, settings: htmlTreeBuilder.defaultSettings)
     }
-    
+
     /**
      * Parse a fragment of XML into a list of nodes.
      *
@@ -80,9 +143,9 @@ open class Parser {
      * @param baseUri base URI of document (i.e. original fetch location), for resolving relative URLs.
      * @return list of nodes parsed from the input XML.
      */
-    open static func parse(fragmentXML: String, baseUri: String?) -> [Node] {
+    open static func parse(fragmentXML: String, baseUri: String?, errors: ParseErrorList = ParseErrorList.noTracking()) -> [Node] {
         let xmlTreeBuilder = XMLTreeBuilder()
-        return xmlTreeBuilder.parse(fragment: fragmentXML, baseUri: baseUri, errors: ParseErrorList.noTracking(), settings: xmlTreeBuilder.defaultSettings)
+        return xmlTreeBuilder.parse(fragment: fragmentXML, baseUri: baseUri, errors: errors, settings: xmlTreeBuilder.defaultSettings)
     }
     
     /**
@@ -93,12 +156,12 @@ open class Parser {
      *
      * @return Document, with empty head, and HTML parsed into body
      */
-    open static func parse(bodyFragment: String, baseUri: String?) -> Document {
+    open static func parse(bodyFragment: String, baseUri: String?, errors: ParseErrorList = ParseErrorList.noTracking()) -> Document {
         let document = Document.createEmpty(baseUri: baseUri)
         
         let body = document.body
         
-        let nodeList = parse(fragmentHTML: bodyFragment, withContext: body, baseUri: baseUri)
+        let nodeList = parse(fragmentHTML: bodyFragment, withContext: body, baseUri: baseUri, errors: errors)
         
         for i in (0..<nodeList.count).reversed() {
             nodeList[i].removeFromParent()
@@ -139,7 +202,5 @@ open class Parser {
     public static var xmlParser: Parser {
         return Parser(treeBuilder: XMLTreeBuilder())
     }
-    
-    
     
 }
