@@ -62,7 +62,7 @@ public class ParseErrorList: List<LocalizedError>, LocalizedError {
     }
     
     public var errorDescription: String? {
-        return elements.flatMap { $0.errorDescription }.joined("\n")
+        return elements.compactMap { $0.errorDescription }.joined("\n")
     }
     
 }

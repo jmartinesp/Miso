@@ -181,7 +181,7 @@ enum TokeniserState: TokeniserStateProtocol {
                 break
             default:
                 if (r.matchesLetter()) {
-                    t.createTagPending(start: true)
+                    _ = t.createTagPending(start: true)
                     t.transition(newState: .TagName)
                 } else {
                     t.error(state: self)
@@ -197,7 +197,7 @@ enum TokeniserState: TokeniserStateProtocol {
                 t.emit("</")
                 t.transition(newState: .Data)
             } else if (r.matchesLetter()) {
-                t.createTagPending(start: false)
+                _ = t.createTagPending(start: false)
                 t.transition(newState: .TagName)
             } else if (r.matches(char: ">")) {
                 t.error(state: self)
@@ -267,7 +267,7 @@ enum TokeniserState: TokeniserStateProtocol {
             break
         case .RCDATAEndTagOpen:
             if (r.matchesLetter()) {
-                t.createTagPending(start: false)
+                _ = t.createTagPending(start: false)
                 t.tagPending?.append(tagName: r.current.string)
                 t.dataBuffer += r.current.string
                 t.advanceTransition(newState: .RCDATAEndTagName)
@@ -494,7 +494,7 @@ enum TokeniserState: TokeniserStateProtocol {
             break
         case .ScriptDataEscapedEndTagOpen:
             if (r.matchesLetter()) {
-                t.createTagPending(start: false)
+                _ = t.createTagPending(start: false)
                 t.tagPending?.append(tagName: r.current.string)
                 t.dataBuffer.append(r.current)
                 t.advanceTransition(newState: .ScriptDataEscapedEndTagName)
@@ -1566,7 +1566,7 @@ enum TokeniserState: TokeniserStateProtocol {
         case .CdataSection:
             let data = r.consume(to: "]]>")
             t.emit(data)
-            r.matchesConsume(sequence: "]]>")
+            _ = r.matchesConsume(sequence: "]]>")
             t.transition(newState: .Data)
             break
         }
@@ -1644,7 +1644,7 @@ enum TokeniserState: TokeniserStateProtocol {
     
     private static func readEndTag(_ t: Tokeniser, _ r: CharacterReader, _ a: TokeniserState, _ b: TokeniserState) {
         if (r.matchesLetter()) {
-            t.createTagPending(start: false)
+            _ = t.createTagPending(start: false)
             t.transition(newState: a)
         } else {
             t.emit("</")

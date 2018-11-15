@@ -57,7 +57,7 @@ public class Entities {
                     codePoint2 = none
                 }
                 
-                let index = Int(reader.consume(to: "\n"), radix: codepointRadix) ?? 0
+                _ = Int(reader.consume(to: "\n"), radix: codepointRadix) ?? 0
                 // Skip '\n'
                 reader.advance()
                 

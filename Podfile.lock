@@ -1,16 +1,21 @@
 PODS:
-  - Embassy (3.1.0)
-  - EnvoyAmbassador (3.0.0):
-    - Embassy (~> 3.0)
+  - Embassy (4.0.8)
+  - EnvoyAmbassador (4.0.5):
+    - Embassy (~> 4.0)
 
 DEPENDENCIES:
-  - Embassy (~> 3.1)
-  - EnvoyAmbassador (~> 3.0)
+  - Embassy (~> 4.0)
+  - EnvoyAmbassador (~> 4.0)
+
+SPEC REPOS:
+  https://github.com/cocoapods/specs.git:
+    - Embassy
+    - EnvoyAmbassador
 
 SPEC CHECKSUMS:
-  Embassy: 00408403423e4d9d5f21057bec13b1e96e838a32
-  EnvoyAmbassador: 624f3c5a1ff24b09535180992b0de59f207888a4
+  Embassy: fe6a3f8dd2d705881c172dcb144fb97b9408f4cd
+  EnvoyAmbassador: 21cef10e70d003801c68ba5281948684a4e25486
 
-PODFILE CHECKSUM: 901d5bccc3d2f470b47024d94a2f543b2277463e
+PODFILE CHECKSUM: 88b7b1caeb473318a647f68fedc4760c7242f468
 
-COCOAPODS: 1.1.1
+COCOAPODS: 1.5.3

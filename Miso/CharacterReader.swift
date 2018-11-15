@@ -325,7 +325,7 @@ public class CharacterReader: CustomStringConvertible {
 }
 
 extension String.UnicodeScalarView {
-    subscript(range: Range<Int>) -> String.UnicodeScalarView {
+    subscript(range: Range<Int>) -> Substring.UnicodeScalarView {
         let end = self.index(self.startIndex, offsetBy: range.upperBound)
         let result = self.prefix(upTo: end).suffix(range.count)
         
@@ -335,16 +335,5 @@ extension String.UnicodeScalarView {
     subscript(index: Int) -> UnicodeScalar {
         let scalarIndex = self.index(self.startIndex, offsetBy: index)
         return self[scalarIndex]
-    }
-}
-
-extension String.CharacterView {
-    subscript(range: Range<Int>) -> String.CharacterView {
-        let end = self.index(self.startIndex, offsetBy: range.upperBound)
-        return self.prefix(upTo: end).suffix(range.count)
-    }
-    
-    subscript(index: Int) -> Character {
-        return self.prefix(index+1).last!
     }
 }

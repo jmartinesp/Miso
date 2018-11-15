@@ -191,11 +191,11 @@ public class Attributes: OrderedDictionary<String, Attribute>, Equatable {
             }
         }
         
-        public var keys: LazyMapCollection<Dictionary<String, Attribute>, String>? {
+        public var keys: Dictionary<String, Attribute>.Keys? {
             return self.attributes?.keys
         }
         
-        public var values: LazyMapCollection<Dictionary<String, Attribute>, Attribute>? {
+        public var values: Dictionary<String, Attribute>.Values? {
             return self.attributes?.values
         }
         

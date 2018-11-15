@@ -68,7 +68,8 @@ extension String {
     }
     
     subscript(range: NSRange) -> String {
-        return self.substring(with: self.range(fromNSRange: range))
+        let correctedRange = self.range(fromNSRange: range)
+        return String(self[correctedRange])
     }
     
     subscript(range: Range<Int>) -> String {
@@ -78,7 +79,7 @@ extension String {
         let startIndex = self.index(self.startIndex, offsetBy: start)
         let endIndex = self.index(self.startIndex, offsetBy: end)
         
-        return self.substring(with: Range<String.Index>(uncheckedBounds: (startIndex, endIndex)))
+        return String(self[Range<String.Index>(uncheckedBounds: (startIndex, endIndex))])
     }
     
     func range(fromNSRange range: NSRange) -> Range<String.Index> {
@@ -148,11 +149,11 @@ extension Character {
     }
     
     static func ==(lhs: Character, rhs: String) -> Bool {
-        return lhs == rhs.characters.first
+        return lhs == rhs.first
     }
     
     static func ==(lhs: String, rhs: Character) -> Bool {
-        return lhs.characters.first == rhs
+        return lhs.first == rhs
     }
     
     static func +(lhs: String, rhs: Character) -> String {

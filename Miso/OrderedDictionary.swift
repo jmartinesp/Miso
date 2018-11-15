@@ -50,7 +50,7 @@ public class OrderedDictionary<Key: Hashable, Value: Equatable>: SharedDictionar
     }
     
     public var orderedValues: [Value] {
-        return self.orderedKeys.flatMap { self[$0] }
+        return self.orderedKeys.compactMap { self[$0] }
     }
     
     public override var count: Int {

@@ -49,28 +49,20 @@ open class HTTPResponseParser: ResponseParserProtocol {
         }
         
         if let match = validContentTypeRegex.firstMatch(in: contentType!, options: [.anchored], range: NSRange(location: 0, length: contentType!.unicodeScalars.count)) {
-            if match.numberOfRanges == 4, match.rangeAt(3).location != Int.max,
-                let encoding = String.Encoding.from(literal: contentType![match.rangeAt(3).toRange()!]) {
+            if match.numberOfRanges == 4, match.range(at: 3).location != Int.max,
+                let encoding = String.Encoding.from(literal: contentType![Range<Int>(match.range(at: 3))!]) {
                 decodingCharset = encoding
             }
         }
         
         // Can parse String
         if let htmlData = String(data: data!, encoding: decodingCharset) {
-            do {
-                let document = try request.parser.safe.parseInput(html: htmlData, baseUri: httpResponse!.url!.absoluteString)
-                return HTTPConnection.Response(document: document, error: error, data: htmlData, rawResponse: httpResponse)
-            } catch {
-                return HTTPConnection.Response(document: nil, error: error, data: htmlData, rawResponse: httpResponse)
-            }
+            let document = request.parser.parseInput(html: htmlData, baseUri: httpResponse!.url!.absoluteString)
+            return HTTPConnection.Response(document: document, error: error, data: htmlData, rawResponse: httpResponse)
         } else if let asciiData = String(data: data!, encoding: .ascii) {
             // Fallback for 'exotic' encodings
-            do {
-                let document = try request.parser.safe.parseInput(html: asciiData, baseUri: httpResponse!.url!.absoluteString)
-                return HTTPConnection.Response(document: document, error: error, data: asciiData, rawResponse: httpResponse)
-            } catch {
-                return HTTPConnection.Response(document: nil, error: error, data: asciiData, rawResponse: httpResponse)
-            }
+            let document = request.parser.parseInput(html: asciiData, baseUri: httpResponse!.url!.absoluteString)
+            return HTTPConnection.Response(document: document, error: error, data: asciiData, rawResponse: httpResponse)
         } else {
             error = StringEncodingError(encoding: .utf8)
             return HTTPConnection.Response(document: nil, error: error, data: nil, rawResponse: httpResponse)

@@ -97,7 +97,7 @@ public class Elements: List<Element>, CustomStringConvertible {
     }
     
     public func attrs(_ attrName: String) -> [String] {
-        return elements.flatMap { $0.attr(attrName) }
+        return elements.compactMap { $0.attr(attrName) }
     }
     
     @discardableResult
@@ -188,7 +188,7 @@ public class Elements: List<Element>, CustomStringConvertible {
     
     @discardableResult
     public func unwrap() -> Elements {
-        elements.forEach { $0.unwrap() }
+        elements.forEach { _ = $0.unwrap() }
         return self
     }
     
@@ -313,7 +313,7 @@ public class Elements: List<Element>, CustomStringConvertible {
     }
     
     public var texts: [String] {
-        return elements.flatMap { $0.text }.filter { !$0.isEmpty }
+        return elements.compactMap { $0.text }.filter { !$0.isEmpty }
     }
     
     public var hasText: Bool {
@@ -331,7 +331,7 @@ public class Elements: List<Element>, CustomStringConvertible {
     }
     
     public var forms: [FormElement] {
-        return self.elements.flatMap { $0 as? FormElement }
+        return self.elements.compactMap { $0 as? FormElement }
     }
     
 }

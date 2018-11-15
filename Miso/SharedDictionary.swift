@@ -37,11 +37,11 @@ public class SharedDictionary<Key: Hashable, Value>: Sequence {
         }
     }
     
-    public var keys: LazyMapCollection<Dictionary<Key, Value>, Key> {
+    public var keys: Dictionary<Key, Value>.Keys {
         return self.dictionary.keys
     }
     
-    public var values: LazyMapCollection<Dictionary<Key, Value>, Value> {
+    public var values: Dictionary<Key, Value>.Values {
         return self.dictionary.values
     }
     
@@ -50,7 +50,7 @@ public class SharedDictionary<Key: Hashable, Value>: Sequence {
     public var count: Int { return self.dictionary.count }
     
     public func append(dictionary: SharedDictionary<Key, Value>) {
-        for (key, value) in dictionary.dictionary {
+        for (key, value) in dictionary {
             self[key] = value
         }
     }

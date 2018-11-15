@@ -604,7 +604,7 @@ class HTMLTreeBuilder: TreeBuilder, CustomStringConvertible {
     }
     
     func isInActiveFormattingElements(_ element: Element) -> Bool {
-        return isInQueue(queue: formattingElements.flatMap { $0 }, element: element)
+        return isInQueue(queue: formattingElements.compactMap { $0 }, element: element)
     }
     
     func getActiveFormattingElement(_ nodeName: String) -> Element? {
@@ -649,6 +649,6 @@ class HTMLTreeBuilder: TreeBuilder, CustomStringConvertible {
     }
     
     var description: String {
-        return "TreeBuilder{ currentToken=\(currentToken), state=\(state), currentElement=\(currentElement)}"
+        return "TreeBuilder{ currentToken=\(String(describing: currentToken)), state=\(state), currentElement=\(String(describing: currentElement))}"
     }
 }

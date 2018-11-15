@@ -116,7 +116,6 @@ open class TokenQueue {
      Case insensitive.
      * @param seq sequence to remove from head of queue.
      */
-    @discardableResult
     open func consume(text: String) {
         if !matches(text: text) {
             // TODO maybe throw?
@@ -167,7 +166,7 @@ open class TokenQueue {
     @discardableResult
     open func chomp(to text: String, ignoreCase: Bool = false) -> String {
         let data = consume(to: text, ignoreCase: ignoreCase)
-        matchAndChomp(text: text)
+        _ = matchAndChomp(text: text)
         return data
     }
     
@@ -226,8 +225,8 @@ open class TokenQueue {
         return out
     }
     
-    open static func unescape(_ string: String) -> String {
-        var accum = StringBuilder()
+    public static func unescape(_ string: String) -> String {
+        let accum = StringBuilder()
         var last = TokenQueue.zero
         
         for scalar in string.unicodeScalars {

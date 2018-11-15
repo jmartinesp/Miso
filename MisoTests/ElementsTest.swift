@@ -263,7 +263,7 @@ class ElementsTest: XCTestCase {
     func testTraverse() {
         let doc = Miso.parse(html: "<div><p>Hello</p></div><div>There</div>")
         let accum = StringBuilder()
-        doc.select("div").traverse(nodeVisitor: NodeVisitor(head: { node, depth in
+        _ = doc.select("div").traverse(nodeVisitor: NodeVisitor(head: { node, depth in
             accum.append("<" + node.nodeName + ">")
         }, tail: { node, depth in
             accum.append("</" + node.nodeName + ">")

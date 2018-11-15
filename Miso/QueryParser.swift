@@ -299,8 +299,8 @@ public class QueryParser {
             a = 2
             b = 0
         } else if !matchAB.isEmpty {
-            a = matchAB.first!.numberOfRanges >= 3 && !string[matchAB.first!.rangeAt(3)].isEmpty ? Int(string[matchAB.first!.rangeAt(1)].replaceFirst(regex: "^\\+", by: ""))! : 1
-            b = matchAB.first!.rangeAt(4).location != Int.max && !string[matchAB.first!.rangeAt(4)].isEmpty ? Int(string[matchAB.first!.rangeAt(4)].replaceFirst(regex: "^\\+", by: ""))! : 0
+            a = matchAB.first!.numberOfRanges >= 3 && !string[matchAB.first!.range(at: 3)].isEmpty ? Int(string[matchAB.first!.range(at: 1)].replaceFirst(regex: "^\\+", by: ""))! : 1
+            b = matchAB.first!.range(at: 4).location != Int.max && !string[matchAB.first!.range(at: 4)].isEmpty ? Int(string[matchAB.first!.range(at: 4)].replaceFirst(regex: "^\\+", by: ""))! : 0
         } else if !matchB.isEmpty {
             a = 0
             b = Int(string[matchB.first!.range].replaceFirst(regex: "^\\+", by: ""))!

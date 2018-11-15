@@ -63,7 +63,7 @@ open class Parser {
             return nodes
         }
         
-        open static func parse(bodyFragment: String, baseUri: String?) throws -> Document {
+        public static func parse(bodyFragment: String, baseUri: String?) throws -> Document {
             let errors = ParseErrorList.tracking()
             let nodeList = Parser.parse(bodyFragment: bodyFragment, baseUri: baseUri, errors: errors)
             
@@ -115,7 +115,7 @@ open class Parser {
      *
      * @return parsed Document
      */
-    open static func parse(html: String, baseUri: String?, errors: ParseErrorList = ParseErrorList.noTracking()) -> Document {
+    public static func parse(html: String, baseUri: String?, errors: ParseErrorList = ParseErrorList.noTracking()) -> Document {
         let htmlTreeBuilder = HTMLTreeBuilder()
         return htmlTreeBuilder.parse(input: html, baseUri: baseUri, errors: errors, settings: htmlTreeBuilder.defaultSettings)
     }
@@ -130,7 +130,7 @@ open class Parser {
      *
      * @return list of nodes parsed from the input HTML. Note that the context element, if supplied, is not modified.
      */
-    open static func parse(fragmentHTML: String, withContext context: Element?, baseUri: String?, errors: ParseErrorList = ParseErrorList.noTracking()) -> [Node] {
+    public static func parse(fragmentHTML: String, withContext context: Element?, baseUri: String?, errors: ParseErrorList = ParseErrorList.noTracking()) -> [Node] {
         let htmlTreeBuilder = HTMLTreeBuilder()
         
         return htmlTreeBuilder.parse(fragment: fragmentHTML, context: context, baseUri: baseUri, errors: errors, settings: htmlTreeBuilder.defaultSettings)
@@ -143,7 +143,7 @@ open class Parser {
      * @param baseUri base URI of document (i.e. original fetch location), for resolving relative URLs.
      * @return list of nodes parsed from the input XML.
      */
-    open static func parse(fragmentXML: String, baseUri: String?, errors: ParseErrorList = ParseErrorList.noTracking()) -> [Node] {
+    public static func parse(fragmentXML: String, baseUri: String?, errors: ParseErrorList = ParseErrorList.noTracking()) -> [Node] {
         let xmlTreeBuilder = XMLTreeBuilder()
         return xmlTreeBuilder.parse(fragment: fragmentXML, baseUri: baseUri, errors: errors, settings: xmlTreeBuilder.defaultSettings)
     }
@@ -156,7 +156,7 @@ open class Parser {
      *
      * @return Document, with empty head, and HTML parsed into body
      */
-    open static func parse(bodyFragment: String, baseUri: String?, errors: ParseErrorList = ParseErrorList.noTracking()) -> Document {
+    public static func parse(bodyFragment: String, baseUri: String?, errors: ParseErrorList = ParseErrorList.noTracking()) -> Document {
         let document = Document.createEmpty(baseUri: baseUri)
         
         let body = document.body
@@ -180,7 +180,7 @@ open class Parser {
      * @param inAttribute if the string is to be escaped in strict mode (as attributes are)
      * @return an unescaped string
      */
-    open static func unescape(entities: String, inAttributes: Bool) -> String {
+    public static func unescape(entities: String, inAttributes: Bool) -> String {
         let tokeniser = Tokeniser(reader: CharacterReader(input: entities), errors: ParseErrorList.noTracking())
         return tokeniser.unescapeEntities(inAttributes: inAttributes)
     }

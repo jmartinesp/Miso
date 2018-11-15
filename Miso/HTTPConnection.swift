@@ -256,7 +256,7 @@ public class HTTPConnection: Connection {
     }
     
     public func data(params: [String : String]) -> Self {
-        for (key, value) in params {
+        for (key, value) in params.sorted(by: { $0.key < $1.key }) {
             httpRequest.params[key] = value
         }
         return self
@@ -294,7 +294,7 @@ public class HTTPConnection: Connection {
     
     public func cookies(_ cookies: [HTTPCookie]) -> Self {
         for cookie in cookies {
-            self.cookie(cookie)
+            _ = self.cookie(cookie)
         }
         return self
     }
@@ -465,24 +465,26 @@ public class HTTPConnection: Connection {
                     let boundary = randomBoundary()
                     headers[HTTPConnection.CONTENT_TYPE] = HTTPConnection.MULTIPART_FORM_DATA + "; boundary=" + boundary
                     bodyContents += params.map { (pair: (key: String, value: String)) -> String in
-                        let key = pair.key.addingPercentEncoding(withAllowedCharacters: .alphanumerics)!
-                        var base = "--\(boundary)\r\nContent-Disposition: form-data; name=\"\(key)\""
-                        if pair.value.hasPrefix("; filename") {
-                            base += pair.value
-                        } else {
-                            base += "\r\n\r\n\(pair.value)"
+                            let key = pair.key.addingPercentEncoding(withAllowedCharacters: .alphanumerics)!
+                            var base = "--\(boundary)\r\nContent-Disposition: form-data; name=\"\(key)\""
+                            if pair.value.hasPrefix("; filename") {
+                                base += pair.value
+                            } else {
+                                base += "\r\n\r\n\(pair.value)"
+                            }
+                            return base
                         }
-                        return base
-                    }.joined()
+                        .joined()
                     bodyContents += "--\(boundary)--"
                 } else {
                     // URL-Encoded
                     headers[HTTPConnection.CONTENT_TYPE] = HTTPConnection.FORM_URL_ENCODED + "; encoding=" + postDataEncoding.displayName
                     bodyContents = params.map { (pair: (key: String, value: String)) -> String in
-                        let key = pair.key.addingPercentEncoding(withAllowedCharacters: .alphanumerics)
-                        let value = pair.value.addingPercentEncoding(withAllowedCharacters: .alphanumerics)
-                        return "\(key!)=\(value!)"
-                    }.joined(separator: "&")
+                            let key = pair.key.addingPercentEncoding(withAllowedCharacters: .alphanumerics)
+                            let value = pair.value.addingPercentEncoding(withAllowedCharacters: .alphanumerics)
+                            return "\(key!)=\(value!)"
+                        }
+                        .joined(separator: "&")
                 }
             } else if !params.isEmpty {
                 // ~GET
@@ -531,14 +533,14 @@ public class HTTPConnection: Connection {
         }
 
         // Generate random boundary for multipart requests
-        let boundaryChars = "-_1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".characters.map {
+        let boundaryChars = "-_1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".map {
             $0
         }
         func randomBoundary() -> String {
             let boundary = StringBuilder()
             let count = 32
             for _ in 0..<count {
-                let random = Int(arc4random()) % boundaryChars.count
+                let random = Int.random(in: 0..<boundaryChars.count)
                 boundary.append(boundaryChars[random])
             }
             return boundary.stringValue

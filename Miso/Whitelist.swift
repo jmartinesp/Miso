@@ -60,7 +60,7 @@ open class Whitelist {
      This whitelist allows only text nodes: all HTML will be stripped.
      @return whitelist
      */
-    open static var none: Whitelist {
+    public static var none: Whitelist {
         return Whitelist()
     }
 
@@ -69,7 +69,7 @@ open class Whitelist {
      attributes) will be removed.
      @return whitelist
      */
-    open static var simpleText: Whitelist {
+    public static var simpleText: Whitelist {
         return Whitelist().add(tags: "b", "em", "i", "strong", "u")
     }
 
@@ -87,7 +87,7 @@ open class Whitelist {
      </p>
      @return whitelist
      */
-    open static var basic: Whitelist {
+    public static var basic: Whitelist {
         return Whitelist().add(tags: "a", "b", "blockquote", "br", "cite", "code", "dd", "dl", "dt", "em",
                 "i", "li", "ol", "p", "pre", "q", "small", "span", "strike", "strong", "sub",
                 "sup", "u", "ul")
@@ -107,7 +107,7 @@ open class Whitelist {
      attributes, with <code>src</code> pointing to <code>http</code> or <code>https</code>.
      @return whitelist
      */
-    open static var basicWithImages: Whitelist {
+    public static var basicWithImages: Whitelist {
         return basic.add(tags: "img")
                 .add(to: "img", attributes: "align", "alt", "height", "src", "title", "width")
                 .add(to: "img", attr: "src", protocols: "http", "https")
@@ -122,7 +122,7 @@ open class Whitelist {
      </p>
      @return whitelist
      */
-    open static var relaxed: Whitelist {
+    public static var relaxed: Whitelist {
         return Whitelist().add(tags: "a", "b", "blockquote", "br", "caption", "cite", "code", "col",
                 "colgroup", "dd", "div", "dl", "dt", "em", "h1", "h2", "h3", "h4", "h5", "h6",
                 "i", "img", "li", "ol", "p", "pre", "q", "small", "span", "strike", "strong",
@@ -384,7 +384,7 @@ open class Whitelist {
         }
 
         // might be an enforced attribute?
-        if let enforcedSet = self.enforcedAttributes[tagName] {
+        if self.enforcedAttributes[tagName] != nil {
             let expect: Attributes = getEnforcedAttributes(forTag: tag)
             let attrKey = attr.tag
 

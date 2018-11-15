@@ -10,7 +10,7 @@ import Foundation
 
 open class Collector {
     
-    open static func collect(evaluator: EvaluatorProtocol, root: Element) -> Elements {
+    public static func collect(evaluator: EvaluatorProtocol, root: Element) -> Elements {
         let elements = Elements()
         NodeTraversor(visitor: Accumulator(root: root, elements: elements, evaluator: evaluator)).traverse(root: root)
         return elements

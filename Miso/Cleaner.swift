@@ -42,7 +42,7 @@ open class Cleaner {
         let cleanDoc = Document.createEmpty(baseUri: dirty.baseUri)
 
         if dirty.body != nil {
-            copySafeNodes(from: dirty.body!, to: cleanDoc.body!)
+            _ = copySafeNodes(from: dirty.body!, to: cleanDoc.body!)
         }
 
         return cleanDoc
@@ -148,7 +148,7 @@ open class Cleaner {
                     self.destination?.append(childNode: destText)
                 } else if let dataNode = node as? DataNode, self.cleaner.whitelist.isSafeTag(node.parentNode!.nodeName) {
                     let destData = DataNode(data: dataNode.wholeData, baseUri: dataNode.baseUri)
-                    self.destination?.append(childNode: dataNode)
+                    self.destination?.append(childNode: destData)
                 } else { // else, we don't care about comments, xml proc instructions, etc
                     self.numDiscarded += 1
                 }

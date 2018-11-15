@@ -43,7 +43,7 @@ class ConnectionTest: XCTestCase {
     let loremIpsum = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
     
     func testSimpleRequest() {
-        let response = HTTPConnection(url: "http://www.agenciatributaria.es/")!.request()
+        let response = HTTPConnection(url: "https://www.google.es/")!.request()
         XCTAssertNil(response.error)
         XCTAssertEqual(200, response.rawResponse?.statusCode)
     }
@@ -106,7 +106,7 @@ class ConnectionTest: XCTestCase {
             .data(params: ["limit": "1", "album_type": "SINGLE"])
             .rawRequest
         
-        XCTAssertEqual("http://test.com/?limit=1&album_type=SINGLE", request.url?.absoluteString)
+        XCTAssertEqual("http://test.com/?album_type=SINGLE&limit=1", request.url?.absoluteString)
     }
     
     func testGETEmptyParamsDictionary() {

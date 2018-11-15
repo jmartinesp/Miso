@@ -55,7 +55,7 @@ class AttributesTest: XCTestCase {
     func testIteratorEmpty() {
         let attributes = Attributes()
         
-        var iterator = attributes.makeIterator()
+        let iterator = attributes.makeIterator()
         XCTAssertNil(iterator.next())
     }
     

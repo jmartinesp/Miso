@@ -14,10 +14,6 @@ public class List<T>: Sequence {
         self.init([])
     }
     
-    public convenience init(_ list: List<T>) {
-        self.init(list)
-    }
-    
     public convenience init(_ elements: T...) {
         self.init(elements)
     }

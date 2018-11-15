@@ -99,7 +99,7 @@ open class Tag: Equatable, Hashable, CustomStringConvertible {
         return _tags
     }
     
-    open let tagName: String
+    let tagName: String
     open var isBlock = true              // block or line
     open var formatAsBlock = true        // should be formatted as a block
     open var canContainInline = true     // only pcdata if not
@@ -118,7 +118,7 @@ open class Tag: Equatable, Hashable, CustomStringConvertible {
     open var isSelfClosing: Bool { return isEmpty || selfClosing }
     open var isKnownTag: Bool { return Tag.isKnownTag(tagName: tagName) }
     
-    open static func isKnownTag(tagName: String) -> Bool {
+    public static func isKnownTag(tagName: String) -> Bool {
         return Tag.tags.keys.contains(tagName)
     }
     
@@ -159,7 +159,7 @@ open class Tag: Equatable, Hashable, CustomStringConvertible {
         return tagName
     }
     
-    open static func valueOf(tagName: String, settings: ParseSettings) -> Tag {
+    public static func valueOf(tagName: String, settings: ParseSettings) -> Tag {
         var tagName = tagName
         var tag: Tag
         
@@ -179,11 +179,11 @@ open class Tag: Equatable, Hashable, CustomStringConvertible {
         return tag
     }
     
-    open static func valueOf(tagName: String) -> Tag {
+    public static func valueOf(tagName: String) -> Tag {
         return Tag.valueOf(tagName: tagName, settings: ParseSettings.preserveCase)
     }
     
-    open static func register(tag: Tag) {
+    public static func register(tag: Tag) {
         Tag._tags[tag.tagName] = tag
     }
 }

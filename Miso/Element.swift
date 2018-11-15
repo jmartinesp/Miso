@@ -20,38 +20,9 @@ import Foundation
  */
 open class Element: Node {
     
-    open class ESafe: Node.Safe {
-        
-        let element: Element
-        
-        init(element: Element) {
-            self.element = element
-            super.init(node: element)
-        }
-        
-        @discardableResult
-        open func append(html: String) throws -> [Node] {
-            let nodes = try Parser.Safe.parse(fragmentHTML: html, withContext: element, baseUri: element.baseUri)
-            element.append(children: nodes)
-            return nodes
-        }
-        
-        @discardableResult
-        open func prepend(html: String) throws -> [Node] {
-            let nodes = try Parser.Safe.parse(fragmentHTML: html, withContext: element, baseUri: element.baseUri)
-            element.insert(children: nodes, at: 0)
-            return nodes
-        }
-        
-        @discardableResult
-        open func html(replaceWith newValue: String) throws -> Element {
-            element.removeAll()
-            try self.append(html: newValue)
-            return element
-        }
-    }
+    public typealias Safe = _ElementSafe
     
-    public override var safe: ESafe { return ESafe(element: self) }
+    public override var safe: _ElementSafe { return Safe(element: self) }
     
     public private(set) var tag: Tag
     
@@ -545,24 +516,27 @@ open class Element: Node {
             .contains(className.lowercased())
     }
     
+    @discardableResult
     open func addClass(_ className: String) -> Element {
-        var classes = self.classNames
+        let classes = self.classNames
         classes.insert(className.normalizedWhitespace(stripLeading: true).trimmingCharacters(in: .whitespaces))
         self.classNames = classes
         
         return self
     }
     
+    @discardableResult
     open func removeClass(_ className: String) -> Element {
-        var classes = self.classNames
+        let classes = self.classNames
         classes.remove(className)
         self.classNames = classes
         
         return self
     }
     
+    @discardableResult
     open func toggleClass(_ className: String) -> Element {
-        var classes = self.classNames
+        let classes = self.classNames
         let correctedClassName = className.normalizedWhitespace(stripLeading: true).trimmingCharacters(in: .whitespaces)
         
         if classes.contains(correctedClassName) {
@@ -656,10 +630,6 @@ open class Element: Node {
     open override var description: String {
         return outerHTML
     }
-    
-    open override var hashValue: Int {
-        return description.hashValue
-    }
 
     public static func ==(lhs: Element, rhs: Element) -> Bool {
         return lhs.outerHTML == rhs.outerHTML
@@ -671,5 +641,36 @@ open class Element: Node {
     
     open override func hasSameValue(_ other: Node) -> Bool {
         return super.hasSameValue(other)
+    }
+}
+
+open class _ElementSafe: Node.Safe {
+    
+    private let element: Element
+    
+    init(element: Element) {
+        self.element = element
+        super.init(node: element)
+    }
+    
+    @discardableResult
+    open func append(html: String) throws -> [Node] {
+        let nodes = try Parser.Safe.parse(fragmentHTML: html, withContext: element, baseUri: element.baseUri)
+        element.append(children: nodes)
+        return nodes
+    }
+    
+    @discardableResult
+    open func prepend(html: String) throws -> [Node] {
+        let nodes = try Parser.Safe.parse(fragmentHTML: html, withContext: element, baseUri: element.baseUri)
+        element.insert(children: nodes, at: 0)
+        return nodes
+    }
+    
+    @discardableResult
+    open func html(replaceWith newValue: String) throws -> Element {
+        element.removeAll()
+        try self.append(html: newValue)
+        return element
     }
 }

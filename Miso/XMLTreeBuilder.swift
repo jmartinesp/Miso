@@ -52,8 +52,6 @@ public class XMLTreeBuilder: TreeBuilder {
             break
         case .EOF: // could put some normalisation here if desired
             break
-        default:
-            fatalError("Unexpected token type: " + token.type.description)
         }
         return true
     }

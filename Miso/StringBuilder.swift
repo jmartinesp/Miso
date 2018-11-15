@@ -15,7 +15,7 @@ open class StringBuilder: CustomStringConvertible, CustomDebugStringConvertible 
      :param: string Initial value; defaults to empty string
      */
     public init(string: String = "") {
-        self.buffer = Array(string.characters)
+        self.buffer = Array(string)
     }
     
     public init() {
@@ -43,7 +43,7 @@ open class StringBuilder: CustomStringConvertible, CustomDebugStringConvertible 
      */
     @discardableResult
     open func append(_ string: String) -> StringBuilder {
-        buffer.append(contentsOf: string.characters)
+        buffer.append(contentsOf: string)
         return self
     }
 
@@ -88,13 +88,13 @@ open class StringBuilder: CustomStringConvertible, CustomDebugStringConvertible 
      */
     @discardableResult
     open func append<T: CustomStringConvertible>(_ value: T) -> StringBuilder {
-        buffer.append(contentsOf: value.description.characters)
+        buffer.append(contentsOf: value.description)
         return self
     }
     
     @discardableResult
     open func insert<T: CustomStringConvertible>(_ offset: Int, _ value: T) -> StringBuilder {
-        buffer.insert(contentsOf: value.description.characters, at: offset)
+        buffer.insert(contentsOf: value.description, at: offset)
         return self
     }
     
@@ -107,7 +107,7 @@ open class StringBuilder: CustomStringConvertible, CustomDebugStringConvertible 
      */
     @discardableResult
     open func appendLine(_ string: String) -> StringBuilder {
-        buffer.append(contentsOf: "\n".characters)
+        buffer.append(contentsOf: "\n")
         return self
     }
     
@@ -120,8 +120,8 @@ open class StringBuilder: CustomStringConvertible, CustomDebugStringConvertible 
      */
     @discardableResult
     open func appendLine<T: CustomStringConvertible>(_ value: T) -> StringBuilder {
-        buffer.append(contentsOf: value.description.characters)
-        buffer.append(contentsOf: "\n".characters)
+        buffer.append(contentsOf: value.description)
+        buffer.append(contentsOf: "\n")
         return self
     }
     

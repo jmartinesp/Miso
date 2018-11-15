@@ -35,7 +35,7 @@ open class Document: Element {
         self.location = baseUri
     }
     
-    open static func createEmpty(baseUri: String?) -> Document {
+    public static func createEmpty(baseUri: String?) -> Document {
         let document = Document(baseUri: baseUri)
         
         let html = document.append(element: "html")
@@ -245,7 +245,7 @@ open class Document: Element {
                     if declaration.name == "xml" {
                         declaration.attr("encoding", setValue: charset.displayName)
                     
-                        if let version = declaration.attr("version") {
+                        if declaration.attr("version") != nil {
                             declaration.attr("version", setValue: "1.0")
                         }
                         

@@ -11,7 +11,7 @@ import Foundation
 extension Sequence {
     
     func cast<T>(to: T.Type) -> [T] {
-        return self.flatMap { $0 as? T }
+        return self.compactMap { $0 as? T }
     }
     
     func joined(_ separator: String? = nil) -> String {
