@@ -8,7 +8,7 @@
 
 import Foundation
 
-public class SharedDictionary<Key: Hashable, Value>: Sequence {
+public class SharedDictionary<Key: Hashable, Value>: Sequence, CustomStringConvertible {
     
     public typealias Iterator = SharedDictionaryIterator<Key, Value>
     public typealias SubSequence = SharedDictionary<Key, Value>
@@ -186,6 +186,17 @@ public class SharedDictionary<Key: Hashable, Value>: Sequence {
         return result
     }
     
+    
+    public var description: String {
+        let pairs = (0..<count).map {
+                let index = self.keys.index(self.keys.startIndex, offsetBy: $0)
+                let key = self.keys[index]
+            return "\t\(key): \(String(describing: self[key]!))"
+            }
+            .joined(separator: ",\n")
+        
+        return "[\n\(pairs)\n]"
+    }
 }
 
 public class SharedDictionaryIterator<Key: Hashable, Value>: IteratorProtocol {

@@ -278,7 +278,7 @@ public class Elements: List<Element>, CustomStringConvertible {
     
     public var html: String {
         let accum = StringBuilder()
-        for element in self {
+        for element in elements {
             if !accum.isEmpty {
                 accum.append("\n")
             }
@@ -290,7 +290,7 @@ public class Elements: List<Element>, CustomStringConvertible {
     
     public var outerHTML: String {
         let accum = StringBuilder()
-        for element in self {
+        for element in elements {
             if !accum.isEmpty {
                 accum.append("\n")
             }
@@ -302,7 +302,7 @@ public class Elements: List<Element>, CustomStringConvertible {
     
     public var text: String {
         let accum = StringBuilder()
-        for element in self {
+        for element in elements {
             if !accum.isEmpty {
                 accum.append(" ")
             }

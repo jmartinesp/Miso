@@ -83,10 +83,7 @@ extension String {
     }
     
     func range(fromNSRange range: NSRange) -> Range<String.Index> {
-        let startIndex = self.index(self.startIndex, offsetBy: range.location)
-        let endIndex = self.index(startIndex, offsetBy: range.length)
-        
-        return Range<String.Index>(uncheckedBounds: (startIndex, endIndex))
+        return Range(range, in: self)!
     }
     
     func matches(_ regex: NSRegularExpression) -> Bool {

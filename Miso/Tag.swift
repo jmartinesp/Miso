@@ -46,58 +46,56 @@ open class Tag: Equatable, Hashable, CustomStringConvertible {
         "input", "keygen", "object", "select", "textarea"
         ]
     
-    private static var _tags = [String : Tag]()
-    private static var tags: [String : Tag] {
-        if _tags.isEmpty {
+    private static var tags: [String : Tag] = {
+        var tags = [String : Tag]()
             
-            // Create
-            blockTags.forEach {
-                let tag = Tag(tagName: $0)
-                register(tag: tag)
-            }
-            
-            inlineTags.forEach {
-                let tag = Tag(tagName: $0)
-                tag.isBlock = false
-                tag.formatAsBlock = false
-                register(tag: tag)
-            }
-            
-            // Modify
-            emptyTags.forEach {
-                let tag = _tags[$0]
-                tag?.canContainInline = false
-                tag?.isEmpty = true
-                register(tag: tag!)
-            }
-            
-            formatAsInlineTags.forEach {
-                let tag = _tags[$0]
-                tag?.formatAsBlock = false
-                register(tag: tag!)
-            }
-            
-            preserveWhitespaceTags.forEach {
-                let tag = _tags[$0]
-                tag?.preserveWhitespace = true
-                register(tag: tag!)
-            }
-            
-            formListedTags.forEach {
-                let tag = _tags[$0]
-                tag?.isFormListed = true
-                register(tag: tag!)
-            }
-            
-            formSubmitTags.forEach {
-                let tag = _tags[$0]
-                tag?.isFormSubmittable = true
-                register(tag: tag!)
-            }
+        // Create
+        blockTags.forEach {
+            let tag = Tag(tagName: $0)
+            tags[tag.tagName] = tag
         }
         
-        return _tags
-    }
+        inlineTags.forEach {
+            let tag = Tag(tagName: $0)
+            tag.isBlock = false
+            tag.formatAsBlock = false
+            tags[tag.tagName] = tag
+        }
+        
+        // Modify
+        emptyTags.forEach {
+            guard let tag = tags[$0] else { return }
+            tag.canContainInline = false
+            tag.isEmpty = true
+            tags[tag.tagName] = tag
+        }
+        
+        formatAsInlineTags.forEach {
+            guard let tag = tags[$0] else { return }
+            tag.formatAsBlock = false
+            tags[tag.tagName] = tag
+        }
+        
+        preserveWhitespaceTags.forEach {
+            guard let tag = tags[$0] else { return }
+            tag.preserveWhitespace = true
+            tags[tag.tagName] = tag
+        }
+        
+        formListedTags.forEach {
+            guard let tag = tags[$0] else { return }
+            tag.isFormListed = true
+            tags[tag.tagName] = tag
+        }
+        
+        formSubmitTags.forEach {
+            guard let tag = tags[$0] else { return }
+            tag.isFormSubmittable = true
+            tags[tag.tagName] = tag
+        }
+        
+        return tags
+    }()
     
     let tagName: String
     open var isBlock = true              // block or line
@@ -184,6 +182,6 @@ open class Tag: Equatable, Hashable, CustomStringConvertible {
     }
     
     public static func register(tag: Tag) {
-        Tag._tags[tag.tagName] = tag
+        Tag.tags[tag.tagName] = tag
     }
 }

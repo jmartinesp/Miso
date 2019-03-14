@@ -66,7 +66,7 @@ public protocol Connection {
     func parser(_ parser: Parser) -> Self
     func postDataEncoding(_ encoding: String.Encoding) -> Self
     
-    func request() -> ResponseType
+    func request(parse: Bool) -> ResponseType
     func request(responseHandler: @escaping (ResponseType) -> ())
 }
 
@@ -78,7 +78,8 @@ public protocol ResponseProtocol {
 
     var error: Error? { get }
     var document: Document? { get }
-    var data: String? { get }
+    var data: Data? { get }
+    var contents: String? { get }
 
 }
 

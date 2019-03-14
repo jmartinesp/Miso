@@ -8,7 +8,7 @@
 
 import Foundation
 
-public class HTTPConnection: Connection {
+public class HTTPConnection: Connection, CustomStringConvertible {
     
     public typealias RequestType = HTTPConnection.Request
     public typealias ResponseType = HTTPConnection.Response
@@ -20,7 +20,7 @@ public class HTTPConnection: Connection {
     public static let CONTENT_ENCODING = "Content-Encoding"
     public static let USER_AGENT = "User-Agent"
     public static let CONTENT_TYPE = "Content-Type"
-    public static let REFERRER = "Referrer"
+    public static let REFERRER = "Referer"
     public static let MULTIPART_FORM_DATA = "multipart/form-data"
     public static let FORM_URL_ENCODED = "application/x-www-form-urlencoded"
     
@@ -28,7 +28,7 @@ public class HTTPConnection: Connection {
      * Many users would get caught by not setting a user-agent and therefore getting different responses on their desktop
      * vs in jsoup, which would otherwise default to {@code Java}. So by default, use a desktop UA.
      */
-    fileprivate static let DEFAULT_USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36"
+    fileprivate static let DEFAULT_USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/51.0.2704.79 Chrome/51.0.2704.79 Safari/537.36"
     
     public static func connect(_ method: Request.Method, url: String) -> HTTPConnection? {
         return HTTPConnection(method, url: url)
@@ -349,7 +349,11 @@ public class HTTPConnection: Connection {
     // MARK: Request methods
     //======================================================================
     
-    public func request() -> ResponseType {
+    public func requestDocument() -> Document? {
+        return self.request(parse: true).document
+    }
+    
+    public func request(parse: Bool = true) -> ResponseType {
         let urlRequest = httpRequest.toURLRequest(session: urlSession)
         let responseData = urlSession.requestSynchronousData(request: urlRequest)
         
@@ -357,7 +361,14 @@ public class HTTPConnection: Connection {
         let urlResponse = responseData.rawResponse
         let error = responseData.error
         
-        return parseResponse(error: error, urlResponse: urlResponse, data: data)
+        if parse {
+            return parseResponse(error: error, urlResponse: urlResponse, data: data)
+        } else {
+            let contents: String? = data != nil ?
+                (String(data: data!, encoding: .utf8) ?? String(data: data!, encoding: .ascii)) :
+                nil
+            return ResponseType(document: nil, error: error, data: data, contents: contents, rawResponse: urlResponse)
+        }
     }
     
     public func request(responseHandler: @escaping (ResponseType) -> ()) {
@@ -371,6 +382,15 @@ public class HTTPConnection: Connection {
         let responseParser = HTTPResponseParser(request: httpRequest)
         return responseParser.parseResponse(error: error, urlResponse: urlResponse, data: data)
     }
+    
+    public func debug() -> HTTPConnection {
+        print(description)
+        return self
+    }
+    
+    public var description: String {
+        return httpRequest.description
+    }
 
 
     public struct Proxy {
@@ -378,7 +398,7 @@ public class HTTPConnection: Connection {
         let port: Int
     }
 
-    public struct Request: RequestProtocol {
+    public struct Request: RequestProtocol, CustomStringConvertible {
 
         public enum Method: String {
             case GET = "GET"
@@ -435,7 +455,10 @@ public class HTTPConnection: Connection {
             return url
         }
 
-        public mutating func toURLRequest(session: URLSession) -> URLRequest {
+        public func toURLRequest(session: URLSession) -> URLRequest {
+            var headers = self.headers
+            var url = self.url
+            
             var urlRequest = URLRequest(url: sanitizeDomain(url: url))
             urlRequest.httpMethod = method.rawValue
 
@@ -449,8 +472,6 @@ public class HTTPConnection: Connection {
 
             if let timeout = self.timeout {
                 urlRequest.timeoutInterval = timeout
-            } else {
-                urlRequest.timeoutInterval = 5
             }
 
             // Params
@@ -478,11 +499,13 @@ public class HTTPConnection: Connection {
                     bodyContents += "--\(boundary)--"
                 } else {
                     // URL-Encoded
-                    headers[HTTPConnection.CONTENT_TYPE] = HTTPConnection.FORM_URL_ENCODED + "; encoding=" + postDataEncoding.displayName
+                    var allowedCharset = NSCharacterSet.urlQueryAllowed
+                    allowedCharset.remove(charactersIn: "!;/?:@&=+$, ")
+                    headers[HTTPConnection.CONTENT_TYPE] = HTTPConnection.FORM_URL_ENCODED + "; charset=" + postDataEncoding.displayName
                     bodyContents = params.map { (pair: (key: String, value: String)) -> String in
-                            let key = pair.key.addingPercentEncoding(withAllowedCharacters: .alphanumerics)
-                            let value = pair.value.addingPercentEncoding(withAllowedCharacters: .alphanumerics)
-                            return "\(key!)=\(value!)"
+                            let key = pair.key.addingPercentEncoding(withAllowedCharacters: allowedCharset)!
+                            let value = pair.value.addingPercentEncoding(withAllowedCharacters: allowedCharset)!
+                            return "\(key)=\(value)"
                         }
                         .joined(separator: "&")
                 }
@@ -545,6 +568,25 @@ public class HTTPConnection: Connection {
             }
             return boundary.stringValue
         }
+        
+        public var description: String {
+            let urlRequest = toURLRequest(session: URLSession.shared)
+            let body = urlRequest.httpBody != nil ? String(data: urlRequest.httpBody!, encoding: postDataEncoding)! : ""
+            let cookies = HTTPCookieStorage.shared.cookies(for: urlRequest.url!)?.map {
+                "\($0.name): \($0.value)"
+            }
+            
+            return """
+            ===================== REQUEST =====================
+            URL: \(urlRequest.url!)
+            Method: \(method)
+            Body: \(body)
+            Headers: \(urlRequest.allHTTPHeaderFields ?? [:])
+            Cookies: \(cookies ?? [])
+            ===================================================
+            
+            """
+        }
 
     }
 
@@ -552,7 +594,8 @@ public class HTTPConnection: Connection {
 
         public var document: Document?
         public var error: Error?
-        public var data: String?
+        public var data: Data?
+        public var contents: String?
         public var rawResponse: HTTPURLResponse?
 
     }

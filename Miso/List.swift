@@ -1,4 +1,23 @@
-public class List<T>: Sequence {
+public class List<T>: Collection {
+    
+    public func index(after i: Int) -> Int {
+        return i+1
+    }
+    
+    public subscript(position: Int) -> T {
+        return elements[position]
+    }
+    
+    public subscript(safe position: Int) -> T? {
+        guard (0..<elements.count).contains(position) else { return nil }
+        return elements[position]
+    }
+    
+    public var startIndex: Int = 0
+    
+    public var endIndex: Int {
+        return elements.count > 0 ? elements.count - 1 : 0
+    }
         
     public final var elements: Array<T>
     
@@ -18,21 +37,12 @@ public class List<T>: Sequence {
         self.init(elements)
     }
     
-    public subscript(index: Int) -> T {
+    public subscript(subRange: Range<Int>) -> List<T> {
         get {
-            return elements[index]
+            return List(elements[subRange].map { $0 })
         }
         set {
-            elements[index] = newValue
-        }
-    }
-    
-    public subscript(subRange: Range<Int>) -> ArraySlice<T> {
-        get {
-            return elements[subRange]
-        }
-        set {
-            elements[subRange] = newValue
+            elements[subRange] = newValue.elements[0...]
         }
     }
     
@@ -58,6 +68,31 @@ public class List<T>: Sequence {
     
     public func reserveCapacity(minimumCapacity: Int) {
         elements.reserveCapacity(minimumCapacity)
+    }
+    
+    public func dropFirst() -> ArraySlice<T> {
+        return ArraySlice(elements.dropFirst())
+    }
+    
+    public func dropFirst(_ k: Int) -> ArraySlice<T> {
+        return ArraySlice(elements.dropFirst(k))
+    }
+    
+    public func dropLast() -> ArraySlice<T> {
+        return ArraySlice(elements.dropLast())
+    }
+    
+    public func dropLast(_ k: Int) -> ArraySlice<T> {
+        return ArraySlice(elements.dropLast(k))
+    }
+    
+    public func drop(while predicate: (T) throws -> Bool) rethrows -> ArraySlice<T> {
+        while elements.count != 0 {
+            if try predicate(elements.first!) {
+                elements.removeFirst()
+            }
+        }
+        return ArraySlice(elements)
     }
     
     public var count: Int {
@@ -90,12 +125,12 @@ public class List<T>: Sequence {
         return List(elements.filter(includeElement))
     }
     
-    public func map<U>(transform: (T) -> U) -> List<U> {
-        return List<U>(elements.map(transform))
+    public func map<Result>(_ transform: (T) throws -> Result) rethrows -> [Result] {
+        return try elements.map(transform)
     }
     
-    public func reduce<U>(initial: U, combine: (U, T) -> U) -> U {
-        return elements.reduce(initial, combine)
+    public func reduce<Result>(_ initialResult: Result, _ nextPartialResult: (Result, T) throws -> Result) rethrows -> Result {
+        return try elements.reduce(initialResult, nextPartialResult)
     }
     
     public var first: T? {
@@ -104,6 +139,10 @@ public class List<T>: Sequence {
     
     public var last: T? {
         return elements.isEmpty ? nil : elements[elements.count-1]
+    }
+    
+    public func compactMap<ElementOfResult>(_ transform: (T) throws -> ElementOfResult?) rethrows -> [ElementOfResult] {
+        return try elements.compactMap(transform)
     }
 }
 
@@ -144,7 +183,7 @@ public struct ListIterator<T> : IteratorProtocol {
     }
     
     public mutating func next() -> T? {
-        if index >= list.count { return nil }
+        guard index < list.count - 1 else { return nil }
         index += 1
         return list[index - 1]
     }
