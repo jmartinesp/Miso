@@ -501,7 +501,9 @@ public class HTTPConnection: Connection, CustomStringConvertible {
                     // URL-Encoded
                     var allowedCharset = NSCharacterSet.urlQueryAllowed
                     allowedCharset.remove(charactersIn: "!;/?:@&=+$, ")
-                    headers[HTTPConnection.CONTENT_TYPE] = HTTPConnection.FORM_URL_ENCODED + "; charset=" + postDataEncoding.displayName
+                    if headers[HTTPConnection.CONTENT_TYPE] == nil {
+                        headers[HTTPConnection.CONTENT_TYPE] = HTTPConnection.FORM_URL_ENCODED + "; charset=" + postDataEncoding.displayName
+                    }
                     bodyContents = params.map { (pair: (key: String, value: String)) -> String in
                             let key = pair.key.addingPercentEncoding(withAllowedCharacters: allowedCharset)!
                             let value = pair.value.addingPercentEncoding(withAllowedCharacters: allowedCharset)!

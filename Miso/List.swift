@@ -141,6 +141,18 @@ public class List<T>: Collection {
         return elements.isEmpty ? nil : elements[elements.count-1]
     }
     
+    public func first(where condition: (T) throws -> Bool) rethrows ->  T? {
+        return try elements.first(where: condition)
+    }
+    
+    public func last(where condition: (T) throws -> Bool) rethrows ->  T? {
+        return try elements.last(where: condition)
+    }
+    
+    public func flatMap<SegmentOfResult>(_ transform: (T) throws -> SegmentOfResult) rethrows -> [SegmentOfResult.Element] where SegmentOfResult : Sequence {
+        return try elements.flatMap(transform)
+    }
+    
     public func compactMap<ElementOfResult>(_ transform: (T) throws -> ElementOfResult?) rethrows -> [ElementOfResult] {
         return try elements.compactMap(transform)
     }
