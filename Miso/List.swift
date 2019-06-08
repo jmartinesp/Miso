@@ -168,8 +168,12 @@ extension List where Iterator.Element: Equatable {
         return lhs.elements != rhs.elements
     }
     
+    public func firstIndex(of element: T) -> Int? {
+        return elements.firstIndex(of: element)
+    }
+    
     public func index(of element: T) -> Int? {
-        return elements.index(of: element)
+        return elements.firstIndex(of: element)
     }
     
 }
