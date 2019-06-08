@@ -417,9 +417,15 @@ public class Evaluator {
         }
         
         override func calculatePosition(root: Element?, and element: Element) -> Int {
-            return element.parentElement!.children.filter {
-                $0.tagName == element.tagName
-            }.index(of: element)! + 1
+            let type = element.tagName
+            guard let allElements = element.parentElement?.children else {
+                return -1
+            }
+            
+            let elementsOfType = allElements.filter { $0.tagName == type }
+            
+            guard let index = elementsOfType.index(of: element) else { return -1 }
+            return index + 1
         }
         
         override var pseudoClass: String { return "nth-of-type" }

@@ -298,19 +298,19 @@ class ConnectionTest: XCTestCase {
         var request = HTTPConnection(url: "http://httpstat.us/301")!.followRedirects(true)
         var response = request.request()
         XCTAssertEqual(200, response.rawResponse?.statusCode)
-        XCTAssert(response.data!.contains("This is a super simple service for generating different HTTP codes."))
+        XCTAssert(response.contents!.contains("This is a super simple service for generating different HTTP codes."))
         
         // 307: Temporary Redirect
         request = HTTPConnection(url: "http://httpstat.us/307")!.followRedirects(true)
         response = request.request()
         XCTAssertEqual(200, response.rawResponse?.statusCode)
-        XCTAssert(response.data!.contains("This is a super simple service for generating different HTTP codes."))
+        XCTAssert(response.contents!.contains("This is a super simple service for generating different HTTP codes."))
         
         // 308: Permanent Redirect
         request = HTTPConnection(url: "http://httpstat.us/308")!.followRedirects(true)
         response = request.request()
         XCTAssertEqual(200, response.rawResponse?.statusCode)
-        XCTAssert(response.data!.contains("This is a super simple service for generating different HTTP codes."))
+        XCTAssert(response.contents!.contains("This is a super simple service for generating different HTTP codes."))
     }
     
     /*
@@ -344,7 +344,7 @@ class ConnectionTest: XCTestCase {
         let request = HTTPConnection(url: "http://httpstat.us/404")?.ignoreHTTPErrors(true)
         let response = request?.request()
         
-        XCTAssertEqual("404 Not Found", response?.data)
+        XCTAssertEqual("404 Not Found", response?.contents)
         XCTAssertEqual(404, response?.rawResponse?.statusCode)
         XCTAssertNil(response?.error)
     }
@@ -353,7 +353,7 @@ class ConnectionTest: XCTestCase {
         let request = HTTPConnection(url: "http://httpstat.us/404")
         let response = request?.request()
         
-        XCTAssertNil(response?.data)
+        XCTAssertNil(response?.contents)
         XCTAssertEqual(404, response?.rawResponse?.statusCode)
         XCTAssertNotNil(response?.error)
     }
@@ -375,7 +375,7 @@ class ConnectionTest: XCTestCase {
         let request = HTTPConnection(url: "https://jsoup.org/rez/osi_logo.png")
         let response = request?.request()
         
-        XCTAssertNil(response!.data)
+        XCTAssertNil(response!.contents)
         XCTAssertEqual(200, response?.rawResponse?.statusCode)
         XCTAssertNotNil(response?.error)
     }

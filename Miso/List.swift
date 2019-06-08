@@ -168,6 +168,10 @@ extension List where Iterator.Element: Equatable {
         return lhs.elements != rhs.elements
     }
     
+    public func index(of element: T) -> Int? {
+        return elements.index(of: element)
+    }
+    
 }
 
 public func += <T>(lhs: inout List<T>, rhs: T) {
@@ -191,12 +195,12 @@ public struct ListIterator<T> : IteratorProtocol {
     
     public init(_ list: List<T>) {
         self.list = list
-        index = 0
+        index = -1
     }
     
     public mutating func next() -> T? {
-        guard index < list.count - 1 else { return nil }
+        guard index + 1 < list.count else { return nil }
         index += 1
-        return list[index - 1]
+        return list[index]
     }
 }

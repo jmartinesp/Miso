@@ -21,7 +21,7 @@ public class Entities {
         public static let xhtml = EscapeMode(characters: Entities.xhtml, size: 4, id: 0)
         /** Default HTML output entities. */
         public static let base = EscapeMode(characters: Entities.base, size: 106, id: 1)
-         /** Complete HTML entities. */
+        /** Complete HTML entities. */
         public static let full = EscapeMode(characters: Entities.full, size: 2125, id: 2)
         
         public static let codeDelimiters: [UnicodeScalar] = [",", ";"]
@@ -83,30 +83,30 @@ public class Entities {
                 i += 1
             }
         }
-
-
+        
+        
         /*public func codepoint(forName name: String) -> Int {
-            guard let index = nameKeys.index(of: name) else {
-                return none
-            }
-            return codeVals[index]
-        }*/
+         guard let index = nameKeys.index(of: name) else {
+         return none
+         }
+         return codeVals[index]
+         }*/
         
         public func codepoint(forName name: String) -> String? {
             return codePoints[name]?.first
         }
         
         /*public func name(forCodepoint codepoint: Int) -> String {
-            let indexes = self.indexes(of: codepoint, in: codeKeys)
-            if let index = codeKeys.index(of: codepoint) {
-                // the results are ordered so lower case versions of same codepoint come after uppercase, and we prefer to emit lower
-                // (and binary search for same item with multi results is undefined
-                
-                return (index < nameVals.count-1 && codeKeys[index+1] == codepoint) ?
-                    nameVals[index+1] : nameVals[index]
-            }
-            return emptyName
-        }*/
+         let indexes = self.indexes(of: codepoint, in: codeKeys)
+         if let index = codeKeys.index(of: codepoint) {
+         // the results are ordered so lower case versions of same codepoint come after uppercase, and we prefer to emit lower
+         // (and binary search for same item with multi results is undefined
+         
+         return (index < nameVals.count-1 && codeKeys[index+1] == codepoint) ?
+         nameVals[index+1] : nameVals[index]
+         }
+         return emptyName
+         }*/
         
         public func name(forCodepoint codepoint: String) -> String? {
             return names[codepoint]?.first
@@ -191,18 +191,20 @@ public class Entities {
     
     public static func codepoints(forName name: String, codepoints: inout [UnicodeScalar]) -> Int {
         
-        if let val: String = multipoints[name] {
+        if let val: String = multipoints[name], val.unicodeScalars.count > 1 {
             codepoints[0] = val.unicodeScalars[0]
             codepoints[1] = val.unicodeScalars[1]
             return 2
         }
         
         if let codepoint = EscapeMode.full.codepoint(forName: name) {
-            if codepoint.contains(",") {
-                let pointsStr = codepoint.components(separatedBy: ",")
-                codepoints[0] = UnicodeScalar(Int(pointsStr[0])!)!
-                codepoints[1] = UnicodeScalar(Int(pointsStr[1])!)!
-            } else {
+            let pointsStr = codepoint.components(separatedBy: ",")
+            if pointsStr.count > 1,
+                let pointInt0 = Int(pointsStr[0]), let scalar0 = UnicodeScalar(pointInt0),
+                let pointInt1 = Int(pointsStr[1]), let scalar1 = UnicodeScalar(pointInt1) {
+                codepoints[0] = scalar0
+                codepoints[1] = scalar1
+            } else if codepoint.count > 0 {
                 codepoints[0] = UnicodeScalar(Int(codepoint)!)!
             }
             return 1
