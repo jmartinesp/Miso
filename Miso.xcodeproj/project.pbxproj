@@ -25,7 +25,6 @@
 		4D2DA1361E9CC749003A17FA /* Elements.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D2DA1351E9CC749003A17FA /* Elements.swift */; };
 		4D2DA1381E9CC8A3003A17FA /* TextNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D2DA1371E9CC8A3003A17FA /* TextNode.swift */; };
 		4D2DA13A1E9CD66F003A17FA /* DataNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D2DA1391E9CD66F003A17FA /* DataNode.swift */; };
-		4D2DA13E1E9CE006003A17FA /* OptionalExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D2DA13D1E9CE006003A17FA /* OptionalExtensions.swift */; };
 		4D2DA1401E9CE766003A17FA /* SequenceExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D2DA13F1E9CE766003A17FA /* SequenceExtension.swift */; };
 		4D2DA1421E9CEB97003A17FA /* Evaluator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D2DA1411E9CEB97003A17FA /* Evaluator.swift */; };
 		4D2DA1441E9D743F003A17FA /* Collector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D2DA1431E9D743F003A17FA /* Collector.swift */; };
@@ -120,7 +119,6 @@
 		4D2DA1351E9CC749003A17FA /* Elements.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Elements.swift; sourceTree = "<group>"; };
 		4D2DA1371E9CC8A3003A17FA /* TextNode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextNode.swift; sourceTree = "<group>"; };
 		4D2DA1391E9CD66F003A17FA /* DataNode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataNode.swift; sourceTree = "<group>"; };
-		4D2DA13D1E9CE006003A17FA /* OptionalExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OptionalExtensions.swift; sourceTree = "<group>"; };
 		4D2DA13F1E9CE766003A17FA /* SequenceExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SequenceExtension.swift; sourceTree = "<group>"; };
 		4D2DA1411E9CEB97003A17FA /* Evaluator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Evaluator.swift; sourceTree = "<group>"; };
 		4D2DA1431E9D743F003A17FA /* Collector.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Collector.swift; sourceTree = "<group>"; };
@@ -348,7 +346,6 @@
 				4D80594C1E9BD31800A8DC94 /* URLExtension.swift */,
 				4D2DA12F1E9CAF2E003A17FA /* StringExtension.swift */,
 				4D2DA1331E9CC411003A17FA /* SharedDictionary.swift */,
-				4D2DA13D1E9CE006003A17FA /* OptionalExtensions.swift */,
 				4D2DA13F1E9CE766003A17FA /* SequenceExtension.swift */,
 				4D2EA3F21EA0F047001678CC /* StringBuilder.swift */,
 				4D2EA3FA1EA369F5001678CC /* BuildExtension.swift */,
@@ -652,7 +649,6 @@
 				4D2DA1441E9D743F003A17FA /* Collector.swift in Sources */,
 				4D2EA3FB1EA369F5001678CC /* BuildExtension.swift in Sources */,
 				4D2EA3F71EA21AF1001678CC /* HTMLTreeBuilderState.swift in Sources */,
-				4D2DA13E1E9CE006003A17FA /* OptionalExtensions.swift in Sources */,
 				4D7C9AFD1EA60ABD00255951 /* OrderedSet.swift in Sources */,
 				4D2DA14A1E9E4027003A17FA /* TokenQueue.swift in Sources */,
 				4D7C9AFB1EA6076600255951 /* OrderedDictionary.swift in Sources */,

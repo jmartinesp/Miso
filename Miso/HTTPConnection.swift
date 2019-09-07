@@ -456,7 +456,7 @@ public class HTTPConnection: Connection, CustomStringConvertible {
         }
 
         public func toURLRequest(session: URLSession) -> URLRequest {
-            var headers = self.headers
+            let headers = self.headers
             var url = self.url
             
             var urlRequest = URLRequest(url: sanitizeDomain(url: url))

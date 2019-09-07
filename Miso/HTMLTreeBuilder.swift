@@ -274,13 +274,12 @@ class HTMLTreeBuilder: TreeBuilder, CustomStringConvertible {
 
     @discardableResult
     func removeFromStack(_ element: Element) -> Element? {
-        if let found = stack.reversed().first(where: { $0 == element }) {
-            if let index = stack.index(of: found) {
-                stack.remove(at: index)
-                return found
-            }
-        }
-        return nil
+        guard let found = stack.reversed().first(where: { $0 == element }),
+            let index = stack.firstIndex(of: found)
+            else { return nil }
+        
+        stack.remove(at: index)
+        return found
     }
     
     func popStackToClose(_ name: String) {

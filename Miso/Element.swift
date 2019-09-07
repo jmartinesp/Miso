@@ -245,7 +245,7 @@ open class Element: Node {
      * @return position in element sibling list
      */
     open var elementSiblingIndex: Int? {
-        return parentNode?.childNodes.cast(to: Element.self).index(of: self)
+        return parentNode?.childNodes.cast(to: Element.self).firstIndex(of: self)
     }
     
     open func elements(byTag tagName: String) -> Elements {

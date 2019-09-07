@@ -23,7 +23,7 @@ extension URLSession {
             semaphore.signal()
         })
         task.resume()
-        semaphore.wait(timeout: DispatchTime.distantFuture)
+        _ = semaphore.wait(timeout: DispatchTime.distantFuture)
         return (data, response, error)
     }
     

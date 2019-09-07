@@ -61,9 +61,10 @@ open class Attribute: CustomStringConvertible, Equatable, Hashable {
         return !(lhs == rhs)
     }
     
-    open var hashValue: Int {
-        return tag.hashValue
+    open func hash(into hasher: inout Hasher) {
+        hasher.combine(tag)
     }
+    
 }
 
 open class BooleanAttribute: Attribute {

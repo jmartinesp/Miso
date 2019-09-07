@@ -140,17 +140,16 @@ open class Tag: Equatable, Hashable, CustomStringConvertible {
         return !(lhs == rhs)
     }
     
-    open var hashValue: Int {
-        var hash = tagName.hashValue
-        hash = 31 * hash + (isBlock ? 1 : 0)
-        hash = 31 * hash + (formatAsBlock ? 1 : 0)
-        hash = 31 * hash + (canContainInline ? 1 : 0)
-        hash = 31 * hash + (isEmpty ? 1 : 0)
-        hash = 31 * hash + (selfClosing ? 1 : 0)
-        hash = 31 * hash + (preserveWhitespace ? 1 : 0)
-        hash = 31 * hash + (isFormListed ? 1 : 0)
-        hash = 31 * hash + (isFormSubmittable ? 1 : 0)
-        return hash
+    open func hash(into hasher: inout Hasher) {
+        hasher.combine(tagName)
+        hasher.combine(isBlock)
+        hasher.combine(formatAsBlock)
+        hasher.combine(canContainInline)
+        hasher.combine(isEmpty)
+        hasher.combine(selfClosing)
+        hasher.combine(preserveWhitespace)
+        hasher.combine(isFormListed)
+        hasher.combine(isFormSubmittable)
     }
     
     open var description: String {

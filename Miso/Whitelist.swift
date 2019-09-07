@@ -460,13 +460,6 @@ open class TagName: TypedValue {
         return TagName(value: value)
     }
 
-    public override var hashValue: Int {
-        return super.hashValue
-    }
-    public override var description: String {
-        return super.description
-    }
-
 }
 
 open class AttributeKey: TypedValue {
@@ -476,13 +469,6 @@ open class AttributeKey: TypedValue {
 
     static func value(of value: String) -> AttributeKey {
         return AttributeKey(value: value)
-    }
-
-    public override var hashValue: Int {
-        return super.hashValue
-    }
-    public override var description: String {
-        return super.description
     }
 
 }
@@ -496,13 +482,6 @@ open class AttributeValue: TypedValue {
         return AttributeValue(value: value)
     }
 
-    public override var hashValue: Int {
-        return super.hashValue
-    }
-    public override var description: String {
-        return super.description
-    }
-
 }
 
 open class Protocol: TypedValue {
@@ -514,13 +493,6 @@ open class Protocol: TypedValue {
         return Protocol(value: value)
     }
 
-    public override var hashValue: Int {
-        return super.hashValue
-    }
-    public override var description: String {
-        return super.description
-    }
-
 }
 
 open class TypedValue: Hashable, Equatable, CustomStringConvertible {
@@ -529,10 +501,9 @@ open class TypedValue: Hashable, Equatable, CustomStringConvertible {
     init(value: String) {
         self.value = value
     }
-
-    public var hashValue: Int {
-        let prime = 31
-        return prime + value.hash
+    
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(value)
     }
 
     public static func ==(lhs: TypedValue, rhs: TypedValue) -> Bool {

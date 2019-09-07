@@ -35,7 +35,7 @@ public class Comment: Node {
             return attributes.get(byTag: Comment.COMMENT_KEY)!.value
         }
         set {
-            attributes.put(string: data, forKey: Comment.COMMENT_KEY)
+            attributes.put(string: newValue, forKey: Comment.COMMENT_KEY)
         }
     }
     
