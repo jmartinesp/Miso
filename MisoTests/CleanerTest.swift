@@ -258,7 +258,7 @@ class CleanerTest: XCTestCase {
     
     func testScriptTagInWhiteList() {
         let whitelist = Whitelist.relaxed
-        whitelist.add(tags: "script")
+        _ = whitelist.add(tags: "script")
         XCTAssert(Miso.isValid(bodyHtml: "Hello<script>alert('Doh')</script>World !", whitelist: whitelist))
     }
     

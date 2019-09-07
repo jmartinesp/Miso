@@ -669,7 +669,7 @@ class HTMLParserTest: XCTestCase {
     func testTracksErrorsWhenRequested() {
         let html = "<p>One</p href='no'><!DOCTYPE html>&arrgh;<font /><br /><foo"
         let parser = Parser.htmlParser.trackErrors(count: 500)
-        let doc = Miso.parse(html: html, baseUri: "http://example.com", parser: parser)
+        _ = Miso.parse(html: html, baseUri: "http://example.com", parser: parser)
         
         let errors = parser.errors
         XCTAssertEqual(5, errors.count)
@@ -683,7 +683,7 @@ class HTMLParserTest: XCTestCase {
     func testTracksLimitedErrorsWhenRequested() {
         let html = "<p>One</p href='no'><!DOCTYPE html>&arrgh;<font /><br /><foo"
         let parser = Parser.htmlParser.trackErrors(count: 3)
-        let doc = parser.parseInput(html: html, baseUri: "http://example.com")
+        _ = parser.parseInput(html: html, baseUri: "http://example.com")
         
         let errors = parser.errors
         XCTAssertEqual(3, errors.count)
@@ -853,7 +853,6 @@ class HTMLParserTest: XCTestCase {
  
     func testTestNormalisesIsIndex() {
         let doc = Miso.parse(html: "<body><isindex action='/submit'></body>")
-        let html = doc.outerHTML
         XCTAssertEqual("<form action=\"/submit\"> <hr> <label>This is a searchable index. Enter search keywords: <input name=\"isindex\"></label> <hr> </form>", doc.body?.html.normalizedWhitespace())
     }
     
