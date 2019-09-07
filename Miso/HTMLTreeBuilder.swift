@@ -88,8 +88,8 @@ class HTMLTreeBuilder: TreeBuilder, CustomStringConvertible {
             /*  setup form element to nearest form on context (up ancestor chain). ensures form controls are associated
                 with form correctly */
             
-            let contextChains = context!.parents
-            contextChains.insert(context!, atIndex: 0)
+            var contextChains = context!.parents
+            contextChains.insert(context!, at: 0)
             
             for parent in contextChains {
                 if let formElement = parent as? FormElement {

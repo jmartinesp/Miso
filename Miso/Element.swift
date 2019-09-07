@@ -208,7 +208,7 @@ open class Element: Node {
             return Elements()
         }
         
-        let elements = Elements()
+        var elements = Elements()
         let siblings = parentNode!.childNodes.cast(to: Element.self)
         siblings.filter { $0 != self }.forEach { elements.append($0) }
         

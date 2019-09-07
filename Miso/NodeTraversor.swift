@@ -47,7 +47,6 @@ open class NodeTraversor {
                 
                 node = node?.nextSibling
             }
-            
         }
     }
 }

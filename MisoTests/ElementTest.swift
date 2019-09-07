@@ -698,7 +698,7 @@ class ElementTest: XCTestCase {
         let div2 = doc.select("div")[1]
         
         XCTAssertEqual(2, div2.childNodes.count)
-        div2.insert(children: p1s.elements, at: -1)
+        div2.insert(children: p1s, at: -1)
         XCTAssertEqual(2, div1.childNodes.count) // moved two out
         XCTAssertEqual(4, div2.childNodes.count)
         XCTAssertEqual(3, p1s[1].siblingIndex) // should be last

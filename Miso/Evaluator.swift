@@ -424,7 +424,7 @@ public class Evaluator {
             
             let elementsOfType = allElements.filter { $0.tagName == type }
             
-            guard let index = elementsOfType.index(of: element) else { return -1 }
+            guard let index = elementsOfType.firstIndex(of: element) else { return -1 }
             return index + 1
         }
         
@@ -439,8 +439,8 @@ public class Evaluator {
         
         override func calculatePosition(root: Element?, and element: Element) -> Int {
             return element.parentElement!.children.filter {
-                $0.tagName == element.tagName
-                }.reverse().index(of: element)! + 1
+                    $0.tagName == element.tagName
+                }.reversed().firstIndex(of: element)! + 1
         }
         
         override var pseudoClass: String { return "nth-last-of-type" }
