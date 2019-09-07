@@ -8,10 +8,4 @@
 
 import Foundation
 
-public class Nodes: List<Node>, CustomStringConvertible {
-    
-    public var description: String {
-        return ""
-    }
-    
-}
+public typealias Nodes = Array<Node>

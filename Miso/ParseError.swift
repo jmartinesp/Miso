@@ -24,29 +24,43 @@ open class ParseError: LocalizedError {
     
 }
 
-public class ParseErrorList: List<LocalizedError>, LocalizedError {
+public class ParseErrorList: LocalizedError {
     
     public static let DEFAULT_MAX_SIZE = 16
-    public let maxSize: Int
+    public private(set) var maxSize: Int
+    
+    public private(set) var errors: [LocalizedError]
     
     public init() {
         self.maxSize = ParseErrorList.DEFAULT_MAX_SIZE
-        super.init([])
+        self.errors = []
     }
     
     public init(maxSize: Int) {
         self.maxSize = maxSize
-        super.init([])
+        self.errors = []
     }
     
-    public override func append(_ newElement: LocalizedError) {
+    public func append(_ newElement: LocalizedError) {
         if (canAddError) {
-            self.elements.append(newElement)
+            self.errors.append(newElement)
         }
     }
     
+    public var count: Int {
+        return errors.count
+    }
+    
     public var canAddError: Bool {
-        return count < maxSize
+        return errors.count < maxSize
+    }
+    
+    public var isEmpty: Bool {
+        return errors.isEmpty
+    }
+    
+    public subscript(_ index: Int) -> LocalizedError {
+        return errors[index]
     }
     
     public static func noTracking() -> ParseErrorList {
@@ -62,7 +76,7 @@ public class ParseErrorList: List<LocalizedError>, LocalizedError {
     }
     
     public var errorDescription: String? {
-        return elements.compactMap { $0.errorDescription }.joined("\n")
+        return errors.compactMap { $0.errorDescription }.joined("\n")
     }
     
 }
