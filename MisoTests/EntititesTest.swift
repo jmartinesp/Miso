@@ -29,6 +29,7 @@ class EntititesTest: XCTestCase {
             $0.charset = .utf8
             $0.escapeMode = .full
         })
+        let escapedUtfFullAuto = Entities.escape(string: text)
         let escapedUtfMin = Entities.escape(string: text, outputSettings: build(OutputSettings()) {
             $0.charset = .utf8
             $0.escapeMode = .xhtml
@@ -38,6 +39,7 @@ class EntititesTest: XCTestCase {
         XCTAssertEqual("Hello &amp;&lt;&gt; &Aring; &aring; &pi; &#x65b0; there &frac34; &COPY; &raquo;", escapedAsciiFull)
         XCTAssertEqual("Hello &amp;&lt;&gt; &#xc5; &#xe5; &#x3c0; &#x65b0; there &#xbe; &#xa9; &#xbb;", escapedAsciiXhtml)
         XCTAssertEqual("Hello &amp;&lt;&gt; Å å π 新 there ¾ © »", escapedUtfFull)
+        XCTAssertEqual("Hello &amp;&lt;&gt; Å å π 新 there ¾ © »", escapedUtfFullAuto)
         XCTAssertEqual("Hello &amp;&lt;&gt; Å å π 新 there ¾ © »", escapedUtfMin)
         // odd that it's defined as aring in base but angst in full
         
@@ -46,6 +48,7 @@ class EntititesTest: XCTestCase {
         XCTAssertEqual(text, Entities.unescape(escapedAsciiFull))
         XCTAssertEqual(text, Entities.unescape(escapedAsciiXhtml))
         XCTAssertEqual(text, Entities.unescape(escapedUtfFull))
+        XCTAssertEqual(text, Entities.unescape(escapedUtfFullAuto))
         XCTAssertEqual(text, Entities.unescape(escapedUtfMin))
     }
     
@@ -69,15 +72,15 @@ class EntititesTest: XCTestCase {
     }
     
     func testXhtml() {
-        XCTAssertEqual("38", Entities.EscapeMode.xhtml.codepoint(forName: "amp"))
-        XCTAssertEqual("62", Entities.EscapeMode.xhtml.codepoint(forName: "gt"))
-        XCTAssertEqual("60", Entities.EscapeMode.xhtml.codepoint(forName: "lt"))
-        XCTAssertEqual("34", Entities.EscapeMode.xhtml.codepoint(forName: "quot"))
+        XCTAssertEqual(38, Entities.EscapeMode.xhtml.codepoint(forName: "amp"))
+        XCTAssertEqual(62, Entities.EscapeMode.xhtml.codepoint(forName: "gt"))
+        XCTAssertEqual(60, Entities.EscapeMode.xhtml.codepoint(forName: "lt"))
+        XCTAssertEqual(34, Entities.EscapeMode.xhtml.codepoint(forName: "quot"))
         
-        XCTAssertEqual("amp", Entities.EscapeMode.xhtml.name(forCodepoint: "38"))
-        XCTAssertEqual("gt", Entities.EscapeMode.xhtml.name(forCodepoint: "62"))
-        XCTAssertEqual("lt", Entities.EscapeMode.xhtml.name(forCodepoint: "60"))
-        XCTAssertEqual("quot", Entities.EscapeMode.xhtml.name(forCodepoint: "34"))
+        XCTAssertEqual("amp", Entities.EscapeMode.xhtml.name(forCodepoint: 38))
+        XCTAssertEqual("gt", Entities.EscapeMode.xhtml.name(forCodepoint: 62))
+        XCTAssertEqual("lt", Entities.EscapeMode.xhtml.name(forCodepoint: 60))
+        XCTAssertEqual("quot", Entities.EscapeMode.xhtml.name(forCodepoint: 34))
     }
     
     func testGetByName() {

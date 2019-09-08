@@ -122,9 +122,10 @@ final class Tokeniser {
     var codePointHolder: [UnicodeScalar] = [UnicodeScalar(0)!]
     var multipointHolder = [UnicodeScalar(0)!, UnicodeScalar(0)!]
     func consumeCharacterReference(additionalAllowedCharacter: UnicodeScalar?, inAttributes: Bool) -> [UnicodeScalar] {
-        guard !reader.isEmpty else { return [] }
-        guard !(additionalAllowedCharacter != nil && additionalAllowedCharacter == reader.current) else { return [] }
-        guard !reader.matches(any: Tokeniser.NOT_CHAR_REFS) else { return [] }
+        guard !reader.isEmpty,
+            !(additionalAllowedCharacter != nil && additionalAllowedCharacter == reader.current),
+            !reader.matches(any: Tokeniser.NOT_CHAR_REFS)
+            else { return [] }
         
         var codeRef = codePointHolder
         reader.mark()

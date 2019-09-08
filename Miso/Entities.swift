@@ -10,7 +10,6 @@ import Foundation
 
 public class Entities {
     
-    private static let none: Int = -1
     private static let emptyName: String = ""
     private static let codepointRadix: Int = 36
     
@@ -28,8 +27,8 @@ public class Entities {
         
         let value: Int
         
-        var codePoints: [String: [String]]
-        var names: [String: [String]]
+        var codePoints: [String: Int]
+        var names: [Int: [String]]
         
         public init(characters: String, size: Int, id: Int) {
             codePoints = [:]
@@ -48,35 +47,28 @@ public class Entities {
                 let codePoint1 = Int(reader.consume(toAny: EscapeMode.codeDelimiters), radix: codepointRadix) ?? 0
                 let codeDelimiter = reader.consume()
                 
-                let codePoint2: Int
+                let codePoint2: Int?
                 if codeDelimiter == "," {
                     codePoint2 = Int(reader.consume(to: ";"), radix: codepointRadix) ?? 0
                     // Skip ';'
                     reader.advance()
                 } else {
-                    codePoint2 = none
+                    codePoint2 = nil
                 }
                 
                 _ = Int(reader.consume(to: "\n"), radix: codepointRadix) ?? 0
                 // Skip '\n'
                 reader.advance()
                 
-                var codePointKey = String(codePoint1)
-                if codePoint2 != none {
-                    codePointKey += "," + String(codePoint2)
-                }
-                var namesForCodepoint = names[codePointKey] ?? []
+                var namesForCodepoint = names[codePoint1] ?? []
                 namesForCodepoint.append(name)
                 namesForCodepoint = namesForCodepoint.sorted()
-                names[codePointKey] = namesForCodepoint
+                names[codePoint1] = namesForCodepoint
                 
-                var codepointsForName = codePoints[name] ?? []
-                codepointsForName.append(codePointKey)
-                codepointsForName = codepointsForName.sorted()
-                codePoints[name] = codepointsForName
+                codePoints[name] = codePoint1
                 
-                if codePoint2 != none {
-                    let string = StringBuilder().appendCodePoint(codePoint1).appendCodePoint(codePoint2).stringValue
+                if codePoint2 != nil {
+                    let string = StringBuilder().appendCodePoint(codePoint1).appendCodePoint(codePoint2!).stringValue
                     multipoints[name] = string
                 }
                 
@@ -84,16 +76,8 @@ public class Entities {
             }
         }
         
-        
-        /*public func codepoint(forName name: String) -> Int {
-         guard let index = nameKeys.index(of: name) else {
-         return none
-         }
-         return codeVals[index]
-         }*/
-        
-        public func codepoint(forName name: String) -> String? {
-            return codePoints[name]?.first
+        public func codepoint(forName name: String) -> Int? {
+            return codePoints[name]
         }
         
         /*public func name(forCodepoint codepoint: Int) -> String {
@@ -108,7 +92,7 @@ public class Entities {
          return emptyName
          }*/
         
-        public func name(forCodepoint codepoint: String) -> String? {
+        public func name(forCodepoint codepoint: Int) -> String? {
             return names[codepoint]?.first
         }
         
@@ -161,17 +145,7 @@ public class Entities {
      * @deprecated does not support characters outside the BMP or multiple character names
      */
     public static func characters(byName name: String) -> [UnicodeScalar] {
-        var characters = [UnicodeScalar](repeating: UnicodeScalar(0)!, count: 2)
-        if let codepoints = EscapeMode.full.codepoint(forName: name) {
-            if codepoints.contains(",") {
-                let pointsStr = codepoints.components(separatedBy: ",")
-                characters[0] = UnicodeScalar(Int(pointsStr[0])!)!
-                characters[1] = UnicodeScalar(Int(pointsStr[1])!)!
-            } else {
-                characters[0] = UnicodeScalar(Int(codepoints)!)!
-            }
-        }
-        return []
+        return [UnicodeScalar(EscapeMode.full.codepoint(forName: name) ?? -1)!]
     }
     
     /**
@@ -184,7 +158,7 @@ public class Entities {
         if let val = Entities.multipoints[name] { return val }
         let codepoint = fullEscapeMode.codepoint(forName: name)
         if codepoint != nil {
-            return String(Character(UnicodeScalar(Int(codepoint!)!)!))
+            return String(Character(UnicodeScalar(codepoint!)!))
         }
         return emptyName
     }
@@ -198,18 +172,17 @@ public class Entities {
         }
         
         if let codepoint = EscapeMode.full.codepoint(forName: name) {
-            let pointsStr = codepoint.components(separatedBy: ",")
-            if pointsStr.count > 1,
-                let pointInt0 = Int(pointsStr[0]), let scalar0 = UnicodeScalar(pointInt0),
-                let pointInt1 = Int(pointsStr[1]), let scalar1 = UnicodeScalar(pointInt1) {
-                codepoints[0] = scalar0
-                codepoints[1] = scalar1
-            } else if codepoint.count > 0 {
-                codepoints[0] = UnicodeScalar(Int(codepoint)!)!
-            }
+            codepoints[0] = UnicodeScalar(codepoint)!
             return 1
         }
         return 0
+    }
+    
+    public static func escape(string: String, encoding: String.Encoding = .utf8) -> String{
+        let outputSettings = OutputSettings()
+        outputSettings.charset = encoding
+        outputSettings.escapeMode = .full
+        return escape(string: string, outputSettings: outputSettings)
     }
     
     public static func escape(string: String, outputSettings: OutputSettings) -> String {
@@ -246,7 +219,7 @@ public class Entities {
                 let c = codePoint
                 // html specific and required escapes:
                 switch (codePoint) {
-                case UnicodeScalar.Ampersand:
+                case .Ampersand:
                     accum.append("&amp;")
                     break
                 case UnicodeScalar(UInt32(0xA0))!:
@@ -256,7 +229,7 @@ public class Entities {
                         accum.append("&#xa0;")
                     }
                     break
-                case UnicodeScalar.LessThan:
+                case .LessThan:
                     // escape when in character data or when in a xml attribue val; not needed in html attr val
                     if (!inAttribute || escapeMode == EscapeMode.xhtml) {
                         accum.append("&lt;")
@@ -264,7 +237,7 @@ public class Entities {
                         accum.append(c)
                     }
                     break
-                case UnicodeScalar.GreaterThan:
+                case .GreaterThan:
                     if (!inAttribute) {
                         accum.append("&gt;")
                     } else {
@@ -296,7 +269,7 @@ public class Entities {
     }
     
     private static func appendEncoded(accum: StringBuilder, escapeMode: EscapeMode, codePoint: UnicodeScalar) {
-        let name = escapeMode.name(forCodepoint: String(Int(codePoint.value)))
+        let name = escapeMode.name(forCodepoint: Int(codePoint.value))
         if (name != nil) {
             accum.append(UnicodeScalar.Ampersand).append(name!).append(";")
         } else {

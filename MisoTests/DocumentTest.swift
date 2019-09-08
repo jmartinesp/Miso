@@ -299,6 +299,12 @@ class DocumentTest: XCTestCase {
         XCTAssertFalse(document.updateMetaCharset)
     }
     
-    
+    func testThai()
+    {
+        let str = "บังคับ"
+        let doc = Miso.parse(html: str)
+        let txt = doc.html
+        XCTAssertEqual("<html>\n <head></head>\n <body>\n  บังคับ\n </body>\n</html>", txt)
+    }
  
 }
