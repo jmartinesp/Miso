@@ -17,11 +17,11 @@ public class Entities {
     
     public struct EscapeMode: Equatable {
         /** Restricted entities suitable for XHTML output: lt, gt, amp, and quot only. */
-        public static let xhtml = EscapeMode(characters: Entities.xhtml, size: 4, id: 0)
+        public static let xhtml = EscapeMode(characters: Entities.xhtml, id: 0)
         /** Default HTML output entities. */
-        public static let base = EscapeMode(characters: Entities.base, size: 106, id: 1)
+        public static let base = EscapeMode(characters: Entities.base, id: 1)
         /** Complete HTML entities. */
-        public static let full = EscapeMode(characters: Entities.full, size: 2125, id: 2)
+        public static let full = EscapeMode(characters: Entities.full, id: 2)
         
         public static let codeDelimiters: [UnicodeScalar] = [",", ";"]
         
@@ -30,15 +30,13 @@ public class Entities {
         var codePoints: [String: Int]
         var names: [Int: [String]]
         
-        public init(characters: String, size: Int, id: Int) {
+        public init(characters: String, id: Int) {
             codePoints = [:]
             names = [:]
             
             value = id
             
             let reader = CharacterReader(input: characters)
-            
-            var i = 0
             
             while !reader.isEmpty {
                 let name = reader.consume(to: "=")
@@ -47,32 +45,25 @@ public class Entities {
                 let codePoint1 = Int(reader.consume(toAny: EscapeMode.codeDelimiters), radix: codepointRadix) ?? 0
                 let codeDelimiter = reader.consume()
                 
-                let codePoint2: Int?
-                if codeDelimiter == "," {
-                    codePoint2 = Int(reader.consume(to: ";"), radix: codepointRadix) ?? 0
-                    // Skip ';'
-                    reader.advance()
-                } else {
-                    codePoint2 = nil
-                }
+                let codePoint2: Int? = codeDelimiter == "," ?
+                    (Int(reader.consume(to: ";"), radix: codepointRadix) ?? 0) :
+                    nil
                 
-                _ = Int(reader.consume(to: "\n"), radix: codepointRadix) ?? 0
+                _ = reader.consume(to: "\n")
                 // Skip '\n'
                 reader.advance()
                 
                 var namesForCodepoint = names[codePoint1] ?? []
                 namesForCodepoint.append(name)
-                namesForCodepoint = namesForCodepoint.sorted()
                 names[codePoint1] = namesForCodepoint
                 
                 codePoints[name] = codePoint1
                 
+                // If several codepoints match a name, add it to multipoints
                 if codePoint2 != nil {
                     let string = StringBuilder().appendCodePoint(codePoint1).appendCodePoint(codePoint2!).stringValue
                     multipoints[name] = string
                 }
-                
-                i += 1
             }
         }
         
@@ -154,13 +145,13 @@ public class Entities {
      * @return the string value of the character(s) represented by this entity, or "" if not defined
      */
     public static func entity(byName name: String) -> String {
-        let fullEscapeMode = EscapeMode.full
-        if let val = Entities.multipoints[name] { return val }
-        let codepoint = fullEscapeMode.codepoint(forName: name)
-        if codepoint != nil {
-            return String(Character(UnicodeScalar(codepoint!)!))
+        if let val = Entities.multipoints[name] {
+            return val
+        } else if let codepoint = EscapeMode.full.codepoint(forName: name) {
+            return String(UnicodeScalar(codepoint)!)
+        } else {
+            return emptyName
         }
-        return emptyName
     }
     
     public static func codepoints(forName name: String, codepoints: inout [UnicodeScalar]) -> Int {
