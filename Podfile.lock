@@ -8,7 +8,7 @@ DEPENDENCIES:
   - EnvoyAmbassador (~> 4.0)
 
 SPEC REPOS:
-  https://github.com/cocoapods/specs.git:
+  https://github.com/CocoaPods/Specs.git:
     - Embassy
     - EnvoyAmbassador
 
@@ -18,4 +18,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: 88b7b1caeb473318a647f68fedc4760c7242f468
 
-COCOAPODS: 1.5.3
+COCOAPODS: 1.8.4

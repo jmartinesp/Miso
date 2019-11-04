@@ -13,9 +13,12 @@ public class HTTPConnection: Connection, CustomStringConvertible {
     public typealias RequestType = HTTPConnection.Request
     public typealias ResponseType = HTTPConnection.Response
     
+    #if os(watchOS)
+    #else
     private static let PROXY_ENABLE = String(kCFNetworkProxiesHTTPEnable)
     private static let PROXY_HOST = String(kCFNetworkProxiesHTTPProxy)
     private static let PROXY_PORT = String(kCFNetworkProxiesHTTPPort)
+    #endif
     
     public static let CONTENT_ENCODING = "Content-Encoding"
     public static let USER_AGENT = "User-Agent"
@@ -462,6 +465,8 @@ public class HTTPConnection: Connection, CustomStringConvertible {
             var urlRequest = URLRequest(url: sanitizeDomain(url: url))
             urlRequest.httpMethod = method.rawValue
 
+            #if os(watchOS)
+            #else
             if proxy != nil {
                 session.configuration.connectionProxyDictionary = [
                         HTTPConnection.PROXY_ENABLE: true,
@@ -469,6 +474,7 @@ public class HTTPConnection: Connection, CustomStringConvertible {
                         HTTPConnection.PROXY_HOST: proxy!.url.host!
                 ]
             }
+            #endif
 
             if let timeout = self.timeout {
                 urlRequest.timeoutInterval = timeout
@@ -642,17 +648,6 @@ class ConfigurableSessionTaskDelegate: NSObject, URLSessionTaskDelegate {
         completionHandler(.performDefaultHandling, nil)
     }
     
-    func urlSessionDidFinishEvents(forBackgroundURLSession session: URLSession) {
-        print("Finished")
-    }
-    
-    func urlSession(_ session: URLSession, didBecomeInvalidWithError error: Error?) {
-        print("Error")
-    }
-    
-    func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
-        print("Completed - error")
-    }
 }
 
 public struct HTTPError: LocalizedError {

@@ -6,7 +6,7 @@
 //  Copyright © 2017 Jorge Martín Espinosa. All rights reserved.
 //
 
-#import <UIKit/UIKit.h>
+@import Foundation;
 
 //! Project version number for SwiftySoup.
 FOUNDATION_EXPORT double SwiftySoupVersionNumber;
