@@ -142,7 +142,7 @@ class HTMLTreeBuilder: TreeBuilder, CustomStringConvertible {
     
     func error(_ state: HTMLTreeBuilderState) {
         if errors.canAddError {
-            errors.append(ParseError(pos: characterReader.pos, message: String(format: "Unexpected token [%@] when in state [%@]", currentToken!.type.description, state.description)))
+            errors.append(ParseError(pos: characterReader.pos, message: "Unexpected token [\(currentToken!.type)] when in state [\(state)]"))
         }
     }
 

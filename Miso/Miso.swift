@@ -52,6 +52,24 @@ public class Miso {
             clean.outputSettings = outputSettings
             return clean.body!.html
         }
+        
+        public static func requestAndParse(_ method: HTTPConnection.Request.Method, url: String) throws -> Document {
+            let connection = HTTPConnection.connect(method, url: url)
+            let response = connection?.request()
+            if let error = response?.error {
+                throw error
+            }
+            return response!.document!
+        }
+        
+        public static func requestAndParse(_ method: HTTPConnection.Request.Method, url: URL) throws -> Document {
+            let connection = HTTPConnection.connect(method, url: url)
+            let response = connection.request()
+            if let error = response.error {
+                throw error
+            }
+            return response.document!
+        }
     }
 
     /**

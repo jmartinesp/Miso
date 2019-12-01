@@ -192,6 +192,7 @@
 		4D5A7DF72370A4400066F307 /* Miso_MacOS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Miso_MacOS.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4D5A7DF92370A4400066F307 /* Miso_MacOS.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Miso_MacOS.h; sourceTree = "<group>"; };
 		4D5A7DFA2370A4400066F307 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		4D5A7E332370A6420066F307 /* Swift.package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Swift.package.swift; sourceTree = "<group>"; };
 		4D720BF21EB1CA2100BEEB37 /* TokenQueueTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TokenQueueTest.swift; sourceTree = "<group>"; };
 		4D720BF41EB1D56800BEEB37 /* XMLTreeBuilderTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = XMLTreeBuilderTest.swift; sourceTree = "<group>"; };
 		4D720BF71EB36A9700BEEB37 /* CleanerTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CleanerTest.swift; sourceTree = "<group>"; };
@@ -365,6 +366,7 @@
 		4D80590B1E9B624300A8DC94 = {
 			isa = PBXGroup;
 			children = (
+				4D5A7E332370A6420066F307 /* Swift.package.swift */,
 				4D8059171E9B624300A8DC94 /* Miso */,
 				4D8059221E9B624300A8DC94 /* MisoTests */,
 				4D5A7DF82370A4400066F307 /* Miso-MacOS */,
@@ -906,7 +908,7 @@
 				INFOPLIST_FILE = "Miso-MacOS/Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.arasthel.Miso-MacOS";
@@ -935,7 +937,7 @@
 				INFOPLIST_FILE = "Miso-MacOS/Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.arasthel.Miso-MacOS";
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";

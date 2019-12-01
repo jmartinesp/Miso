@@ -7,6 +7,9 @@
 //
 
 import Foundation
+#if os(Linux)
+import FoundationNetworking
+#endif
 
 public class HTTPConnection: Connection, CustomStringConvertible {
     
@@ -14,6 +17,7 @@ public class HTTPConnection: Connection, CustomStringConvertible {
     public typealias ResponseType = HTTPConnection.Response
     
     #if os(watchOS)
+    #elseif os(Linux)
     #else
     private static let PROXY_ENABLE = String(kCFNetworkProxiesHTTPEnable)
     private static let PROXY_HOST = String(kCFNetworkProxiesHTTPProxy)
@@ -226,6 +230,24 @@ public class HTTPConnection: Connection, CustomStringConvertible {
     }
     
     //======================================================================
+    // MARK: Authentication
+    //======================================================================
+    
+    public func authenticate(user: String, password: String) -> Self {
+        followRedirectsDelegate.credential = URLCredential(user: user, password: password, persistence: .forSession)
+        return self
+    }
+    
+    public func authenticate(token: String) -> Self {
+        httpRequest.headers["Authorization"] = "Bearer \(token)"
+        return self
+    }
+    
+    public func authentication() -> URLCredential? {
+        return followRedirectsDelegate.credential
+    }
+    
+    //======================================================================
     // MARK: Headers
     //======================================================================
     
@@ -282,6 +304,11 @@ public class HTTPConnection: Connection, CustomStringConvertible {
     }
     
     public func body(_ body: String?) -> Self {
+        httpRequest.rawBodyData = body?.data(using: postDataEncoding)
+        return self
+    }
+    
+    public func body(_ body: Data?) -> Self {
         httpRequest.rawBodyData = body
         return self
     }
@@ -370,15 +397,16 @@ public class HTTPConnection: Connection, CustomStringConvertible {
             let contents: String? = data != nil ?
                 (String(data: data!, encoding: .utf8) ?? String(data: data!, encoding: .ascii)) :
                 nil
-            return ResponseType(document: nil, error: error, data: data, contents: contents, rawResponse: urlResponse)
+            return ResponseType(document: nil, error: error, data: data, contents: contents, rawRequest: urlRequest, rawResponse: urlResponse)
         }
     }
     
     public func request(responseHandler: @escaping (ResponseType) -> ()) {
         let urlRequest = httpRequest.toURLRequest(session: urlSession)
         urlSession.dataTask(with: urlRequest, completionHandler: { data, response, error in
-            responseHandler(self.parseResponse(error: error, urlResponse: response, data: data))
-        })
+                responseHandler(self.parseResponse(error: error, urlResponse: response, data: data))
+            })
+            .resume()
     }
     
     private func parseResponse(error: Error?, urlResponse: URLResponse?, data: Data?) -> Response {
@@ -440,7 +468,7 @@ public class HTTPConnection: Connection, CustomStringConvertible {
         var ignoreContentType: Bool = false
         var postDataEncoding: String.Encoding = .utf8
 
-        var rawBodyData: String? = nil
+        var rawBodyData: Data? = nil
         var params = OrderedDictionary<String, String>()
         var headers = OrderedDictionary<String, String>()
         var cookies = [String: String]()
@@ -466,6 +494,7 @@ public class HTTPConnection: Connection, CustomStringConvertible {
             urlRequest.httpMethod = method.rawValue
 
             #if os(watchOS)
+            #elseif os(Linux)
             #else
             if proxy != nil {
                 session.configuration.connectionProxyDictionary = [
@@ -484,7 +513,7 @@ public class HTTPConnection: Connection, CustomStringConvertible {
             var bodyContents = ""
             if rawBodyData != nil {
                 // Set body data directly
-                bodyContents = rawBodyData!
+                urlRequest.httpBody = rawBodyData
             } else if method.hasBody {
                 // ~POST method
                 if needsMultipart {
@@ -604,6 +633,7 @@ public class HTTPConnection: Connection, CustomStringConvertible {
         public var error: Error?
         public var data: Data?
         public var contents: String?
+        public var rawRequest: URLRequest
         public var rawResponse: HTTPURLResponse?
 
     }
@@ -613,7 +643,8 @@ class ConfigurableSessionTaskDelegate: NSObject, URLSessionTaskDelegate {
 
     var validateTLSCertificates: Bool = true
     var followRedirects: Bool = false
-
+    var credential: URLCredential?
+    
     func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse, newRequest request: URLRequest, completionHandler: @escaping (URLRequest?) -> Void) {
 
         var responseRequest: URLRequest? = nil
@@ -627,6 +658,17 @@ class ConfigurableSessionTaskDelegate: NSObject, URLSessionTaskDelegate {
     }
     
     func urlSession(_ session: URLSession, task: URLSessionTask, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+        #if os(Linux)
+        if let credential = self.credential {
+            completionHandler(.useCredential, credential)
+        } else if let credential = session.configuration.urlCredentialStorage?.defaultCredential(for: challenge.protectionSpace) {
+            completionHandler(.useCredential, credential)
+        } else if let credential = challenge.proposedCredential {
+            completionHandler(.useCredential, credential)
+        } else {
+            completionHandler(.performDefaultHandling, nil)
+        }
+        #else
         if validateTLSCertificates {
             if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust {
                 if let trust = challenge.protectionSpace.serverTrust {
@@ -644,8 +686,17 @@ class ConfigurableSessionTaskDelegate: NSObject, URLSessionTaskDelegate {
                 }
             }
         }
-
-        completionHandler(.performDefaultHandling, nil)
+        
+        if let credential = self.credential {
+            completionHandler(.useCredential, credential)
+        } else if let credential = session.configuration.urlCredentialStorage?.defaultCredential(for: challenge.protectionSpace) {
+            completionHandler(.useCredential, credential)
+        } else if let credential = challenge.proposedCredential {
+            completionHandler(.useCredential, credential)
+        } else {
+            completionHandler(.performDefaultHandling, nil)
+        }
+        #endif
     }
     
 }

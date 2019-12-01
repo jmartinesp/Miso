@@ -7,6 +7,9 @@
 //
 
 import Foundation
+#if os(Linux)
+import FoundationNetworking
+#endif
 
 /**
  * A Connection provides a convenient interface to fetch content from the web, and parse them into Documents.

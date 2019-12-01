@@ -170,7 +170,7 @@ final class Tokeniser {
             if !found {
                 reader.rewindToMark()
                 if looksLegit { // named with semicolon
-                    characterReferenceError(message: String(format: "invalid named reference '%@'", nameRef))
+                    characterReferenceError(message: "invalid named reference '\(nameRef)'")
                 }
                 return []
             }
@@ -274,19 +274,19 @@ final class Tokeniser {
     
     func error(state: TokeniserState) {
         if errors.canAddError {
-            errors.append(ParseError(pos: reader.pos, message: String(format: "Unexpected character '%@' in input state [%@]", reader.current.string, "\(state)")))
+            errors.append(ParseError(pos: reader.pos, message: "Unexpected character '\(reader.current.string)' in input state [\(state)]"))
         }
     }
     
     func eofError(state: TokeniserState) {
         if (errors.canAddError) {
-            errors.append(ParseError(pos: reader.pos, message: String(format: "Unexpectedly reached end of file (EOF) in input state [%@]", "\(state)")))
+            errors.append(ParseError(pos: reader.pos, message: "Unexpectedly reached end of file (EOF) in input state [\(state)]"))
         }
     }
     
     private func characterReferenceError(message: String) {
         if errors.canAddError {
-            errors.append(ParseError(pos: reader.pos, message: String(format: "Invalid character reference: %@", message)))
+            errors.append(ParseError(pos: reader.pos, message: "Invalid character reference: \(message)"))
         }
     }
     
