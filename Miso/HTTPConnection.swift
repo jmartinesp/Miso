@@ -23,14 +23,24 @@ public class HTTPConnection: Connection, CustomStringConvertible {
     private static let PROXY_HOST = String(kCFNetworkProxiesHTTPProxy)
     private static let PROXY_PORT = String(kCFNetworkProxiesHTTPPort)
     #endif
-    
+
+#if os(Linux)    
+    public static let CONTENT_ENCODING = "content-encoding"
+    public static let USER_AGENT = "user-agent"
+    public static let CONTENT_TYPE = "content-type"
+    public static let REFERRER = "referer"
+    public static let MULTIPART_FORM_DATA = "multipart/form-data"
+    public static let FORM_URL_ENCODED = "application/x-www-form-urlencoded"
+#else
     public static let CONTENT_ENCODING = "Content-Encoding"
     public static let USER_AGENT = "User-Agent"
     public static let CONTENT_TYPE = "Content-Type"
     public static let REFERRER = "Referer"
     public static let MULTIPART_FORM_DATA = "multipart/form-data"
     public static let FORM_URL_ENCODED = "application/x-www-form-urlencoded"
-    
+#endif
+
+   
     /**
      * Many users would get caught by not setting a user-agent and therefore getting different responses on their desktop
      * vs in jsoup, which would otherwise default to {@code Java}. So by default, use a desktop UA.
