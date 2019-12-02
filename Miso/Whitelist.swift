@@ -87,7 +87,7 @@ open class Whitelist {
      </p>
      @return whitelist
      */
-    public static let basic: Whitelist = {
+    public static var basic: Whitelist {
         return Whitelist().add(tags: "a", "b", "blockquote", "br", "cite", "code", "dd", "dl", "dt", "em",
                 "i", "li", "ol", "p", "pre", "q", "small", "span", "strike", "strong", "sub",
                 "sup", "u", "ul")
@@ -100,18 +100,18 @@ open class Whitelist {
                 .add(to: "blockquote", attr: "cite", protocols: "http", "https")
                 .add(to: "cite", attr: "cite", protocols: "http", "https")
                 .add(to: "a", attr: "rel", enforcedValue: "nofollow")
-    }()
+    }
 
     /**
      This whitelist allows the same text tags as {@link #basic}, and also allows <code>img</code> tags, with appropriate
      attributes, with <code>src</code> pointing to <code>http</code> or <code>https</code>.
      @return whitelist
      */
-    public static let basicWithImages: Whitelist = {
+    public static var basicWithImages: Whitelist {
         return basic.add(tags: "img")
                 .add(to: "img", attributes: "align", "alt", "height", "src", "title", "width")
                 .add(to: "img", attr: "src", protocols: "http", "https")
-    }()
+    }
 
     /**
      This whitelist allows a full range of text and structural body HTML: <code>a, b, blockquote, br, caption, cite,
@@ -122,7 +122,7 @@ open class Whitelist {
      </p>
      @return whitelist
      */
-    public static let relaxed: Whitelist = {
+    public static var relaxed: Whitelist {
         return Whitelist().add(tags: "a", "b", "blockquote", "br", "caption", "cite", "code", "col",
                 "colgroup", "dd", "div", "dl", "dt", "em", "h1", "h2", "h3", "h4", "h5", "h6",
                 "i", "img", "li", "ol", "p", "pre", "q", "small", "span", "strike", "strong",
@@ -139,7 +139,7 @@ open class Whitelist {
                 .add(to: "cite", attr: "cite", protocols: "http", "https")
                 .add(to: "img", attr: "src", protocols: "http", "https")
                 .add(to: "q", attr: "cite", protocols: "http", "https")
-    }()
+    }
 
     /**
      Create a new, empty whitelist. Generally it will be better to start with a default prepared whitelist instead.

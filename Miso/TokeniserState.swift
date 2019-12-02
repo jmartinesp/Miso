@@ -95,7 +95,6 @@ enum TokeniserState: TokeniserStateProtocol {
     case CdataSection
     
     internal func read(_ t: Tokeniser, _ r: CharacterReader) throws {
-	let current = r.current
         switch self {
         case .Data:
             switch (r.current) {
@@ -799,7 +798,7 @@ enum TokeniserState: TokeniserStateProtocol {
             break
         case .AttributeValue_doubleQuoted:
             let value = r.consume(to: "\"")
-            if (value.count > 0) {
+            if (value.unicodeScalars.count > 0) {
                 t.tagPending?.append(attributeValue: value)
             } else {
                 t.tagPending?.hasEmptyAttributeValue = true

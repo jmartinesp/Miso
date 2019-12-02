@@ -20,7 +20,7 @@ final class Tokeniser {
     private var isEmitPending: Bool = false
     
     private var charsString: String? = nil
-    private var charsBuilder = StringBuilder(string: "")
+    private var charsBuilder = ""
     var dataBuffer = ""
     
     var tagPending: Token.Tag?
@@ -57,7 +57,7 @@ final class Tokeniser {
             let copy = charsBuilder
             charsBuilder.removeAll()
             charsString = nil
-            charPending.data = copy.stringValue
+            charPending.data = copy
             return charPending
         } else if charsString != nil {
             charPending.data = charsString
@@ -131,7 +131,7 @@ final class Tokeniser {
         reader.mark()
         
         if reader.matchesConsume(sequence: "#") {  // numbered
-	    let hexScalars = [UnicodeScalar("X"), UnicodeScalar("x")]
+            let hexScalars = [UnicodeScalar("X"), UnicodeScalar("x")]
             let isHexMode = hexScalars.contains(reader.current)
             
             let numRef = isHexMode ? reader.consumeHexSequence() : reader.consumeDigitSequence()

@@ -12,10 +12,10 @@ public class CharacterReader: CustomStringConvertible {
 
     public static let empty = ""
     public static let EOF: UnicodeScalar = "\u{FFFF}"
-    public static let tagnameDelimiters: Set<UnicodeScalar> = Set([UnicodeScalar.Tabulation, UnicodeScalar.NewLine,
+    public static let tagnameDelimiters: [UnicodeScalar] = [UnicodeScalar.Tabulation, UnicodeScalar.NewLine,
                                                             UnicodeScalar.BackslashR, UnicodeScalar.BackslashF,
                                                             UnicodeScalar.Space, UnicodeScalar.Slash,
-                                                            UnicodeScalar.GreaterThan, TokeniserStateVars.nullScalar])
+                                                            UnicodeScalar.GreaterThan, TokeniserStateVars.nullScalar]
     
     let hexadecimalCharacterSet = CharacterSet(charactersIn: "0123456789abcdefABCDEF")
     
@@ -34,7 +34,7 @@ public class CharacterReader: CustomStringConvertible {
     
     public init(input: String) {
         self.rawInput = input
-	self.rawInputLowercased = input.lowercased()
+        self.rawInputLowercased = input.lowercased()
         self.input = Array(input.unicodeScalars)
     }
     
@@ -207,7 +207,7 @@ public class CharacterReader: CustomStringConvertible {
     }
     
     func consumeHexSequence() -> String {
-        let start = pos
+        let start = pos + 1
         
         for i in (start..<count) {
             if hexadecimalCharacterSet.contains(input[i]) {
@@ -241,7 +241,7 @@ public class CharacterReader: CustomStringConvertible {
     func matches(string: String) -> Bool {
         let length = string.unicodeScalars.count
 
-	if length == 1 { return matches(char: string.unicodeScalars.first!) }
+        //if length == 1 { return matches(char: string.unicodeScalars.first!) }
         
         guard (count - pos) >= length else { return false }
         
@@ -249,13 +249,14 @@ public class CharacterReader: CustomStringConvertible {
     }
     
     func matchesIgnoreCase(string: String) -> Bool {
-       let length = string.unicodeScalars.count
-       guard pos + length < count else { return false }
+        let length = string.unicodeScalars.count
+        
+        guard pos + length <= count else { return false }
 
-       let lowercasedString = string.lowercased()
+        let lowercasedString = string.lowercased()
 
-       let substring = rawInputLowercased.unicodeScalars[pos..<(pos + length)]
-       return Array(substring) == Array(lowercasedString.unicodeScalars)
+        let substring = rawInputLowercased.unicodeScalars[pos..<(pos + length)]
+        return Array(substring) == Array(lowercasedString.unicodeScalars)
     }
     
     func matches(any characters: [UnicodeScalar]) -> Bool {
@@ -306,7 +307,7 @@ public class CharacterReader: CustomStringConvertible {
 
 extension String.UnicodeScalarView {
     subscript(range: Range<Int>) -> Substring.UnicodeScalarView {
-	let start = self.index(startIndex, offsetBy: range.lowerBound)
+        let start = self.index(startIndex, offsetBy: range.lowerBound)
         let end = self.index(self.startIndex, offsetBy: range.upperBound)
         
         return self[start..<end]
