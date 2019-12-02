@@ -12,7 +12,7 @@ let package = Package(
     ],
     targets: [
         .target(name: "Miso",  dependencies: [], path: "Miso"),
-	.testTarget(name: "MisoTests", dependencies: ["Miso", "Ambassador"], path: "MisoTests"),
+	.testTarget(name: "MisoTests", dependencies: ["Miso", "Ambassador", "Embassy"], path: "MisoTests"),
 //        .target(name: "Miso-MacOS", dependencies: [], path: "Miso-MacOS")
     ]
 )

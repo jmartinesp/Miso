@@ -6,6 +6,8 @@
 //  Copyright © 2017 Jorge Martín Espinosa. All rights reserved.
 //
 
+#if !os(Linux)
+
 import XCTest
 @testable import Miso
 
@@ -380,3 +382,5 @@ class ConnectionTest: XCTestCase {
         XCTAssertNotNil(response?.error)
     }
 }
+
+#endif

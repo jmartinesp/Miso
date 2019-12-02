@@ -667,6 +667,7 @@ class HTMLParserTest: XCTestCase {
     }
     
     func testTracksErrorsWhenRequested() {
+#if !os(Linux)
         let html = "<p>One</p href='no'><!DOCTYPE html>&arrgh;<font /><br /><foo"
         let parser = Parser.htmlParser.trackErrors(count: 500)
         _ = Miso.parse(html: html, baseUri: "http://example.com", parser: parser)
@@ -678,9 +679,11 @@ class HTMLParserTest: XCTestCase {
         XCTAssertEqual("36: Invalid character reference: invalid named reference 'arrgh'", errors[2].localizedDescription)
         XCTAssertEqual("50: Self closing flag not acknowledged", errors[3].localizedDescription)
         XCTAssertEqual("61: Unexpectedly reached end of file (EOF) in input state [TagName]", errors[4].localizedDescription)
+#endif
     }
         
     func testTracksLimitedErrorsWhenRequested() {
+#if !os(Linux)
         let html = "<p>One</p href='no'><!DOCTYPE html>&arrgh;<font /><br /><foo"
         let parser = Parser.htmlParser.trackErrors(count: 3)
         _ = parser.parseInput(html: html, baseUri: "http://example.com")
@@ -690,6 +693,7 @@ class HTMLParserTest: XCTestCase {
         XCTAssertEqual("20: Attributes incorrectly present on end tag", errors[0].localizedDescription)
         XCTAssertEqual("35: Unexpected token [Doctype] when in state [InBody]", errors[1].localizedDescription)
         XCTAssertEqual("36: Invalid character reference: invalid named reference 'arrgh'", errors[2].localizedDescription)
+#endif
     }
     
     /*
