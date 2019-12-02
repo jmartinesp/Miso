@@ -5,9 +5,9 @@
 open class StringBuilder: CustomStringConvertible, CustomDebugStringConvertible {
     public typealias StringLiteralType = String
     
-    fileprivate var buffer: Array<Character>
+    fileprivate var buffer: String
     
-    public var stringValue: String { return String(buffer) }
+    public var stringValue: String { return buffer }
     
     /**
      Construct with initial String contents
@@ -15,11 +15,11 @@ open class StringBuilder: CustomStringConvertible, CustomDebugStringConvertible 
      :param: string Initial value; defaults to empty string
      */
     public init(string: String = "") {
-        self.buffer = Array(string)
+        self.buffer = string
     }
     
     public init() {
-        self.buffer = Array()
+        self.buffer = ""
     }
     
     /**
@@ -94,7 +94,8 @@ open class StringBuilder: CustomStringConvertible, CustomDebugStringConvertible 
     
     @discardableResult
     open func insert<T: CustomStringConvertible>(_ offset: Int, _ value: T) -> StringBuilder {
-        buffer.insert(contentsOf: value.description, at: offset)
+        let index = buffer.index(buffer.startIndex, offsetBy: offset)
+        buffer.insert(contentsOf: value.description, at: index)
         return self
     }
     
@@ -132,19 +133,21 @@ open class StringBuilder: CustomStringConvertible, CustomDebugStringConvertible 
      */
     @discardableResult
     open func removeAll() -> StringBuilder {
-        buffer = Array();
+        buffer = ""
         return self
     }
     
     @discardableResult
     open func remove(at index: Int) -> StringBuilder {
-        buffer.remove(at: index)
+        buffer.remove(at: buffer.index(buffer.startIndex, offsetBy: index))
         return self
     }
     
     @discardableResult
     open func remove(in range: Range<Int>) -> StringBuilder {
-        buffer.removeSubrange(range)
+        let start = buffer.index(buffer.startIndex, offsetBy: range.lowerBound)
+        let end = buffer.index(buffer.startIndex, offsetBy: range.upperBound)
+        buffer.removeSubrange(start..<end)
         return self
     }
     
@@ -157,7 +160,7 @@ open class StringBuilder: CustomStringConvertible, CustomDebugStringConvertible 
     }
     
     open subscript(index: Int) -> UnicodeScalar {
-        return buffer[index].unicodeScalar
+        return buffer[buffer.index(buffer.startIndex, offsetBy: index)].unicodeScalar
     }
     
     open subscript(range: Range<Int>) -> String {
