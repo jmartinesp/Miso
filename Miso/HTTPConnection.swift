@@ -244,7 +244,12 @@ public class HTTPConnection: Connection, CustomStringConvertible {
     //======================================================================
     
     public func authenticate(user: String, password: String) -> Self {
+#if os(Linux)
+	let base64 = "\(user):\(password)".data(using: .utf8)!.base64EncodedString()
+	httpRequest.headers["Authorization"] = "Basic \(base64)"
+#else
         followRedirectsDelegate.credential = URLCredential(user: user, password: password, persistence: .forSession)
+#endif
         return self
     }
     
@@ -580,9 +585,11 @@ public class HTTPConnection: Connection, CustomStringConvertible {
             }
 
             // Headers
+	    var httpHeaders = urlRequest.allHTTPHeaderFields ?? [:]
             headers.forEach { key, value in
-                urlRequest.allHTTPHeaderFields?[key] = value
+                httpHeaders[key] = value
             }
+            urlRequest.allHTTPHeaderFields = httpHeaders
 
             // User-Agent
             if !headers.keys.contains(HTTPConnection.USER_AGENT) {

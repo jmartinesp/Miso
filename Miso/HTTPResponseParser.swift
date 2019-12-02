@@ -52,7 +52,7 @@ open class HTTPResponseParser: ResponseParserProtocol {
             return HTTPConnection.Response(document: nil, error: error, data: data, contents: nil, rawRequest: urlRequest, rawResponse: httpResponse)
         }
         
-        if let match = validContentTypeRegex.firstMatch(in: contentType!, options: [.anchored], range: NSRange(location: 0, length: contentType!.unicodeScalars.count)) {
+        if contentType != nil, let match = validContentTypeRegex.firstMatch(in: contentType!, options: [.anchored], range: NSRange(location: 0, length: contentType!.unicodeScalars.count)) {
             if match.numberOfRanges == 4, match.range(at: 3).location != Int.max,
                 let encoding = String.Encoding.from(literal: contentType![Range<Int>(match.range(at: 3))!]) {
                 decodingCharset = encoding
