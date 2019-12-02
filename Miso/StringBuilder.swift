@@ -16,10 +16,12 @@ open class StringBuilder: CustomStringConvertible, CustomDebugStringConvertible 
      */
     public init(string: String = "") {
         self.buffer = string
+	self.buffer.reserveCapacity(string.count + 512)
     }
     
     public init() {
         self.buffer = ""
+	self.buffer.reserveCapacity(1024)
     }
     
     /**
@@ -134,6 +136,7 @@ open class StringBuilder: CustomStringConvertible, CustomDebugStringConvertible 
     @discardableResult
     open func removeAll() -> StringBuilder {
         buffer = ""
+	buffer.reserveCapacity(1024)
         return self
     }
     
@@ -214,7 +217,7 @@ public func += <T: CustomStringConvertible>(lhs: StringBuilder, rhs: T) {
  :result StringBuilder
  */
 public func +(lhs: StringBuilder, rhs: StringBuilder) -> StringBuilder {
-    return StringBuilder(string: lhs.stringValue + rhs.stringValue)
+    return StringBuilder(string: lhs.stringValue).append(rhs.stringValue)
 }
 
 extension StringBuilder {

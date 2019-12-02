@@ -12,16 +12,17 @@ public class CharacterReader: CustomStringConvertible {
 
     public static let empty = ""
     public static let EOF: UnicodeScalar = "\u{FFFF}"
-    public static let tagnameDelimiters: [UnicodeScalar] = [UnicodeScalar.Tabulation, UnicodeScalar.NewLine,
+    public static let tagnameDelimiters: Set<UnicodeScalar> = Set([UnicodeScalar.Tabulation, UnicodeScalar.NewLine,
                                                             UnicodeScalar.BackslashR, UnicodeScalar.BackslashF,
                                                             UnicodeScalar.Space, UnicodeScalar.Slash,
-                                                            UnicodeScalar.GreaterThan, TokeniserStateVars.nullScalar]
+                                                            UnicodeScalar.GreaterThan, TokeniserStateVars.nullScalar])
     
     let hexadecimalCharacterSet = CharacterSet(charactersIn: "0123456789abcdefABCDEF")
     
     let maxCacheLength = 12
     
     let rawInput: String
+    let rawInputLowercased: String
     
     public let input: [UnicodeScalar]
     
@@ -31,10 +32,9 @@ public class CharacterReader: CustomStringConvertible {
         return input.count
     }
     
-    var stringCache = [String?](repeating: nil, count: 512)
-    
     public init(input: String) {
         self.rawInput = input
+	self.rawInputLowercased = input.lowercased()
         self.input = Array(input.unicodeScalars)
     }
     
@@ -82,6 +82,8 @@ public class CharacterReader: CustomStringConvertible {
     
     private func rangeEquals(_ range: CountableRange<Int>, scalar: String.UnicodeScalarView) -> Bool {
         guard !scalar.isEmpty else { return false }
+
+//	return Array(input[range]) == Array(scalar)
                 
         for i in range {
             if input[i] != scalar[i - range.lowerBound] {
@@ -238,6 +240,8 @@ public class CharacterReader: CustomStringConvertible {
     
     func matches(string: String) -> Bool {
         let length = string.unicodeScalars.count
+
+	if length == 1 { return matches(char: string.unicodeScalars.first!) }
         
         guard (count - pos) >= length else { return false }
         
@@ -245,14 +249,13 @@ public class CharacterReader: CustomStringConvertible {
     }
     
     func matchesIgnoreCase(string: String) -> Bool {
-        let length = string.unicodeScalars.count
-        
-        guard (count - pos) >= length else { return false }
-        
-        let lowercasedString = string.lowercased()
-        let lowercasedInput = rawInput.lowercased()
-        
-        return String(lowercasedInput.unicodeScalars[pos..<(pos + length)]) == lowercasedString
+       let length = string.unicodeScalars.count
+       guard pos + length < count else { return false }
+
+       let lowercasedString = string.lowercased()
+
+       let substring = rawInputLowercased.unicodeScalars[pos..<(pos + length)]
+       return Array(substring) == Array(lowercasedString.unicodeScalars)
     }
     
     func matches(any characters: [UnicodeScalar]) -> Bool {
@@ -288,48 +291,25 @@ public class CharacterReader: CustomStringConvertible {
     }
     
     func containsIgnoreCase(sequence: String) -> Bool {
-        return rawInput.lowercased().contains(sequence.lowercased())
+        return rawInputLowercased.contains(sequence.lowercased())
     }
     
     public var description: String {
         return input[pos..<count].joined()
     }
-    
+   
     func cacheString(start: Int, count: Int) -> String {
-        return input[start..<(start + count)].joined()
-        
-        /*
-         * Theoretically, this should speed up everything. I haven't really seen much improvement
-        if count > maxCacheLength {
-            return String(input[start..<(start + count)])
-        }
-        
-        var hash = 0
-        var offset = start
-        
-        for _ in 0..<count {
-            hash = (hash * 31) + Int(input[offset].value)
-            offset += 1
-        }
-        
-        let index = hash & (stringCache.count - 1)
-        if let cached = stringCache[index], cached.unicodeScalars == input[start..<(start + count)] {
-            return cached
-        } else {
-            let string = input[start..<(start + count)].joined()
-            stringCache[index] = string
-            return string
-        }*/
+       return input[start..<(start + count)].joined()
     }
     
 }
 
 extension String.UnicodeScalarView {
     subscript(range: Range<Int>) -> Substring.UnicodeScalarView {
+	let start = self.index(startIndex, offsetBy: range.lowerBound)
         let end = self.index(self.startIndex, offsetBy: range.upperBound)
-        let result = self.prefix(upTo: end).suffix(range.count)
         
-        return result
+        return self[start..<end]
     }
     
     subscript(index: Int) -> UnicodeScalar {

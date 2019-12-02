@@ -50,10 +50,10 @@ import Foundation
  @author Jonathan Hedley
  */
 open class Whitelist {
-    private var tagNames: Set<TagName> // tags allowed, lower case. e.g. [p, br, span]
-    private var attributes: [TagName : Set<AttributeKey>] // tag -> attribute[]. allowed attributes [href] for a tag.
-    private var enforcedAttributes: [TagName : [AttributeKey : AttributeValue]]  // always set these attribute values
-    private var protocols: [TagName : [AttributeKey : Set<Protocol>]] // allowed URL protocols for attributes
+    private var tagNames: Set<String> // tags allowed, lower case. e.g. [p, br, span]
+    private var attributes: [String : Set<AttributeKey>] // tag -> attribute[]. allowed attributes [href] for a tag.
+    private var enforcedAttributes: [String : [AttributeKey : AttributeValue]]  // always set these attribute values
+    private var protocols: [String : [AttributeKey : Set<Protocol>]] // allowed URL protocols for attributes
     private var preserveRelativeLinks: Bool // option to preserve relative links
 
     /**
@@ -69,9 +69,9 @@ open class Whitelist {
      attributes) will be removed.
      @return whitelist
      */
-    public static var simpleText: Whitelist {
+    public static let simpleText: Whitelist = {
         return Whitelist().add(tags: "b", "em", "i", "strong", "u")
-    }
+    }()
 
     /**
      <p>
@@ -87,7 +87,7 @@ open class Whitelist {
      </p>
      @return whitelist
      */
-    public static var basic: Whitelist {
+    public static let basic: Whitelist = {
         return Whitelist().add(tags: "a", "b", "blockquote", "br", "cite", "code", "dd", "dl", "dt", "em",
                 "i", "li", "ol", "p", "pre", "q", "small", "span", "strike", "strong", "sub",
                 "sup", "u", "ul")
@@ -100,18 +100,18 @@ open class Whitelist {
                 .add(to: "blockquote", attr: "cite", protocols: "http", "https")
                 .add(to: "cite", attr: "cite", protocols: "http", "https")
                 .add(to: "a", attr: "rel", enforcedValue: "nofollow")
-    }
+    }()
 
     /**
      This whitelist allows the same text tags as {@link #basic}, and also allows <code>img</code> tags, with appropriate
      attributes, with <code>src</code> pointing to <code>http</code> or <code>https</code>.
      @return whitelist
      */
-    public static var basicWithImages: Whitelist {
+    public static let basicWithImages: Whitelist = {
         return basic.add(tags: "img")
                 .add(to: "img", attributes: "align", "alt", "height", "src", "title", "width")
                 .add(to: "img", attr: "src", protocols: "http", "https")
-    }
+    }()
 
     /**
      This whitelist allows a full range of text and structural body HTML: <code>a, b, blockquote, br, caption, cite,
@@ -122,7 +122,7 @@ open class Whitelist {
      </p>
      @return whitelist
      */
-    public static var relaxed: Whitelist {
+    public static let relaxed: Whitelist = {
         return Whitelist().add(tags: "a", "b", "blockquote", "br", "caption", "cite", "code", "col",
                 "colgroup", "dd", "div", "dl", "dt", "em", "h1", "h2", "h3", "h4", "h5", "h6",
                 "i", "img", "li", "ol", "p", "pre", "q", "small", "span", "strike", "strong",
@@ -139,7 +139,7 @@ open class Whitelist {
                 .add(to: "cite", attr: "cite", protocols: "http", "https")
                 .add(to: "img", attr: "src", protocols: "http", "https")
                 .add(to: "q", attr: "cite", protocols: "http", "https")
-    }
+    }()
 
     /**
      Create a new, empty whitelist. Generally it will be better to start with a default prepared whitelist instead.
@@ -149,10 +149,10 @@ open class Whitelist {
      @see #relaxed()
      */
     public init() {
-        tagNames = Set<TagName>();
-        attributes = [TagName : Set<AttributeKey>]()
-        enforcedAttributes = [TagName : [AttributeKey : AttributeValue]]()
-        protocols = [TagName : [AttributeKey: Set<Protocol>]]()
+        tagNames = Set<String>();
+        attributes = [String : Set<AttributeKey>]()
+        enforcedAttributes = [String : [AttributeKey : AttributeValue]]()
+        protocols = [String : [AttributeKey: Set<Protocol>]]()
         preserveRelativeLinks = false
     }
 
@@ -162,8 +162,8 @@ open class Whitelist {
      @return this (for chaining)
      */
     open func add(tags: String...) -> Whitelist {
-        tags.forEach { tagName in
-            tagNames.insert(TagName.value(of: tagName))
+        for tagName in tags {
+            tagNames.insert(tagName)
         }
         return self
     }
@@ -174,19 +174,18 @@ open class Whitelist {
      @return this (for chaining)
      */
     open func add(to tag: String, attributes: String...) -> Whitelist {
-        let tagName = TagName.value(of: tag)
-        tagNames.insert(tagName)
+        tagNames.insert(tag)
 
-        var attrSet = self.attributes[tagName]
+        var attrSet = self.attributes[tag]
         if attrSet == nil {
             attrSet = Set()
         }
 
-        attributes.forEach { attr in
+        for attr in attributes {
             attrSet!.insert(AttributeKey.value(of: attr))
         }
 
-        self.attributes[tagName] = attrSet
+        self.attributes[tag] = attrSet
 
         return self
     }
@@ -206,14 +205,13 @@ open class Whitelist {
      @return this (for chaining)
      */
     open func remove(from tag: String, attributes: String...) -> Whitelist {
-        let tagName = TagName.value(of: tag)
-        tagNames.insert(tagName)
+        tagNames.insert(tag)
 
-        if var attrSet = self.attributes[tagName] {
-            attributes.forEach { attr in
+        if var attrSet = self.attributes[tag] {
+            for attr in attributes {
                 attrSet.remove(AttributeKey.value(of: attr))
             }
-            self.attributes[tagName] = attrSet
+            self.attributes[tag] = attrSet
         }
 
         return self
@@ -232,20 +230,19 @@ open class Whitelist {
      @return this (for chaining)
      */
     open func add(to tag: String, attr: String, enforcedValue: String) -> Whitelist {
-        let tagName = TagName.value(of: tag)
-        tagNames.insert(tagName)
+        tagNames.insert(tag)
 
         let attrKey = AttributeKey.value(of: attr)
         let attrValue = AttributeValue.value(of: enforcedValue)
 
-        var enforcedAttrs = self.enforcedAttributes[tagName]
+        var enforcedAttrs = self.enforcedAttributes[tag]
         if enforcedAttrs == nil {
             enforcedAttrs = [:]
         }
 
         enforcedAttrs![attrKey] = attrValue
 
-        self.enforcedAttributes[tagName] = enforcedAttrs!
+        self.enforcedAttributes[tag] = enforcedAttrs!
 
         return self
     }
@@ -257,14 +254,13 @@ open class Whitelist {
      @return this (for chaining)
      */
     open func remove(from tag: String, attrEnforced: String) -> Whitelist {
-        let tagName = TagName.value(of: tag)
-        tagNames.insert(tagName)
+        tagNames.insert(tag)
 
         let attrKey = AttributeKey.value(of: attrEnforced)
 
-        if var enforcedAttrs = self.enforcedAttributes[tagName] {
+        if var enforcedAttrs = self.enforcedAttributes[tag] {
             enforcedAttrs[attrKey] = nil
-            self.enforcedAttributes[tagName] = enforcedAttrs
+            self.enforcedAttributes[tag] = enforcedAttrs
         }
 
         return self
@@ -291,23 +287,22 @@ open class Whitelist {
      @return this, for chaining
      */
     open func add(to tag: String, attr: String, protocols: String...) -> Whitelist {
-        let tagName = TagName.value(of: tag)
-        tagNames.insert(tagName)
+        tagNames.insert(tag)
 
-        var protocolMap = self.protocols[tagName]
+        var protocolMap = self.protocols[tag]
         if protocolMap == nil {
             protocolMap = [:]
         }
 
         let attrKey = AttributeKey.value(of: attr)
 
-        protocols.forEach { prot in
+        for prot in protocols {
             var protocolSet = protocolMap![attrKey] ?? Set()
             protocolSet.insert(Protocol.value(of: prot))
             protocolMap![attrKey] = protocolSet
         }
 
-        self.protocols[tagName] = protocolMap
+        self.protocols[tag] = protocolMap
 
         return self
     }
@@ -324,18 +319,17 @@ open class Whitelist {
      @return this, for chaining
      */
     open func remove(from tag: String, attr: String, protocols: String...) -> Whitelist {
-        let tagName = TagName.value(of: tag)
-        tagNames.insert(tagName)
+        tagNames.insert(tag)
 
         let attrKey = AttributeKey.value(of: attr)
 
-        if var attrsMap = self.protocols[tagName] {
+        if var attrsMap = self.protocols[tag] {
             if var protocolSet = attrsMap[attrKey] {
-                protocols.forEach { prot in
+                for prot in protocols {
                     protocolSet.remove(Protocol.value(of: prot))
                 }
                 attrsMap[attrKey] = protocolSet
-                self.protocols[tagName] = attrsMap
+                self.protocols[tag] = attrsMap
             }
         }
 
@@ -344,11 +338,10 @@ open class Whitelist {
     
     open func remove(tags: String...) -> Whitelist {
         for tag in tags {
-            let tagName = TagName.value(of: tag)
-            if tagNames.remove(tagName) != nil {
-                attributes.removeValue(forKey: tagName)
-                enforcedAttributes.removeValue(forKey: tagName)
-                protocols.removeValue(forKey: tagName)
+            if tagNames.remove(tag) != nil {
+                attributes.removeValue(forKey: tag)
+                enforcedAttributes.removeValue(forKey: tag)
+                protocols.removeValue(forKey: tag)
             }
         }
         return self
@@ -360,7 +353,7 @@ open class Whitelist {
      * @return true if allowed
      */
     func isSafeTag(_ tag: String) -> Bool {
-        return tagNames.contains(TagName.value(of: tag))
+        return tagNames.contains(tag)
     }
 
     /**
@@ -371,7 +364,7 @@ open class Whitelist {
      * @return true if allowed
      */
     func isSafeAttribute(_ attr: Attribute, in element: Element, forTag tag: String) -> Bool {
-        let tagName = TagName.value(of: tag.lowercased())
+        let tagName = tag.lowercased()
         let key = AttributeKey.value(of: attr.tag.lowercased())
 
         if let okSet = self.attributes[tagName], okSet.contains(key) {
@@ -439,25 +432,13 @@ open class Whitelist {
     func getEnforcedAttributes(forTag tag: String) -> Attributes {
         let attrs = Attributes()
 
-        let tagName = TagName.value(of: tag)
-        if let keyVals = enforcedAttributes[tagName] {
+        if let keyVals = enforcedAttributes[tag] {
             for (key, val) in keyVals {
                 attrs.put(string: val.value, forKey: key.value)
             }
         }
 
         return attrs
-    }
-
-}
-
-open class TagName: TypedValue {
-    override init(value: String) {
-        super.init(value: value)
-    }
-
-    static func value(of value: String) -> TagName {
-        return TagName(value: value)
     }
 
 }
@@ -514,3 +495,4 @@ open class TypedValue: Hashable, Equatable, CustomStringConvertible {
         return value
     }
 }
+
