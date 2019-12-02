@@ -11,7 +11,7 @@ import XCTest
 
 // Fake HTTP server dependencies
 import Embassy
-import EnvoyAmbassador
+import Ambassador
 
 struct FakeHTTPServer {
     let loop = try! SelectorEventLoop(selector: try! KqueueSelector())
