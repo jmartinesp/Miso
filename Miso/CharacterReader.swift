@@ -253,12 +253,18 @@ public class CharacterReader: CustomStringConvertible {
         
         guard pos + length <= count else { return false }
 
-        let lowercasedString = string.lowercased()
+        let lowercasedString = string.lowercased().unicodeScalars
 
-        let substring = rawInputLowercased.unicodeScalars[pos..<(pos + length)]
-        return Array(substring) == Array(lowercasedString.unicodeScalars)
+        let substring = rawInputLowercased.unicodeScalars
+        
+        for i in 0..<length {
+            if substring[pos + i] != lowercasedString[i] { 
+		return false 
+	    }
+        }
+        return true
     }
-    
+        
     func matches(any characters: [UnicodeScalar]) -> Bool {
         return characters.contains(current)
     }
