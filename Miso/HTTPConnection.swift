@@ -328,6 +328,12 @@ public class HTTPConnection: Connection, CustomStringConvertible {
         return self
     }
     
+    public func body<T: Encodable>(_ body: T?, encoder: JSONEncoder = JSONEncoder()) -> Self {
+        guard let body = body, let data = try? encoder.encode(body) else { return self }
+        httpRequest.rawBodyData = data
+        return self
+    }
+    
     //======================================================================
     // MARK: Cookies
     //======================================================================
