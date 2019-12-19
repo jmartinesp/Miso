@@ -80,9 +80,15 @@ public class HTTPConnection: Connection, CustomStringConvertible {
         return mimeName.replaceAll(regex: "\"", by: "%22")
     }
     
+    private static var followRedirectsDelegate = ConfigurableSessionTaskDelegate()
+    public static var sharedSession: URLSession = {
+        URLSession(configuration: URLSessionConfiguration.default,
+                                delegate: followRedirectsDelegate,
+                                delegateQueue: OperationQueue())
+    }()
+
     private var httpRequest: RequestType
     private var response: HTTPURLResponse?
-    private var followRedirectsDelegate = ConfigurableSessionTaskDelegate()
     private var urlSession: URLSession
     
     //======================================================================
@@ -93,34 +99,26 @@ public class HTTPConnection: Connection, CustomStringConvertible {
         guard let realURL = URL(string: url) else { return nil }
         self.httpRequest = Request(url: realURL)
         
-        urlSession = URLSession(configuration: URLSessionConfiguration.default,
-                                delegate: followRedirectsDelegate,
-                                delegateQueue: OperationQueue())
+        urlSession = Self.sharedSession
     }
     
     public required init?(_ method: Request.Method, url: String) {
         guard let realURL = URL(string: url) else { return nil }
         self.httpRequest = Request(url: realURL, method: method)
-        
-        urlSession = URLSession(configuration: URLSessionConfiguration.default,
-                                delegate: followRedirectsDelegate,
-                                delegateQueue: OperationQueue())
+    
+        urlSession = Self.sharedSession    
     }
     
     public required init(url: URL) {
         self.httpRequest = Request(url: url)
         
-        urlSession = URLSession(configuration: URLSessionConfiguration.default,
-                                delegate: followRedirectsDelegate,
-                                delegateQueue: OperationQueue())
+        urlSession = Self.sharedSession
     }
     
     public required init(_ method: Request.Method, url: URL) {
         self.httpRequest = Request(url: url, method: method)
         
-        urlSession = URLSession(configuration: URLSessionConfiguration.default,
-                                delegate: followRedirectsDelegate,
-                                delegateQueue: OperationQueue())
+        urlSession = Self.sharedSession
     }
     
     //======================================================================
@@ -192,12 +190,12 @@ public class HTTPConnection: Connection, CustomStringConvertible {
     //======================================================================
     
     public func followRedirects(_ follows: Bool) -> Self {
-        followRedirectsDelegate.followRedirects = follows
+        Self.followRedirectsDelegate.followRedirects = follows
         return self
     }
     
     public var followRedirects: Bool {
-        return followRedirectsDelegate.followRedirects
+        return Self.followRedirectsDelegate.followRedirects
     }
     
     //======================================================================
@@ -231,12 +229,12 @@ public class HTTPConnection: Connection, CustomStringConvertible {
     //======================================================================
     
     public func validateTLSCertificate(_ validate: Bool) -> Self {
-        followRedirectsDelegate.validateTLSCertificates = validate
+        Self.followRedirectsDelegate.validateTLSCertificates = validate
         return self
     }
     
     public var validateTLSCertificate: Bool {
-        return followRedirectsDelegate.validateTLSCertificates
+        return Self.followRedirectsDelegate.validateTLSCertificates
     }
     
     //======================================================================
@@ -248,7 +246,7 @@ public class HTTPConnection: Connection, CustomStringConvertible {
 	let base64 = "\(user):\(password)".data(using: .utf8)!.base64EncodedString()
 	httpRequest.headers["Authorization"] = "Basic \(base64)"
 #else
-        followRedirectsDelegate.credential = URLCredential(user: user, password: password, persistence: .forSession)
+        Self.followRedirectsDelegate.credential = URLCredential(user: user, password: password, persistence: .forSession)
 #endif
         return self
     }
@@ -259,7 +257,7 @@ public class HTTPConnection: Connection, CustomStringConvertible {
     }
     
     public func authentication() -> URLCredential? {
-        return followRedirectsDelegate.credential
+        return Self.followRedirectsDelegate.credential
     }
     
     //======================================================================
