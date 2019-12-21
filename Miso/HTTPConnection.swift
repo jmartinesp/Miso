@@ -95,30 +95,30 @@ public class HTTPConnection: Connection, CustomStringConvertible {
     // MARK: Initializers
     //======================================================================
     
-    public required init?(url: String) {
+    public required init?(url: String, session: URLSession = HTTPConnection.sharedSession) {
         guard let realURL = URL(string: url) else { return nil }
         self.httpRequest = Request(url: realURL)
         
-        urlSession = Self.sharedSession
+        urlSession = session
     }
     
-    public required init?(_ method: Request.Method, url: String) {
+    public required init?(_ method: Request.Method, url: String, session: URLSession = HTTPConnection.sharedSession) {
         guard let realURL = URL(string: url) else { return nil }
         self.httpRequest = Request(url: realURL, method: method)
     
-        urlSession = Self.sharedSession    
+        urlSession = session
     }
     
-    public required init(url: URL) {
+    public required init(url: URL, session: URLSession = HTTPConnection.sharedSession) {
         self.httpRequest = Request(url: url)
         
-        urlSession = Self.sharedSession
+        urlSession = session
     }
     
-    public required init(_ method: Request.Method, url: URL) {
+    public required init(_ method: Request.Method, url: URL, session: URLSession = HTTPConnection.sharedSession) {
         self.httpRequest = Request(url: url, method: method)
         
-        urlSession = Self.sharedSession
+        urlSession = session
     }
     
     //======================================================================

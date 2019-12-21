@@ -28,8 +28,8 @@ public protocol Connection {
     associatedtype RequestType: RequestProtocol
     associatedtype ResponseType: ResponseProtocol
     
-    init?(url: String)
-    init(url: URL)
+    init?(url: String, session: URLSession)
+    init(url: URL, session: URLSession)
     
     // TODO: see if there is a replacement in Swift for `func proxy(_ proxy: Proxy) -> Self`
     func proxy(host: String, port: Int) -> Self
