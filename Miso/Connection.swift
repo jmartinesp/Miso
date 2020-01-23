@@ -82,7 +82,6 @@ public protocol ResponseProtocol {
     var error: Error? { get }
     var document: Document? { get }
     var data: Data? { get }
-    var contents: String? { get }
 
 }
 

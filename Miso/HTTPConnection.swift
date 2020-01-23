@@ -411,26 +411,23 @@ public class HTTPConnection: Connection, CustomStringConvertible {
         let error = responseData.error
         
         if parse {
-            return parseResponse(error: error, urlResponse: urlResponse, data: data)
+            return parseResponse(error: error, urlResponse: urlResponse, data: data, rawRequest: rawRequest)
         } else {
-            let contents: String? = data != nil ?
-                (String(data: data!, encoding: .utf8) ?? String(data: data!, encoding: .ascii)) :
-                nil
-            return ResponseType(document: nil, error: error, data: data, contents: contents, rawRequest: urlRequest, rawResponse: urlResponse)
+            return ResponseType(document: nil, error: error, data: data, rawRequest: urlRequest, rawResponse: urlResponse)
         }
     }
     
     public func request(responseHandler: @escaping (ResponseType) -> ()) {
         let urlRequest = httpRequest.toURLRequest(session: urlSession)
         urlSession.dataTask(with: urlRequest, completionHandler: { data, response, error in
-                responseHandler(self.parseResponse(error: error, urlResponse: response, data: data))
+                responseHandler(self.parseResponse(error: error, urlResponse: response, data: data, rawRequest: urlRequest))
             })
             .resume()
     }
     
-    private func parseResponse(error: Error?, urlResponse: URLResponse?, data: Data?) -> Response {
+    private func parseResponse(error: Error?, urlResponse: URLResponse?, data: Data?, rawRequest: URLRequest) -> Response {
         let responseParser = HTTPResponseParser(request: httpRequest)
-        return responseParser.parseResponse(error: error, urlResponse: urlResponse, data: data)
+        return responseParser.parseResponse(error: error, urlResponse: urlResponse, data: data, rawRequest: rawRequest)
     }
     
     public func debug() -> HTTPConnection {
@@ -653,7 +650,6 @@ public class HTTPConnection: Connection, CustomStringConvertible {
         public var document: Document?
         public var error: Error?
         public var data: Data?
-        public var contents: String?
         public var rawRequest: URLRequest
         public var rawResponse: HTTPURLResponse?
 
