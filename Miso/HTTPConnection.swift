@@ -406,6 +406,10 @@ public class HTTPConnection: Connection, CustomStringConvertible {
         let urlRequest = httpRequest.toURLRequest(session: urlSession)
         let responseData = urlSession.requestSynchronousData(request: urlRequest)
         
+        if urlSession !== Self.sharedSession {
+            urlSession.finishTasksAndInvalidate()
+        }
+        
         let data = responseData.data
         let urlResponse = responseData.rawResponse
         let error = responseData.error
@@ -419,7 +423,11 @@ public class HTTPConnection: Connection, CustomStringConvertible {
     
     public func request(responseHandler: @escaping (ResponseType) -> ()) {
         let urlRequest = httpRequest.toURLRequest(session: urlSession)
-        urlSession.dataTask(with: urlRequest, completionHandler: { data, response, error in
+        urlSession.dataTask(with: urlRequest, completionHandler: { [weak self] data, response, error in
+                guard let self = self else { return }
+                if self.urlSession !== Self.sharedSession {
+                    self.urlSession.finishTasksAndInvalidate()
+                }
                 responseHandler(self.parseResponse(error: error, urlResponse: response, data: data, rawRequest: urlRequest))
             })
             .resume()
@@ -445,7 +453,7 @@ public class HTTPConnection: Connection, CustomStringConvertible {
         let port: Int
     }
 
-    public struct Request: RequestProtocol, CustomStringConvertible {
+    public class Request: RequestProtocol, CustomStringConvertible {
 
         public enum Method: String {
             case GET = "GET"

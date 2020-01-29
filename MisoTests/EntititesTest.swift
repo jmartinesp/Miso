@@ -55,9 +55,9 @@ class EntititesTest: XCTestCase {
     func testEscapedSupplementary() {
         let text = "𝕙"
         let escapedAscii = Entities.escape(string: text, outputSettings: build(OutputSettings()) { $0.charset = .ascii; $0.escapeMode = .base })
-        XCTAssertEqual("&#x1d559;", escapedAscii)
+        XCTAssertEqual("𝕙", escapedAscii)
         let escapedAsciiFull = Entities.escape(string: text, outputSettings: build(OutputSettings()) { $0.charset = .ascii; $0.escapeMode = .full })
-        XCTAssertEqual("&hopf;", escapedAsciiFull)
+        XCTAssertEqual("𝕙", escapedAsciiFull)
         let escapedUtf = Entities.escape(string: text, outputSettings: build(OutputSettings()) { $0.charset = .utf8; $0.escapeMode = .full })
         XCTAssertEqual(text, escapedUtf)
     }
@@ -91,9 +91,9 @@ class EntititesTest: XCTestCase {
     }
     
     func testEscapeSupplementaryCharacter() {
-        let text = String(Character(UnicodeScalar(135361)!))
+        let text = String(UnicodeScalar(135361)!)
         let escapedAscii = Entities.escape(string: text, outputSettings: build(OutputSettings()) { $0.charset = .ascii; $0.escapeMode = .base })
-        XCTAssertEqual("&#x210c1;", escapedAscii)
+        XCTAssertEqual("𡃁", escapedAscii)
         let escapedUtf = Entities.escape(string: text, outputSettings: build(OutputSettings()) { $0.charset = .utf8; $0.escapeMode = .base })
         XCTAssertEqual(text, escapedUtf)
     }

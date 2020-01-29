@@ -63,13 +63,13 @@ open class StringBuilder: CustomStringConvertible, CustomDebugStringConvertible 
 
     @discardableResult
     open func appendCodePoint(_ ch: Int) -> StringBuilder {
-        buffer.append(Character(UnicodeScalar(ch)!))
+        buffer.append(UnicodeScalar(ch)!)
         return self
     }
 
     @discardableResult
     open func appendCodePoint(_ ch: UnicodeScalar) -> StringBuilder {
-        buffer.append(Character(ch))
+        buffer.append(ch)
         return self
     }
 
@@ -163,7 +163,7 @@ open class StringBuilder: CustomStringConvertible, CustomDebugStringConvertible 
     }
     
     open subscript(index: Int) -> UnicodeScalar {
-        return buffer[buffer.index(buffer.startIndex, offsetBy: index)].unicodeScalar
+        return buffer.unicodeScalars[index]
     }
     
     open subscript(range: Range<Int>) -> String {
@@ -184,7 +184,7 @@ open class StringBuilder: CustomStringConvertible, CustomDebugStringConvertible 
 
     open func contains(_ scalar: UnicodeScalar) -> Bool {
         let char = Character(scalar)
-        return buffer.contains(where: { $0 == char })
+        return contains(char)
     }
 }
 

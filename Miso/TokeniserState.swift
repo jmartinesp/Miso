@@ -813,7 +813,7 @@ enum TokeniserState: TokeniserStateProtocol {
                 
                 let ref = t.consumeCharacterReference(additionalAllowedCharacter: "\"", inAttributes: true)
                 if !ref.isEmpty {
-                    t.tagPending?.append(attributeValue: ref.joined())
+                    t.tagPending?.append(attributeValue: String(ref))
                 } else {
                     t.tagPending?.append(attributeValue: UnicodeScalar.Ampersand.string)
                 }
@@ -848,7 +848,7 @@ enum TokeniserState: TokeniserStateProtocol {
                 
                 let ref = t.consumeCharacterReference(additionalAllowedCharacter: "'", inAttributes: true)
                 if !ref.isEmpty {
-                    t.tagPending?.append(attributeValue: ref.joined())
+                    t.tagPending?.append(attributeValue: String(ref))
                 } else {
                     t.tagPending?.append(attributeValue: UnicodeScalar.Ampersand.string)
                 }
@@ -880,7 +880,7 @@ enum TokeniserState: TokeniserStateProtocol {
             case UnicodeScalar.Ampersand:
                 let ref = t.consumeCharacterReference(additionalAllowedCharacter: ">", inAttributes: true)
                 if !ref.isEmpty {
-                    t.tagPending?.append(attributeValue: ref.joined())
+                    t.tagPending?.append(attributeValue: String(ref))
                 } else {
                     t.tagPending?.append(attributeValue: UnicodeScalar.Ampersand.string)
                 }

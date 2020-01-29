@@ -303,7 +303,7 @@ public class Entities {
         case String.Encoding.utf8:
             return true // real is:!(Character.isLowSurrogate(c) || Character.isHighSurrogate(c)) - but already check above
         default:
-            return fallback.canEncode(String(Character(c)))
+            return fallback.canEncode(String(c))
         }
     }
     

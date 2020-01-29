@@ -88,7 +88,7 @@ public class XMLTreeBuilder: TreeBuilder {
             let data = comment.data
             
             if data.unicodeScalars.count > 1 && (data.hasPrefix("!") || data.hasPrefix("?")) {
-                let validData = data[1..<data.unicodeScalars.count-1]
+                let validData = data[1..<data.unicodeScalars.count-2]
                 let document = Miso.parse(html: "<" + validData + ">", baseUri: baseUri, parser: Parser.xmlParser)
                 if let element = document.children.first {
                     toInsert = XmlDeclaration(name: settings.normalize(tagName: element.tagName), baseUri: comment.baseUri, isProcessingInstruction: data.hasPrefix("!"))

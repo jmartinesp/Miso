@@ -45,11 +45,6 @@ class CharacterReaderTest: XCTestCase {
         XCTAssertEqual("e", reader.current)
         XCTAssertEqual("e", reader.consume())
         XCTAssert(reader.isEmpty)
-        
-        XCTAssertEqual(CharacterReader.EOF, reader.consume())
-        reader.unconsume()
-        XCTAssert(reader.isEmpty)
-        XCTAssertEqual(CharacterReader.EOF, reader.consume())
     }
     
     func testMark() {
@@ -79,12 +74,12 @@ class CharacterReaderTest: XCTestCase {
         let reader = CharacterReader(input: input)
         
         XCTAssertEqual(nil, reader.nextIndex(ofCharacter: "x"))
-        XCTAssertEqual(3, reader.nextIndex(ofCharacter: "h"))
+        XCTAssertEqual(input.index(input.startIndex, offsetBy: 3), reader.nextIndex(ofCharacter: "h"))
         let pulled = reader.consume(to: "h")
         XCTAssertEqual("bla", pulled)
         reader.consume()
         
-        XCTAssertEqual(2, reader.nextIndex(ofCharacter: "l"))
+        XCTAssertEqual(input.index(reader.index, offsetBy: 2), reader.nextIndex(ofCharacter: "l"))
         XCTAssertEqual(" blah", reader.consumeToEnd())
         
         XCTAssertEqual(nil, reader.nextIndex(ofCharacter: "x"))
@@ -95,9 +90,9 @@ class CharacterReaderTest: XCTestCase {
         let reader = CharacterReader(input: input)
         
         XCTAssertEqual(nil, reader.nextIndex(of: "Foo"))
-        XCTAssertEqual(4, reader.nextIndex(of: "Two"))
+        XCTAssertEqual(input.index(input.startIndex, offsetBy: 4), reader.nextIndex(of: "Two"))
         XCTAssertEqual("One Two ", reader.consume(to: "something"))
-        XCTAssertEqual(10, reader.nextIndex(of: "Two"))
+        XCTAssertEqual(input.index(reader.index, offsetBy: 10), reader.nextIndex(of: "Two"))
         XCTAssertEqual("something Two Three Four", reader.consumeToEnd())
         XCTAssertEqual(nil, reader.nextIndex(of: "Two"))
     }

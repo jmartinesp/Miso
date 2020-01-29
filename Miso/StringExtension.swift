@@ -11,10 +11,14 @@ import Foundation
 extension String {
     
     static let padding = ["", " ", " "*2, " "*3, " "*4, " "*5, " "*6, " "*7, " "*8, " "*9]
+    
+    init(_ scalars: [UnicodeScalar]) {
+        self.init(UnicodeScalarView(scalars))
+    }
 
     @discardableResult
     mutating func append(_ scalar: UnicodeScalar) -> String {
-        self.append(Character(scalar))
+        self.unicodeScalars.append(scalar)
         return self
     }
     
@@ -87,13 +91,13 @@ extension String {
     }
     
     func matches(_ regex: NSRegularExpression) -> Bool {
-        return regex.numberOfMatches(in: self, options: [], range: NSRange(location: 0, length: self.unicodeScalars.count)) > 0
+        return regex.numberOfMatches(in: self, options: [], range: NSRange(location: 0, length: self.count)) > 0
     }
     
     func replaceFirst(regex regexStr: String, by replacement: String) -> String {
         var result = self
         guard let regex = try? NSRegularExpression(pattern: regexStr, options: []) else { return result }
-        if let match = regex.firstMatch(in: self, options: [], range: NSRange(location: 0, length: self.unicodeScalars.count)) {
+        if let match = regex.firstMatch(in: self, options: [], range: NSRange(location: 0, length: self.count)) {
             result.replaceSubrange(self.range(fromNSRange: match.range), with: replacement)
         }
         return result
@@ -103,7 +107,7 @@ extension String {
         var result = self
         guard let regex = try? NSRegularExpression(pattern: regexStr, options: []) else { return result }
         
-        while let match = regex.firstMatch(in: result, options: [], range: NSRange(location: 0, length: result.unicodeScalars.count)) {
+        while let match = regex.firstMatch(in: result, options: [], range: NSRange(location: 0, length: result.count)) {
             result.replaceSubrange(self.range(fromNSRange: match.range), with: replacement)
         }
         
@@ -205,11 +209,15 @@ extension UnicodeScalar {
     }
     
     static func +(lhs: String, rhs: UnicodeScalar) -> String {
-        return lhs + String(Character(rhs))
+        var sum = lhs
+        sum.append(rhs)
+        return sum
     }
     
     static func +(lhs: UnicodeScalar, rhs: String) -> String {
-        return String(Character(lhs)) + rhs
+        var sum = rhs
+        sum.append(lhs)
+        return sum
     }
     
     var character: Character {
@@ -217,7 +225,7 @@ extension UnicodeScalar {
     }
     
     var string: String {
-        return String(Character(self))
+        return String(self)
     }
     
     static let Space: UnicodeScalar = " "
@@ -235,17 +243,17 @@ extension UnicodeScalar {
 
 extension String.UnicodeScalarView {
     public static func ==(lhs: String.UnicodeScalarView, rhs: String.UnicodeScalarView) -> Bool {
-        return lhs.joined() == rhs.joined()
+        return String(lhs) == String(rhs)
     }
 
     public static func !=(lhs: String.UnicodeScalarView, rhs: String.UnicodeScalarView) -> Bool {
-        return lhs.joined() != rhs.joined()
+        return String(lhs) != String(rhs)
     }
 }
 
 extension String.Encoding {
     func canEncode(_ string: String) -> Bool {
-        return string.cString(using: self) != nil
+        return string.data(using: self, allowLossyConversion: true) != nil
     }
     
     public var displayName: String {

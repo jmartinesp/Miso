@@ -16,7 +16,7 @@ open class Node: Equatable, Hashable, CustomStringConvertible, CustomDebugString
     
     public var safe: Safe { return Safe(node: self) }
     
-    public var parentNode: Node?
+    public weak var parentNode: Node?
     public var childNodes = [Node]()
     public var attributes = Attributes()
     private var _baseUri: String?
@@ -26,8 +26,8 @@ open class Node: Equatable, Hashable, CustomStringConvertible, CustomDebugString
         }
         set {
             self._baseUri = newValue
-            traverse(nodeVisitor: NodeVisitor(head: { node, depth in
-                node._baseUri = self.baseUri
+            traverse(nodeVisitor: NodeVisitor(head: { [weak self] node, depth in
+                node._baseUri = self?.baseUri
             }, tail: { node, depth in
             
             }))
