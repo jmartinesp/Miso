@@ -423,8 +423,7 @@ public class HTTPConnection: Connection, CustomStringConvertible {
     
     public func request(responseHandler: @escaping (ResponseType) -> ()) {
         let urlRequest = httpRequest.toURLRequest(session: urlSession)
-        urlSession.dataTask(with: urlRequest, completionHandler: { [weak self] data, response, error in
-                guard let self = self else { return }
+        urlSession.dataTask(with: urlRequest, completionHandler: { data, response, error in
                 if self.urlSession !== Self.sharedSession {
                     self.urlSession.finishTasksAndInvalidate()
                 }
