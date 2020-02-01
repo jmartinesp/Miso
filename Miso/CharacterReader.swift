@@ -114,11 +114,11 @@ public class CharacterReader: CustomStringConvertible {
     }
     
     func nextIndex(ofCharacters characters: String.UnicodeScalarView) -> String.UnicodeScalarView.Index? {
-        let remaining = input.distance(from: index, to: input.endIndex) // TODO maybe +1?
-        guard !isEmpty && !characters.isEmpty && remaining >= characters.count else { return nil }
+        let upperLimit = input.index(input.endIndex, offsetBy: -characters.count)
+        guard !isEmpty && !characters.isEmpty && upperLimit > index else { return nil }
         
         var i = index
-        for _ in 0..<(remaining-characters.count) {
+        while i < upperLimit {
             let end = input.index(i, offsetBy: characters.count)
             if rangeEquals((i..<end), scalar: characters) {
                 return i
@@ -272,7 +272,7 @@ public class CharacterReader: CustomStringConvertible {
 
         //if length == 1 { return matches(char: string.unicodeScalars.first!) }
         
-        guard input.distance(from: index, to: input.endIndex) >= length else { return false }
+        guard input.index(input.endIndex, offsetBy: -length) > index else { return false }
         
         return rangeEquals(index..<input.index(index, offsetBy: length), scalar: string.unicodeScalars)
     }
@@ -280,14 +280,13 @@ public class CharacterReader: CustomStringConvertible {
     func matchesIgnoreCase(string: String) -> Bool {
         let length = string.unicodeScalars.count
         
-        guard input.distance(from: index, to: input.endIndex) >= length else { return false }
+        guard input.index(input.endIndex, offsetBy: -length) > index else { return false }
 
         let lowercasedString = string.lowercased().unicodeScalars
 
         let substring = rawInputLowercased.unicodeScalars
         
-        let offset = input.distance(from: input.startIndex, to: index)
-        var indexA = substring.index(substring.startIndex, offsetBy: offset)
+        var indexA = index
         var indexB = lowercasedString.startIndex
         for _ in 0..<length {
             if substring[indexA] != lowercasedString[indexB] {

@@ -6,10 +6,30 @@
 //  Copyright © 2017 Jorge Martín Espinosa. All rights reserved.
 //
 
-/*
+
 import XCTest
 @testable import Miso
 
+class ConnectionTest: XCTestCase {
+
+    func testAsynchronousConnection() {
+        let expectation = XCTestExpectation()
+        
+        request(expectation: expectation)
+        
+        wait(for: [expectation], timeout: 10)
+    }
+    
+    private func request(expectation: XCTestExpectation) {
+        let connection = HTTPConnection(.GET, url: URL(string: "https://google.com")!)
+        connection.request { response in
+            expectation.fulfill()
+        }
+    }
+
+}
+
+/*
 // Fake HTTP server dependencies
 import Embassy
 import Ambassador

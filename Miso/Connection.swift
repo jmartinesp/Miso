@@ -10,6 +10,8 @@ import Foundation
 #if os(Linux)
 import FoundationNetworking
 #endif
+import AsyncHTTPClient
+import NIO
 
 /**
  * A Connection provides a convenient interface to fetch content from the web, and parse them into Documents.
@@ -37,8 +39,8 @@ public protocol Connection {
     
     func userAgent(_ agent: String) -> Self
     var userAgent: String { get }
-    func timeout(_ time: TimeInterval?) -> Self
-    var timeout: TimeInterval? { get }
+    func timeout(_ time: TimeAmount?) -> Self
+    var timeout: TimeAmount? { get }
     func maxBodySize(_ maxSize: Int?) -> Self
     var maxBodySize: Int? { get }
     func referrer(_ referrer: String?) -> Self
@@ -69,12 +71,12 @@ public protocol Connection {
     func parser(_ parser: Parser) -> Self
     func postDataEncoding(_ encoding: String.Encoding) -> Self
     
-    func request(parse: Bool) -> ResponseType
+    func request(parse: Bool) -> ResponseType?
     func request(responseHandler: @escaping (ResponseType) -> ())
 }
 
 public protocol RequestProtocol {
-    mutating func toURLRequest(session: URLSession) -> URLRequest
+    mutating func toURLRequest() throws -> HTTPClient.Request
 }
 
 public protocol ResponseProtocol {

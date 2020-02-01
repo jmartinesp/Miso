@@ -65,10 +65,10 @@ public class Miso {
         public static func requestAndParse(_ method: HTTPConnection.Request.Method, url: URL) throws -> Document {
             let connection = HTTPConnection.connect(method, url: url)
             let response = connection.request()
-            if let error = response.error {
+            if let error = response?.error {
                 throw error
             }
-            return response.document!
+            return response!.document!
         }
     }
 

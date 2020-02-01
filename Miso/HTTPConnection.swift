@@ -10,8 +10,13 @@ import Foundation
 #if os(Linux)
 import FoundationNetworking
 #endif
+import AsyncHTTPClient
+import NIOHTTP1
+import NIO
 
 public class HTTPConnection: Connection, CustomStringConvertible {
+
+    private static let httpClient = HTTPClient(eventLoopGroupProvider: .createNew)
     
     public typealias RequestType = HTTPConnection.Request
     public typealias ResponseType = HTTPConnection.Response
@@ -39,6 +44,7 @@ public class HTTPConnection: Connection, CustomStringConvertible {
     public static let MULTIPART_FORM_DATA = "multipart/form-data"
     public static let FORM_URL_ENCODED = "application/x-www-form-urlencoded"
 #endif
+    public static let COOKIE = "Cookie"
 
    
     /**
@@ -47,11 +53,11 @@ public class HTTPConnection: Connection, CustomStringConvertible {
      */
     fileprivate static let DEFAULT_USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/51.0.2704.79 Chrome/51.0.2704.79 Safari/537.36"
     
-    public static func connect(_ method: Request.Method, url: String) -> HTTPConnection? {
+    public static func connect(_ method: HTTPMethod, url: String) -> HTTPConnection? {
         return HTTPConnection(method, url: url)
     }
     
-    public static func connect(_ method: Request.Method, url: URL) -> HTTPConnection {
+    public static func connect(_ method: HTTPMethod, url: URL) -> HTTPConnection {
         return HTTPConnection(method, url: url)
     }
     
@@ -102,7 +108,7 @@ public class HTTPConnection: Connection, CustomStringConvertible {
         urlSession = session
     }
     
-    public required init?(_ method: Request.Method, url: String, session: URLSession = HTTPConnection.sharedSession) {
+    public required init?(_ method: HTTPMethod, url: String, session: URLSession = HTTPConnection.sharedSession) {
         guard let realURL = URL(string: url) else { return nil }
         self.httpRequest = Request(url: realURL, method: method)
     
@@ -115,7 +121,7 @@ public class HTTPConnection: Connection, CustomStringConvertible {
         urlSession = session
     }
     
-    public required init(_ method: Request.Method, url: URL, session: URLSession = HTTPConnection.sharedSession) {
+    public required init(_ method: HTTPMethod, url: URL, session: URLSession = HTTPConnection.sharedSession) {
         self.httpRequest = Request(url: url, method: method)
         
         urlSession = session
@@ -152,12 +158,12 @@ public class HTTPConnection: Connection, CustomStringConvertible {
     // MARK: Request timeout
     //======================================================================
     
-    public func timeout(_ time: TimeInterval?) -> Self {
+    public func timeout(_ time: TimeAmount?) -> Self {
         httpRequest.timeout = time
         return self
     }
     
-    public var timeout: TimeInterval? { return httpRequest.timeout }
+    public var timeout: TimeAmount? { return httpRequest.timeout }
     
     //======================================================================
     // MARK: Maximum Body Size
@@ -390,8 +396,8 @@ public class HTTPConnection: Connection, CustomStringConvertible {
     // MARK: Build
     //======================================================================
     
-    public var rawRequest: URLRequest {
-        return httpRequest.toURLRequest(session: urlSession)
+    public var rawRequest: HTTPClient.Request? {
+        return try? httpRequest.toURLRequest()
     }
     
     //======================================================================
@@ -399,42 +405,51 @@ public class HTTPConnection: Connection, CustomStringConvertible {
     //======================================================================
     
     public func requestDocument() -> Document? {
-        return self.request(parse: true).document
+        return self.request(parse: true)?.document
     }
     
-    public func request(parse: Bool = true) -> ResponseType {
-        let urlRequest = httpRequest.toURLRequest(session: urlSession)
-        let responseData = urlSession.requestSynchronousData(request: urlRequest)
+    public func request(parse: Bool = true) -> ResponseType? {
+        guard let urlRequest = try? httpRequest.toURLRequest() else { return nil }
+        let responseData = Self.httpClient.requestSynchronousData(request: urlRequest, in: Self.httpClient, timeout: timeout)
         
         if urlSession !== Self.sharedSession {
             urlSession.finishTasksAndInvalidate()
         }
         
         let data = responseData.data
-        let urlResponse = responseData.rawResponse
+        let urlResponse = responseData.response
         let error = responseData.error
         
         if parse {
-            return parseResponse(error: error, urlResponse: urlResponse, data: data, rawRequest: rawRequest)
+            return parseResponse(error: error, urlResponse: urlResponse, data: data, rawRequest: urlRequest)
         } else {
             return ResponseType(document: nil, error: error, data: data, rawRequest: urlRequest, rawResponse: urlResponse)
         }
     }
     
     public func request(responseHandler: @escaping (ResponseType) -> ()) {
-        let urlRequest = httpRequest.toURLRequest(session: urlSession)
-        urlSession.dataTask(with: urlRequest, completionHandler: { data, response, error in
-                if self.urlSession !== Self.sharedSession {
-                    self.urlSession.finishTasksAndInvalidate()
-                }
-                responseHandler(self.parseResponse(error: error, urlResponse: response, data: data, rawRequest: urlRequest))
-            })
-            .resume()
+        guard let urlRequest = try? httpRequest.toURLRequest() else { return }
+        let deadline = timeout != nil ? NIODeadline.now() + timeout! : nil
+        Self.httpClient.execute(request: urlRequest, deadline: deadline).whenComplete { result in
+            var responseError: Error? = nil
+            var data: Data? = nil
+            var responseResult: HTTPClient.Response? = nil
+            switch result {
+            case .success(let response):
+                responseResult = response
+                var body = response.body
+                let length = body?.readableBytes ?? 0
+                data = body?.readData(length: length)
+            case .failure(let error):
+                responseError = error
+            }
+            responseHandler(self.parseResponse(error: responseError, urlResponse: responseResult, data: data, rawRequest: urlRequest))
+        }
     }
     
-    private func parseResponse(error: Error?, urlResponse: URLResponse?, data: Data?, rawRequest: URLRequest) -> Response {
+    private func parseResponse(error: Error?, urlResponse: HTTPClient.Response?, data: Data?, rawRequest: HTTPClient.Request) -> Response {
         let responseParser = HTTPResponseParser(request: httpRequest)
-        return responseParser.parseResponse(error: error, urlResponse: urlResponse, data: data, rawRequest: rawRequest)
+        return responseParser.parseResponse(error: error, response: urlResponse, data: data, rawRequest: rawRequest)
     }
     
     public func debug() -> HTTPConnection {
@@ -454,37 +469,17 @@ public class HTTPConnection: Connection, CustomStringConvertible {
 
     public class Request: RequestProtocol, CustomStringConvertible {
 
-        public enum Method: String {
-            case GET = "GET"
-            case POST = "POST"
-            case PUT = "PUT"
-            case DELETE = "DELETE"
-            case PATCH = "PATCH"
-            case HEAD = "HEAD"
-            case OPTIONS = "OPTIONS"
-            case TRACE = "TRACE"
+        public typealias Method = HTTPMethod
 
-            /**
-             * Check if this HTTP method has/needs a request body
-             * @return if body needed
-             */
-            var hasBody: Bool {
-                if [.POST, .PUT, .PATCH].contains(self) {
-                    return true
-                }
-                return false
-            }
-        }
-
-        init(url: URL, method: Request.Method = .GET) {
+        init(url: URL, method: HTTPMethod = .GET) {
             self.url = url
             self.method = method
         }
 
         var url: URL
-        var method: Request.Method
+        var method: HTTPMethod
         var proxy: Proxy? = nil
-        var timeout: TimeInterval? = nil
+        var timeout: TimeAmount? = nil
         var maxBodySize: Int? = nil
         var parser: Parser = Parser.htmlParser
         var ignoreHTTPErrors: Bool = false
@@ -496,6 +491,8 @@ public class HTTPConnection: Connection, CustomStringConvertible {
         var headers = OrderedDictionary<String, String>()
         var cookies = [String: String]()
         var hasMultipartElement: Bool = false
+        
+        var rawComputedBody: String?
 
         private var needsMultipart: Bool {
             return method.hasBody && (hasMultipartElement || headers[HTTPConnection.CONTENT_ENCODING] == HTTPConnection.MULTIPART_FORM_DATA)
@@ -509,69 +506,55 @@ public class HTTPConnection: Connection, CustomStringConvertible {
             return url
         }
 
-        public func toURLRequest(session: URLSession) -> URLRequest {
-            let headers = self.headers
+        public func toURLRequest() throws -> HTTPClient.Request {
             var url = self.url
             
-            var urlRequest = URLRequest(url: sanitizeDomain(url: url))
-            urlRequest.httpMethod = method.rawValue
-
-            #if os(watchOS)
-            #elseif os(Linux)
-            #else
-            if proxy != nil {
-                session.configuration.connectionProxyDictionary = [
-                        HTTPConnection.PROXY_ENABLE: true,
-                        HTTPConnection.PROXY_PORT: proxy!.port,
-                        HTTPConnection.PROXY_HOST: proxy!.url.host!
-                ]
+            var nioRequest = try HTTPClient.Request(url: sanitizeDomain(url: url), method: method)
+            
+            let headers = self.headers
+            for header in headers {
+                nioRequest.headers.add(name: header.key, value: header.value)
             }
-            #endif
-
-            if let timeout = self.timeout {
-                urlRequest.timeoutInterval = timeout
-            }
-
-            // Params
-            var bodyContents = ""
-            if rawBodyData != nil {
-                // Set body data directly
-                urlRequest.httpBody = rawBodyData
+            
+            if let bodyData = rawBodyData {
+                nioRequest.body = .data(bodyData)
+                rawComputedBody = String(data: bodyData, encoding: postDataEncoding)
             } else if method.hasBody {
-                // ~POST method
+                var bodyContents = ""
                 if needsMultipart {
-                    // Multipart
                     let boundary = randomBoundary()
                     headers[HTTPConnection.CONTENT_TYPE] = HTTPConnection.MULTIPART_FORM_DATA + "; boundary=" + boundary
                     bodyContents += params.map { (pair: (key: String, value: String)) -> String in
-                            let key = pair.key.addingPercentEncoding(withAllowedCharacters: .alphanumerics)!
-                            var base = "--\(boundary)\r\nContent-Disposition: form-data; name=\"\(key)\""
-                            if pair.value.hasPrefix("; filename") {
-                                base += pair.value
-                            } else {
-                                base += "\r\n\r\n\(pair.value)"
-                            }
-                            return base
+                        let key = pair.key.addingPercentEncoding(withAllowedCharacters: .alphanumerics)!
+                        var base = "--\(boundary)\r\nContent-Disposition: form-data; name=\"\(key)\""
+                        if pair.value.hasPrefix("; filename") {
+                            base += pair.value
+                        } else {
+                            base += "\r\n\r\n\(pair.value)"
                         }
-                        .joined()
+                        return base
+                    }
+                    .joined()
                     bodyContents += "--\(boundary)--"
                 } else {
                     // URL-Encoded
-                    var allowedCharset = NSCharacterSet.urlQueryAllowed
+                    var allowedCharset = CharacterSet.urlQueryAllowed
                     allowedCharset.remove(charactersIn: "!;/?:@&=+$, ")
                     if headers[HTTPConnection.CONTENT_TYPE] == nil {
                         headers[HTTPConnection.CONTENT_TYPE] = HTTPConnection.FORM_URL_ENCODED + "; charset=" + postDataEncoding.displayName
                     }
                     bodyContents = params.map { (pair: (key: String, value: String)) -> String in
-                            let key = pair.key.addingPercentEncoding(withAllowedCharacters: allowedCharset)!
-                            let value = pair.value.addingPercentEncoding(withAllowedCharacters: allowedCharset)!
-                            return "\(key)=\(value)"
-                        }
-                        .joined(separator: "&")
+                        let key = pair.key.addingPercentEncoding(withAllowedCharacters: allowedCharset)!
+                        let value = pair.value.addingPercentEncoding(withAllowedCharacters: allowedCharset)!
+                        return "\(key)=\(value)"
+                    }
+                    .joined(separator: "&")
                 }
+                nioRequest.body = .string(bodyContents)
+                rawComputedBody = bodyContents
             } else if !params.isEmpty {
                 // ~GET
-                var urlComponents = URLComponents(url: urlRequest.url!, resolvingAgainstBaseURL: false)
+                var urlComponents = URLComponents(url: url, resolvingAgainstBaseURL: false)
                 if urlComponents?.queryItems == nil {
                     urlComponents?.queryItems = []
                 }
@@ -580,70 +563,61 @@ public class HTTPConnection: Connection, CustomStringConvertible {
                 }
                 if let resultURL = urlComponents?.url {
                     url = resultURL
-                    urlRequest.url = url
+                    
+                    nioRequest = try nioRequest.copy(newURL: url)
                 }
             }
-
-            // Set body data if needed
-            if !bodyContents.isEmpty {
-                if maxBodySize != nil {
-                    bodyContents = bodyContents[0..<maxBodySize!]
-                }
-                urlRequest.httpBody = bodyContents.data(using: postDataEncoding)
-            }
-
-            // Headers
-	    var httpHeaders = urlRequest.allHTTPHeaderFields ?? [:]
-            headers.forEach { key, value in
-                httpHeaders[key] = value
-            }
-            urlRequest.allHTTPHeaderFields = httpHeaders
-
+            
             // User-Agent
             if !headers.keys.contains(HTTPConnection.USER_AGENT) {
-                urlRequest.setValue(HTTPConnection.DEFAULT_USER_AGENT, forHTTPHeaderField: HTTPConnection.USER_AGENT)
+                nioRequest.headers.remove(name: HTTPConnection.DEFAULT_USER_AGENT)
+                nioRequest.headers.add(name: HTTPConnection.DEFAULT_USER_AGENT, value: HTTPConnection.USER_AGENT)
             }
-
+                                    
             // Cookies
-            if let cookieStorage = session.configuration.httpCookieStorage {
-                cookies.forEach {
-                    if let cookie = HTTPCookie(properties: [.name: $0.key, .value: $0.value]) {
-                        // TODO check if needs more info
+            if !headers.keys.contains(HTTPConnection.COOKIE) {
+                let cookieStorage = HTTPCookieStorage.shared
+                for cookie in cookies {
+                    if let cookie = HTTPCookie(properties: [.name: cookie.key, .value: cookie.value]) {
                         cookieStorage.setCookie(cookie)
                     }
                 }
+            
+                if let matchingCookies = cookieStorage.cookies(for: url) {
+                    let cookieHeader = matchingCookies.map { "\($0.name)=\($0.value)" }.joined("; ")
+                    nioRequest.headers.remove(name: HTTPConnection.COOKIE)
+                    nioRequest.headers.add(name: HTTPConnection.COOKIE, value: cookieHeader)
+                }
             }
-
-            return urlRequest
+            
+            return nioRequest
         }
 
         // Generate random boundary for multipart requests
-        let boundaryChars = "-_1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".map {
-            $0
-        }
+        static let boundaryChars = "-_1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".map { $0 }
         func randomBoundary() -> String {
             let boundary = StringBuilder()
             let count = 32
             for _ in 0..<count {
-                let random = Int.random(in: 0..<boundaryChars.count)
-                boundary.append(boundaryChars[random])
+                let random = Int.random(in: 0..<Self.boundaryChars.count)
+                boundary.append(Self.boundaryChars[random])
             }
             return boundary.stringValue
         }
         
         public var description: String {
-            let urlRequest = toURLRequest(session: URLSession.shared)
-            let body = urlRequest.httpBody != nil ? String(data: urlRequest.httpBody!, encoding: postDataEncoding)! : ""
-            let cookies = HTTPCookieStorage.shared.cookies(for: urlRequest.url!)?.map {
+            guard let urlRequest = try? toURLRequest() else { return "Invalid request" }
+            let body = self.rawComputedBody ?? ""
+            let cookies = HTTPCookieStorage.shared.cookies(for: urlRequest.url)?.map {
                 "\($0.name): \($0.value)"
             }
             
             return """
             ===================== REQUEST =====================
-            URL: \(urlRequest.url!)
+            URL: \(urlRequest.url)
             Method: \(method)
             Body: \(body)
-            Headers: \(urlRequest.allHTTPHeaderFields ?? [:])
+            Headers: \(headers)
             Cookies: \(cookies ?? [])
             ===================================================
             
@@ -657,8 +631,8 @@ public class HTTPConnection: Connection, CustomStringConvertible {
         public var document: Document?
         public var error: Error?
         public var data: Data?
-        public var rawRequest: URLRequest
-        public var rawResponse: HTTPURLResponse?
+        public var rawRequest: HTTPClient.Request
+        public var rawResponse: HTTPClient.Response?
 
     }
 }
@@ -748,6 +722,25 @@ public struct InvalidContentTypeError: LocalizedError {
     let contentType: String?
     public var localizedDescription: String {
         return "Unknown content type: \(contentType ?? "nil")"
+    }
+    
+}
+
+extension HTTPClient.Request {
+    
+    func copy(newURL: URL) throws -> HTTPClient.Request {
+        return try Self.init(url: newURL, method: method, headers: headers, body: body)
+    }
+    
+}
+
+extension HTTPMethod {
+    
+    var hasBody: Bool {
+        if [.POST, .PUT, .PATCH].contains(self) {
+            return true
+        }
+        return false
     }
     
 }
