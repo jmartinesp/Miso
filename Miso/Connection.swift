@@ -72,7 +72,7 @@ public protocol Connection {
     func postDataEncoding(_ encoding: String.Encoding) -> Self
     
     func request(parse: Bool) -> ResponseType?
-    func request(responseHandler: @escaping (ResponseType) -> ())
+    func request(parse: Bool, responseHandler: @escaping (ResponseType) -> ())
 }
 
 public protocol RequestProtocol {

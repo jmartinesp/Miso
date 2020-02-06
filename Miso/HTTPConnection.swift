@@ -427,7 +427,7 @@ public class HTTPConnection: Connection, CustomStringConvertible {
         }
     }
     
-    public func request(responseHandler: @escaping (ResponseType) -> ()) {
+    public func request(parse: Bool, responseHandler: @escaping (ResponseType) -> ()) {
         guard let urlRequest = try? httpRequest.toURLRequest() else { return }
         let deadline = timeout != nil ? NIODeadline.now() + timeout! : nil
         Self.httpClient.execute(request: urlRequest, deadline: deadline).whenComplete { result in
@@ -443,7 +443,13 @@ public class HTTPConnection: Connection, CustomStringConvertible {
             case .failure(let error):
                 responseError = error
             }
-            responseHandler(self.parseResponse(error: responseError, urlResponse: responseResult, data: data, rawRequest: urlRequest))
+            let response: ResponseType
+            if parse {
+                response = self.parseResponse(error: responseError, urlResponse: responseResult, data: data, rawRequest: urlRequest)
+            } else {
+                response = ResponseType(document: nil, error: responseError, data: data, rawRequest: urlRequest, rawResponse: responseResult)
+            }
+            responseHandler(response)
         }
     }
     
