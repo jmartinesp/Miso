@@ -570,8 +570,8 @@ public class HTTPConnection: Connection, CustomStringConvertible {
             
             // User-Agent
             if !headers.keys.contains(HTTPConnection.USER_AGENT) {
-                nioRequest.headers.remove(name: HTTPConnection.DEFAULT_USER_AGENT)
-                nioRequest.headers.add(name: HTTPConnection.DEFAULT_USER_AGENT, value: HTTPConnection.USER_AGENT)
+                nioRequest.headers.remove(name: HTTPConnection.USER_AGENT)
+                nioRequest.headers.add(name: HTTPConnection.USER_AGENT, value: HTTPConnection.DEFAULT_USER_AGENT)
             }
                                     
             // Cookies
