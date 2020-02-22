@@ -16,18 +16,11 @@ import NIO
 
 public class HTTPConnection: Connection, CustomStringConvertible {
 
-    private static let httpClient = HTTPClient(eventLoopGroupProvider: .createNew)
+    private static let defaultHTTPClient = HTTPClient(eventLoopGroupProvider: .createNew)
     
     public typealias RequestType = HTTPConnection.Request
     public typealias ResponseType = HTTPConnection.Response
-    
-    #if os(watchOS)
-    #elseif os(Linux)
-    #else
-    private static let PROXY_ENABLE = String(kCFNetworkProxiesHTTPEnable)
-    private static let PROXY_HOST = String(kCFNetworkProxiesHTTPProxy)
-    private static let PROXY_PORT = String(kCFNetworkProxiesHTTPPort)
-    #endif
+
 
 #if os(Linux)    
     public static let CONTENT_ENCODING = "content-encoding"
@@ -85,59 +78,51 @@ public class HTTPConnection: Connection, CustomStringConvertible {
     private static func encode(mimeName: String) -> String {
         return mimeName.replaceAll(regex: "\"", by: "%22")
     }
-    
-    private static var followRedirectsDelegate = ConfigurableSessionTaskDelegate()
-    public static var sharedSession: URLSession = {
-        URLSession(configuration: URLSessionConfiguration.default,
-                                delegate: followRedirectsDelegate,
-                                delegateQueue: OperationQueue())
-    }()
 
     private var httpRequest: RequestType
     private var response: HTTPURLResponse?
-    private var urlSession: URLSession
+    private var httpClient = HTTPConnection.defaultHTTPClient
+    
+    private var _followRedirects: Bool = false
+    private var _validateTLS: Bool = true
     
     //======================================================================
     // MARK: Initializers
     //======================================================================
     
-    public required init?(url: String, session: URLSession = HTTPConnection.sharedSession) {
+    public required init?(url: String) {
         guard let realURL = URL(string: url) else { return nil }
         self.httpRequest = Request(url: realURL)
-        
-        urlSession = session
     }
     
-    public required init?(_ method: HTTPMethod, url: String, session: URLSession = HTTPConnection.sharedSession) {
+    public required init?(_ method: HTTPMethod, url: String) {
         guard let realURL = URL(string: url) else { return nil }
         self.httpRequest = Request(url: realURL, method: method)
-    
-        urlSession = session
     }
     
-    public required init(url: URL, session: URLSession = HTTPConnection.sharedSession) {
+    public required init(url: URL) {
         self.httpRequest = Request(url: url)
-        
-        urlSession = session
     }
     
-    public required init(_ method: HTTPMethod, url: URL, session: URLSession = HTTPConnection.sharedSession) {
+    public required init(_ method: HTTPMethod, url: URL) {
         self.httpRequest = Request(url: url, method: method)
-        
-        urlSession = session
     }
     
     //======================================================================
     // MARK: Proxy
     //======================================================================
     
-    public func proxy(host: String, port: Int) -> Self {
-        guard let url = URL(string: host) else { return self }
-        httpRequest.proxy = Proxy(url: url, port: port)
+    public func proxy(_ proxy: HTTPClient.Configuration.Proxy) -> Self {
+        httpRequest.proxy = proxy
         return self
     }
     
-    public var proxy: Proxy? {
+    public func proxy(host: String, port: Int, authorization: HTTPClient.Authorization?) -> Self {
+        httpRequest.proxy = HTTPClient.Configuration.Proxy.server(host: host, port: port, authorization: authorization)
+        return self
+    }
+    
+    public var proxy: HTTPClient.Configuration.Proxy? {
         return httpRequest.proxy
     }
     
@@ -166,19 +151,6 @@ public class HTTPConnection: Connection, CustomStringConvertible {
     public var timeout: TimeAmount? { return httpRequest.timeout }
     
     //======================================================================
-    // MARK: Maximum Body Size
-    //======================================================================
-    
-    public func maxBodySize(_ maxSize: Int?) -> Self {
-        httpRequest.maxBodySize = maxSize
-        return self
-    }
-    
-    public var maxBodySize: Int? {
-        return httpRequest.maxBodySize
-    }
-    
-    //======================================================================
     // MARK: Referrer
     //======================================================================
     
@@ -196,12 +168,12 @@ public class HTTPConnection: Connection, CustomStringConvertible {
     //======================================================================
     
     public func followRedirects(_ follows: Bool) -> Self {
-        Self.followRedirectsDelegate.followRedirects = follows
+        self._followRedirects = follows
         return self
     }
     
     public var followRedirects: Bool {
-        return Self.followRedirectsDelegate.followRedirects
+        return _followRedirects
     }
     
     //======================================================================
@@ -235,12 +207,12 @@ public class HTTPConnection: Connection, CustomStringConvertible {
     //======================================================================
     
     public func validateTLSCertificate(_ validate: Bool) -> Self {
-        Self.followRedirectsDelegate.validateTLSCertificates = validate
+        _validateTLS = validate
         return self
     }
     
     public var validateTLSCertificate: Bool {
-        return Self.followRedirectsDelegate.validateTLSCertificates
+        return _validateTLS
     }
     
     //======================================================================
@@ -248,22 +220,17 @@ public class HTTPConnection: Connection, CustomStringConvertible {
     //======================================================================
     
     public func authenticate(user: String, password: String) -> Self {
-#if os(Linux)
-	let base64 = "\(user):\(password)".data(using: .utf8)!.base64EncodedString()
-	httpRequest.headers["Authorization"] = "Basic \(base64)"
-#else
-        Self.followRedirectsDelegate.credential = URLCredential(user: user, password: password, persistence: .forSession)
-#endif
+        httpRequest.authorization = .basic(username: user, password: password)
         return self
     }
     
     public func authenticate(token: String) -> Self {
-        httpRequest.headers["Authorization"] = "Bearer \(token)"
+        httpRequest.authorization = .bearer(tokens: token)
         return self
     }
     
-    public func authentication() -> URLCredential? {
-        return Self.followRedirectsDelegate.credential
+    public func authentication() -> HTTPClient.Authorization? {
+        return httpRequest.authorization
     }
     
     //======================================================================
@@ -404,17 +371,50 @@ public class HTTPConnection: Connection, CustomStringConvertible {
     // MARK: Request methods
     //======================================================================
     
+    private func client(for request: HTTPConnection.RequestType) -> HTTPClient {
+        var needsCustomConfig = false
+        
+        if request.proxy != nil || followRedirects || timeout != nil || !validateTLSCertificate {
+            needsCustomConfig = true
+        }
+        
+        if needsCustomConfig {
+            var configuration = HTTPClient.Configuration()
+            configuration.proxy = request.proxy
+            configuration.redirectConfiguration = followRedirects ?
+                .follow(max: Int.max, allowCycles: true) :
+                .disallow
+            configuration.timeout = .init(connect: timeout, read: timeout)
+            configuration.tlsConfiguration = validateTLSCertificate ?
+                .forClient() :
+                .forClient(certificateVerification: .none)
+            
+            self.httpClient = HTTPClient(eventLoopGroupProvider: .createNew, configuration: configuration)
+            return self.httpClient
+        } else {
+            return Self.defaultHTTPClient
+        }
+    }
+    
+    public func invalidateClient() throws {
+        try httpClient.syncShutdown()
+    }
+    
+    private func invalidateClientIfNeeded() {
+        if httpClient !== Self.defaultHTTPClient {
+            try? invalidateClient()
+        }
+    }
+    
     public func requestDocument() -> Document? {
         return self.request(parse: true)?.document
     }
     
     public func request(parse: Bool = true) -> ResponseType? {
-        guard let urlRequest = try? httpRequest.toURLRequest() else { return nil }
-        let responseData = Self.httpClient.requestSynchronousData(request: urlRequest, in: Self.httpClient, timeout: timeout)
+        defer { self.invalidateClientIfNeeded() }
         
-        if urlSession !== Self.sharedSession {
-            urlSession.finishTasksAndInvalidate()
-        }
+        guard let urlRequest = try? httpRequest.toURLRequest() else { return nil }
+        let responseData = client(for: httpRequest).requestSynchronousData(request: urlRequest)
         
         let data = responseData.data
         let urlResponse = responseData.response
@@ -428,9 +428,11 @@ public class HTTPConnection: Connection, CustomStringConvertible {
     }
     
     public func request(parse: Bool, responseHandler: @escaping (ResponseType) -> ()) {
+        defer { self.invalidateClientIfNeeded() }
+        
         guard let urlRequest = try? httpRequest.toURLRequest() else { return }
-        let deadline = timeout != nil ? NIODeadline.now() + timeout! : nil
-        Self.httpClient.execute(request: urlRequest, deadline: deadline).whenComplete { result in
+        client(for: httpRequest).execute(request: urlRequest).whenComplete { result in
+            
             var responseError: Error? = nil
             var data: Data? = nil
             var responseResult: HTTPClient.Response? = nil
@@ -443,6 +445,7 @@ public class HTTPConnection: Connection, CustomStringConvertible {
             case .failure(let error):
                 responseError = error
             }
+            
             let response: ResponseType
             if parse {
                 response = self.parseResponse(error: responseError, urlResponse: responseResult, data: data, rawRequest: urlRequest)
@@ -467,12 +470,6 @@ public class HTTPConnection: Connection, CustomStringConvertible {
         return httpRequest.description
     }
 
-
-    public struct Proxy {
-        let url: URL
-        let port: Int
-    }
-
     public class Request: RequestProtocol, CustomStringConvertible {
 
         public typealias Method = HTTPMethod
@@ -481,12 +478,12 @@ public class HTTPConnection: Connection, CustomStringConvertible {
             self.url = url
             self.method = method
         }
-
+        
+        var authorization: HTTPClient.Authorization?
         var url: URL
         var method: HTTPMethod
-        var proxy: Proxy? = nil
+        var proxy: HTTPClient.Configuration.Proxy? = nil
         var timeout: TimeAmount? = nil
-        var maxBodySize: Int? = nil
         var parser: Parser = Parser.htmlParser
         var ignoreHTTPErrors: Bool = false
         var ignoreContentType: Bool = false
@@ -520,6 +517,10 @@ public class HTTPConnection: Connection, CustomStringConvertible {
             let headers = self.headers
             for header in headers {
                 nioRequest.headers.add(name: header.key, value: header.value)
+            }
+            
+            if let authorization = self.authorization {
+                nioRequest.headers.add(name: "Authorization", value: authorization.headerValue)
             }
             
             if let bodyData = rawBodyData {
@@ -641,68 +642,6 @@ public class HTTPConnection: Connection, CustomStringConvertible {
         public var rawResponse: HTTPClient.Response?
 
     }
-}
-
-class ConfigurableSessionTaskDelegate: NSObject, URLSessionTaskDelegate {
-
-    var validateTLSCertificates: Bool = true
-    var followRedirects: Bool = false
-    var credential: URLCredential?
-    
-    func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse, newRequest request: URLRequest, completionHandler: @escaping (URLRequest?) -> Void) {
-
-        var responseRequest: URLRequest? = nil
-
-        if followRedirects {
-            responseRequest = request
-            completionHandler(responseRequest)
-        } else {
-            completionHandler(nil)
-        }
-    }
-    
-    func urlSession(_ session: URLSession, task: URLSessionTask, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-        #if os(Linux)
-        if let credential = self.credential {
-            completionHandler(.useCredential, credential)
-        } else if let credential = session.configuration.urlCredentialStorage?.defaultCredential(for: challenge.protectionSpace) {
-            completionHandler(.useCredential, credential)
-        } else if let credential = challenge.proposedCredential {
-            completionHandler(.useCredential, credential)
-        } else {
-            completionHandler(.performDefaultHandling, nil)
-        }
-        #else
-        if validateTLSCertificates {
-            if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust {
-                if let trust = challenge.protectionSpace.serverTrust {
-                    let credential = URLCredential(trust: trust)
-                    completionHandler(.performDefaultHandling, credential)
-                    return
-                }
-            }
-        } else {
-            if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust {
-                if let trust = challenge.protectionSpace.serverTrust {
-                    let credential = URLCredential(trust: trust)
-                    completionHandler(.useCredential, credential)
-                    return
-                }
-            }
-        }
-        
-        if let credential = self.credential {
-            completionHandler(.useCredential, credential)
-        } else if let credential = session.configuration.urlCredentialStorage?.defaultCredential(for: challenge.protectionSpace) {
-            completionHandler(.useCredential, credential)
-        } else if let credential = challenge.proposedCredential {
-            completionHandler(.useCredential, credential)
-        } else {
-            completionHandler(.performDefaultHandling, nil)
-        }
-        #endif
-    }
-    
 }
 
 public struct HTTPError: LocalizedError {

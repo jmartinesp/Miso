@@ -18,7 +18,17 @@ open class Node: Equatable, Hashable, CustomStringConvertible, CustomDebugString
     
     public weak var parentNode: Node?
     public var childNodes = [Node]()
-    public var attributes = Attributes()
+    private(set) var hasAttributes = false
+    private lazy var _attributes: Attributes = { Attributes() }()
+    public var attributes: Attributes {
+        set {
+            hasAttributes = true
+            _attributes = newValue
+        }
+        get {
+            return _attributes
+        }
+    }
     private var _baseUri: String?
     var baseUri: String? {
         get {
@@ -41,17 +51,12 @@ open class Node: Equatable, Hashable, CustomStringConvertible, CustomDebugString
      */
     var siblingIndex: Int? = nil
     
-    public init(baseUri: String?, attributes: Attributes) {
+    public init(baseUri: String?) {
         self.baseUri = baseUri
-        self.attributes = attributes
-    }
-    
-    public convenience init(baseUri: String?) {
-        self.init(baseUri: baseUri, attributes: Attributes())
     }
     
     public convenience init() {
-        self.init(baseUri: nil, attributes: Attributes())
+        self.init(baseUri: nil)
     }
     
     open var nodeName: String { fatalError("\(#function) in \(self.self) must be overriden") }
@@ -117,8 +122,8 @@ open class Node: Equatable, Hashable, CustomStringConvertible, CustomDebugString
     }
     
     open func append(children: [Node]) {
-        children.forEach {
-            self.append(childNode: $0)
+        for child in children {
+            self.append(childNode: child)
         }
     }
     
@@ -296,7 +301,7 @@ open class Node: Equatable, Hashable, CustomStringConvertible, CustomDebugString
     }
     
     open func outerHTML(accum: StringBuilder) {
-        NodeTraversor(visitor: OuterHTMLVisitor(accum: accum, settings: self.outputSettings)).traverse(root: self)
+        NodeTraversor(visitor: OuterHTMLVisitor(accum: accum, settings: outputSettings)).traverse(root: self)
     }
     
     open var outputSettings: OutputSettings {

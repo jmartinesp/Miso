@@ -11,6 +11,22 @@ import XCTest
 
 class QueryParserTest: XCTestCase {
     
+    func testExceptOnEmptySelector() {
+        do {
+            _ = try QueryParser.parse(query: "")
+            XCTFail("Should throw an exception")
+        } catch {}
+    }
+    
+    func testOkOnSpacesForeAndAft() {
+        do {
+            let parse = try QueryParser.parse(query: " span div  ")
+            XCTAssertEqual("div :parentspan", parse.description)
+        } catch {
+            XCTFail("It should parse the query just fine")
+        }
+    }
+    
     func testOrGetsCorrectPrecedence() {
         // tests that a selector "a b, c d, e f" evals to (a AND b) OR (c AND d) OR (e AND f)"
         // top level or, three child ands

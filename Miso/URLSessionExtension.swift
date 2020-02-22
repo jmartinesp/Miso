@@ -36,13 +36,12 @@ extension URLSession {
 
 extension HTTPClient {
     
-    public func requestSynchronousData(request: HTTPClient.Request, in client: HTTPClient, timeout: TimeAmount? = nil) -> (data: Data?, response: HTTPClient.Response?, error: Error?) {
+    public func requestSynchronousData(request: HTTPClient.Request) -> (data: Data?, response: HTTPClient.Response?, error: Error?) {
         var data: Data? = nil
         var responseError: Error? = nil
         var resultResponse: HTTPClient.Response? = nil
         let semaphore = DispatchSemaphore(value: 0)
-        let deadline: NIODeadline? = timeout != nil ? .now() + timeout! : nil
-        client.execute(request: request, deadline: deadline).whenComplete { result in
+        self.execute(request: request).whenComplete { result in
             switch result {
             case .success(let response):
                 resultResponse = response

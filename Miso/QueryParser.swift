@@ -18,9 +18,9 @@ public class QueryParser {
     var evaluators = [EvaluatorProtocol]()
     
     private init(query: String) {
-        self.query = query
+        self.query = query.trimmingCharacters(in: .whitespaces)
         
-        tokenQueue = TokenQueue(query: query)
+        tokenQueue = TokenQueue(query: self.query)
     }
     
     public static func parse(query: String) throws -> EvaluatorProtocol {
@@ -217,17 +217,17 @@ public class QueryParser {
     }
     
     private func byTag() {
-        var tagName = tokenQueue.consumeElementSelector()
+        var tagName = tokenQueue.consumeElementSelector().normalizedWhitespace()
         
         // namespaces: wildcard match equals(tagName) or ending in ":"+tagName
         if tagName.hasPrefix("*|") {
             evaluators.append(CombiningEvaluator.Or(
-                Evaluator.TagIs(tagName: tagName.trimmingCharacters(in: .whitespaces).lowercased()),
+                Evaluator.TagIs(tagName: tagName),
                 Evaluator.TagEndsWith(tagName: tagName.replacingOccurrences(of: "*|", with: ":").trimmingCharacters(in: .whitespaces).lowercased())
             ))
         } else {
             tagName = tagName.replacingOccurrences(of: "|", with: ":")
-            evaluators.append(Evaluator.TagIs(tagName: tagName.trimmingCharacters(in: .whitespaces)))
+            evaluators.append(Evaluator.TagIs(tagName: tagName))
         }
     }
     

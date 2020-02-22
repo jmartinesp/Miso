@@ -27,17 +27,20 @@ open class Element: Node {
     public private(set) var tag: Tag
     
     public convenience init(tag: String) {
-        self.init(tag: Tag.valueOf(tagName: tag), baseUri: nil, attributes: Attributes())
+        self.init(tag: Tag.valueOf(tagName: tag), baseUri: nil)
     }
     
-    public init(tag: Tag, baseUri: String?, attributes: Attributes) {
+    public init(tag: Tag, baseUri: String?, attributes: Attributes?) {
         self.tag = tag
-        super.init(baseUri: baseUri, attributes: attributes)
+        super.init(baseUri: baseUri)
+        if let attributes = attributes {
+            self.attributes = attributes
+        }
     }
     
     public init (tag: Tag, baseUri: String?) {
         self.tag = tag
-        super.init(baseUri: baseUri, attributes: Attributes())
+        super.init(baseUri: baseUri)
     }
     
     open override var nodeName: String {
@@ -58,7 +61,7 @@ open class Element: Node {
     }
     
     open var id: String? {
-        return attributes["id"]?.value
+        return hasAttributes ? attributes["id"]?.value : nil
     }
     
     @discardableResult
@@ -255,7 +258,7 @@ open class Element: Node {
     }
     
     open func element(byId id: String) -> Element? {
-        let id = id.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+        let id = id.trimmingCharacters(in: .whitespacesAndNewlines)
         
         return Collector.collect(evaluator: Evaluator.IdIs(id: id), root: self).first
     }
@@ -505,7 +508,7 @@ open class Element: Node {
     }
     
     open func hasClass(_ className: String) -> Bool {
-        guard let classAttr = attributes.get(byTag: "class", ignoreCase: true)?.value else { return false }
+        guard hasAttributes, let classAttr = attributes.get(byTag: "class", ignoreCase: true)?.value else { return false }
         
         guard !classAttr.isEmpty && classAttr.unicodeScalars.count >= className.unicodeScalars.count else { return false }
         

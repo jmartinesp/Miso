@@ -45,8 +45,8 @@ open class HTTPResponseParser: ResponseParserProtocol {
         }
         
         // Valid Content-Type
-        let contentType = response!.headers[HTTPConnection.CONTENT_TYPE] as? String
-        guard request.ignoreContentType || (contentType != nil && contentType!.matches(self.validContentTypeRegex)) else {
+        let contentType = response!.headers[HTTPConnection.CONTENT_TYPE].first
+        guard request.ignoreContentType || contentType?.matches(self.validContentTypeRegex) == true else {
             error = InvalidContentTypeError(contentType: contentType)
             return HTTPConnection.Response(document: nil, error: error, data: data, rawRequest: rawRequest, rawResponse: response)
         }

@@ -74,4 +74,19 @@ class AttributesTest: XCTestCase {
         XCTAssert(attributes["tot"] != nil)
         XCTAssertFalse(attributes["Tot"] != nil)
     }
+    
+    func testBoolean() {
+        let attributes = Attributes()
+        attributes.put(string: "a", forKey: "a")
+        attributes.put(string: "B", forKey: "b")
+        attributes.put(string: "", forKey: "c")
+        
+        XCTAssert(attributes.contains(key: "a", ignoreCase: false))
+        XCTAssertFalse(attributes.contains(key: "A", ignoreCase: false))
+        XCTAssert(attributes.hasValueIgnoreCase(value: "A"))
+        
+        XCTAssert(attributes.contains(key: "c", ignoreCase: false))
+        XCTAssertFalse(attributes.contains(key: "C", ignoreCase: false))
+        XCTAssertFalse(attributes.hasValueIgnoreCase(value: "C"))
+    }
 }

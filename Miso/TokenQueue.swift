@@ -63,6 +63,8 @@ open class TokenQueue {
     }
     
     open func matches(any chars: [UnicodeScalar]) -> Bool {
+        guard !isEmpty else { return false }
+        
         for char in chars {
             if queue[pos] == char {
                 return true

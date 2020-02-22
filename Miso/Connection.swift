@@ -30,19 +30,17 @@ public protocol Connection {
     associatedtype RequestType: RequestProtocol
     associatedtype ResponseType: ResponseProtocol
     
-    init?(url: String, session: URLSession)
-    init(url: URL, session: URLSession)
+    init?(url: String)
+    init(url: URL)
     
-    // TODO: see if there is a replacement in Swift for `func proxy(_ proxy: Proxy) -> Self`
-    func proxy(host: String, port: Int) -> Self
-    var proxy: HTTPConnection.Proxy? { get }
+    func proxy(_ proxy: HTTPClient.Configuration.Proxy) -> Self
+    func proxy(host: String, port: Int, authorization: HTTPClient.Authorization?) -> Self
+    var proxy: HTTPClient.Configuration.Proxy? { get }
     
     func userAgent(_ agent: String) -> Self
     var userAgent: String { get }
     func timeout(_ time: TimeAmount?) -> Self
     var timeout: TimeAmount? { get }
-    func maxBodySize(_ maxSize: Int?) -> Self
-    var maxBodySize: Int? { get }
     func referrer(_ referrer: String?) -> Self
     var referrer: String? { get }
     func followRedirects(_ follows: Bool) -> Self

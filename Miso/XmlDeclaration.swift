@@ -15,7 +15,7 @@ public class XmlDeclaration: Node {
     init(name: String, baseUri: String?, isProcessingInstruction: Bool) {
         self.name = name
         self.isProcessingInstruction = isProcessingInstruction
-        super.init(baseUri: baseUri, attributes: Attributes())
+        super.init(baseUri: baseUri)
     }
     
     public override var nodeName: String {

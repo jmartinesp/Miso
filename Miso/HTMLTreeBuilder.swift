@@ -17,14 +17,14 @@ class HTMLTreeBuilder: TreeBuilder, CustomStringConvertible {
     private static let TagSearchTableScope = ["html", "table"]
     private static let TagSearchSelectScope = ["optgroup", "option"]
     private static let TagSearchEndTags = ["dd", "dt", "li", "option", "optgroup", "p", "rp", "rt"]
-    private static let TagSearchSpecial = ["address", "applet", "area", "article", "aside", "base", "basefont", "bgsound",
+    private static let TagSearchSpecial = Set(["address", "applet", "area", "article", "aside", "base", "basefont", "bgsound",
                                            "blockquote", "body", "br", "button", "caption", "center", "col", "colgroup", "command", "dd",
                                            "details", "dir", "div", "dl", "dt", "embed", "fieldset", "figcaption", "figure", "footer", "form",
                                            "frame", "frameset", "h1", "h2", "h3", "h4", "h5", "h6", "head", "header", "hgroup", "hr", "html",
                                            "iframe", "img", "input", "isindex", "li", "link", "listing", "marquee", "menu", "meta", "nav",
                                            "noembed", "noframes", "noscript", "object", "ol", "p", "param", "plaintext", "pre", "script",
                                            "section", "select", "style", "summary", "table", "tbody", "td", "textarea", "tfoot", "th", "thead",
-                                           "title", "tr", "ul", "wbr", "xmp"]
+                                           "title", "tr", "ul", "wbr", "xmp"])
     
     private(set) var state: HTMLTreeBuilderState = .Initial // current state
     var originalState: HTMLTreeBuilderState? = nil // original / marked state
@@ -47,15 +47,15 @@ class HTMLTreeBuilder: TreeBuilder, CustomStringConvertible {
         return ParseSettings.htmlDefault
     }
     
-    override func parse(input: String, baseUri: String?, errors: ParseErrorList, settings: ParseSettings) -> Document {
+    override func parse(input: String, baseUri: String?, parser: Parser) -> Document {
         state = .Initial
         baseUriSetFromDoc = false
-        return super.parse(input: input, baseUri: baseUri, errors: errors, settings: settings)
+        return super.parse(input: input, baseUri: baseUri, parser: parser)
     }
     
-    func parse(fragment: String, context: Element?, baseUri: String?, errors: ParseErrorList, settings: ParseSettings) -> [Node] {
+    func parse(fragment: String, context: Element?, baseUri: String?, parser: Parser) -> [Node] {
         state = .Initial
-        initializeParse(input: fragment, baseUri: baseUri, errors: errors, settings: settings)
+        initializeParse(input: fragment, baseUri: baseUri, parser: parser)
         self.contextElement = context
         self.fragmentParsing = true
         
@@ -141,8 +141,8 @@ class HTMLTreeBuilder: TreeBuilder, CustomStringConvertible {
     }
     
     func error(_ state: HTMLTreeBuilderState) {
-        if errors.canAddError {
-            errors.append(ParseError(pos: characterReader.pos, message: "Unexpected token [\(currentToken!.type)] when in state [\(state)]"))
+        if parser?.errors.canAddError == true {
+            parser?.errors.append(ParseError(pos: characterReader.pos, message: "Unexpected token [\(currentToken!.type)] when in state [\(state)]"))
         }
     }
 
@@ -161,8 +161,9 @@ class HTMLTreeBuilder: TreeBuilder, CustomStringConvertible {
             return element
         }
         
+        let attributes = startTag.hasAttributes ? settings.normalize(attributes: startTag.attributes) : nil
         let element = Element(tag: Tag.valueOf(tagName: startTag.tagName ?? "", settings: settings),
-                              baseUri: baseUri, attributes: settings.normalize(attributes: startTag.attributes))
+                              baseUri: baseUri, attributes: attributes)
         insert(element)
         return element
     }
@@ -184,7 +185,7 @@ class HTMLTreeBuilder: TreeBuilder, CustomStringConvertible {
     @discardableResult
     func insert(empty startTag: Token.StartTag) -> Element {
         let tag = Tag.valueOf(tagName: startTag.tagName ?? "", settings: settings)
-        let element = Element(tag: tag, baseUri: baseUri, attributes: startTag.attributes)
+        let element = Element(tag: tag, baseUri: baseUri, attributes: settings.normalize(attributes: startTag.attributes))
         insert(node: element)
         
         if startTag.selfClosing {
@@ -203,7 +204,7 @@ class HTMLTreeBuilder: TreeBuilder, CustomStringConvertible {
     @discardableResult
     func insert(form startTag: Token.StartTag, onStack: Bool) -> Element {
         let tag = Tag.valueOf(tagName: startTag.tagName ?? "", settings: settings)
-        let formElement = FormElement(tag: tag, baseUri: baseUri, attributes: startTag.attributes)
+        let formElement = FormElement(tag: tag, baseUri: baseUri, attributes: settings.normalize(attributes: startTag.attributes))
         self.formElement = formElement
         
         insert(node: formElement)

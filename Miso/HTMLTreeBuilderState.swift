@@ -665,7 +665,7 @@ enum HTMLTreeBuilderState: String, CustomStringConvertible {
                                     break
                                 }
                                 
-                                let replacement: Element = Element(tag: Tag.valueOf(tagName: node!.nodeName, settings: ParseSettings.preserveCase), baseUri: treeBuilder.baseUri)
+                                let replacement: Element = Element(tag: Tag.valueOf(tagName: node!.nodeName, settings: .preserveCase), baseUri: treeBuilder.baseUri)
                                 // case will follow the original node (so honours ParseSettings)
                                 treeBuilder.replaceActiveFormattingElement(out: node!, new: replacement)
                                 treeBuilder.replaceOnStack(out: node!, new: replacement)

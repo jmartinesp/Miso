@@ -215,6 +215,11 @@ final class Tokeniser {
         commentPending.reset()
     }
     
+    func createBogusCommentPending() {
+        commentPending.reset()
+        commentPending.bogus = true
+    }
+    
     func emitCommentPending() {
         emit(commentPending)
     }

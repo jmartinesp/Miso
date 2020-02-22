@@ -13,7 +13,7 @@ open class DataNode: Node {
     static let DATA_KEY = "data"
     
     public init(data: String, baseUri: String?) {
-        super.init(baseUri: baseUri, attributes: Attributes())
+        super.init(baseUri: baseUri)
         self.attributes.put(string: data, forKey: DataNode.DATA_KEY)
     }
     

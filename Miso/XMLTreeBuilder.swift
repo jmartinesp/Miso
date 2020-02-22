@@ -22,11 +22,11 @@ public class XMLTreeBuilder: TreeBuilder {
     }
     
     func parse(input: String, baseUri: String?) -> Document {
-        return parse(input: input, baseUri: baseUri, errors: ParseErrorList.noTracking(), settings: ParseSettings.preserveCase)
+        return parse(input: input, baseUri: baseUri, parser: Parser(treeBuilder: self))
     }
     
-    override func initializeParse(input: String, baseUri: String?, errors: ParseErrorList, settings: ParseSettings) {
-        super.initializeParse(input: input, baseUri: baseUri, errors: errors, settings: settings)
+    override func initializeParse(input: String, baseUri: String?, parser: Parser) {
+        super.initializeParse(input: input, baseUri: baseUri, parser: parser)
         
         stack.append(document) // place the document onto the stack. differs from HtmlTreeBuilder (not on stack)
         document.outputSettings.syntax = .xml
@@ -83,18 +83,9 @@ public class XMLTreeBuilder: TreeBuilder {
         let comment = Comment(data: commentToken.data, baseUri: baseUri)
         
         var toInsert: Node = comment
-        if commentToken.bogus {// xml declarations are emitted as bogus comments (which is right for html, but not xml)
+        if commentToken.bogus && comment.isXMLDeclaration {// xml declarations are emitted as bogus comments (which is right for html, but not xml)
             // so we do a bit of a hack and parse the data as an element to pull the attributes out
-            let data = comment.data
-            
-            if data.unicodeScalars.count > 1 && (data.hasPrefix("!") || data.hasPrefix("?")) {
-                let validData = data[1..<data.unicodeScalars.count-2]
-                let document = Miso.parse(html: "<" + validData + ">", baseUri: baseUri, parser: Parser.xmlParser)
-                if let element = document.children.first {
-                    toInsert = XmlDeclaration(name: settings.normalize(tagName: element.tagName), baseUri: comment.baseUri, isProcessingInstruction: data.hasPrefix("!"))
-                    toInsert.attributes.append(dictionary: element.attributes)
-                }
-            }
+            toInsert = comment.asXMLDeclaration() ?? toInsert
         }
         self.insert(node: toInsert)
     }
@@ -133,8 +124,8 @@ public class XMLTreeBuilder: TreeBuilder {
         }
     }
     
-    func parse(fragment: String, baseUri: String?, errors: ParseErrorList, settings: ParseSettings) -> [Node] {
-        initializeParse(input: fragment, baseUri: baseUri, errors: errors, settings: settings)
+    func parse(fragment: String, baseUri: String?, parser: Parser) -> [Node] {
+        initializeParse(input: fragment, baseUri: baseUri, parser: parser)
         runParser()
         return document.childNodes
     }

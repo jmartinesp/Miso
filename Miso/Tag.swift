@@ -98,6 +98,7 @@ open class Tag: Equatable, Hashable, CustomStringConvertible {
     }()
     
     let tagName: String
+    let normalizedName: String
     open var isBlock = true              // block or line
     open var formatAsBlock = true        // should be formatted as a block
     open var canContainInline = true     // only pcdata if not
@@ -109,6 +110,7 @@ open class Tag: Equatable, Hashable, CustomStringConvertible {
     
     init(tagName: String) {
         self.tagName = tagName
+        self.normalizedName = tagName.lowercased()
     }
     
     open var isInline: Bool { return !isBlock }

@@ -85,21 +85,13 @@ public class CharacterReader: CustomStringConvertible {
     }
     
     func nextIndex(ofCharacter char: UnicodeScalar) -> String.UnicodeScalarView.Index? {
-        var i = index
-        while i < input.endIndex {
-            if input[i] == char {
-                return i
-            }
-            i = input.index(after: i)
-        }
-        return nil
+        return input[index...].firstIndex(of: char)
     }
     
     private func rangeEquals(_ range: Range<String.UnicodeScalarView.Index>, scalar: String.UnicodeScalarView) -> Bool {
         let count = input.distance(from: range.lowerBound, to: range.upperBound)
         guard !scalar.isEmpty, count == scalar.count  else { return false }
 
-//	return Array(input[range]) == Array(scalar)
         var indexA = range.lowerBound
         var indexB = scalar.startIndex
         for _ in 0..<count {
@@ -118,7 +110,7 @@ public class CharacterReader: CustomStringConvertible {
         guard !isEmpty && !characters.isEmpty && upperLimit > index else { return nil }
         
         var i = index
-        while i < upperLimit {
+        while i <= upperLimit {
             let end = input.index(i, offsetBy: characters.count)
             if rangeEquals((i..<end), scalar: characters) {
                 return i
@@ -166,12 +158,40 @@ public class CharacterReader: CustomStringConvertible {
         return consumeToEnd()
     }
     
+    func consume(toAnySorted characters: [UnicodeScalar]) -> String {
+        let start = index
+        var i = index
+        while i < input.endIndex {
+            if characters.binarySearch(value: input[i]) != nil {
+                index = i
+                return cacheString(range: start..<i)
+            }
+            i = input.index(after: i)
+        }
+        return consumeToEnd()
+    }
+    
     func consumeData() -> String {
         let start = index
         var i = index
         while i < input.endIndex {
             let c = input[i]
             if c == UnicodeScalar.Ampersand || c == UnicodeScalar.LessThan || c == TokeniserStateVars.nullScalar {
+                index = i
+                return cacheString(range: start..<i)
+            }
+            i = input.index(after: i)
+        }
+        
+        return consumeToEnd()
+    }
+    
+    func consumeRawData() -> String {
+        let start = index
+        var i = index
+        while i < input.endIndex {
+            let c = input[i]
+            if c == UnicodeScalar.LessThan || c == TokeniserStateVars.nullScalar {
                 index = i
                 return cacheString(range: start..<i)
             }
@@ -272,7 +292,7 @@ public class CharacterReader: CustomStringConvertible {
 
         //if length == 1 { return matches(char: string.unicodeScalars.first!) }
         
-        guard input.index(input.endIndex, offsetBy: -length) > index else { return false }
+        guard count >= length, input.index(input.endIndex, offsetBy: -length) >= index else { return false }
         
         return rangeEquals(index..<input.index(index, offsetBy: length), scalar: string.unicodeScalars)
     }
@@ -280,7 +300,7 @@ public class CharacterReader: CustomStringConvertible {
     func matchesIgnoreCase(string: String) -> Bool {
         let length = string.unicodeScalars.count
         
-        guard input.index(input.endIndex, offsetBy: -length) > index else { return false }
+        guard count >= length, input.index(input.endIndex, offsetBy: -length) >= index else { return false }
 
         let lowercasedString = string.lowercased().unicodeScalars
 

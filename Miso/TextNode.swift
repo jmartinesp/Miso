@@ -16,7 +16,7 @@ open class TextNode: Node {
     
     public init(text: String, baseUri: String?) {
         self._text = text
-        super.init(baseUri: baseUri, attributes: Attributes())
+        super.init(baseUri: baseUri)
         
         attributes.put(string: text, forKey: TextNode.TEXT_KEY)
     }

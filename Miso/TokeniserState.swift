@@ -18,7 +18,7 @@ public class TokeniserStateVars {
     static let attributeSingleValueCharsSorted: [UnicodeScalar] = ["\'", UnicodeScalar.Ampersand, nullScalar].sorted()
     static let attributeDoubleValueCharsSorted = ["\"", UnicodeScalar.Ampersand, nullScalar].sorted()
     static let attributeNameCharsSorted = ["\t", "\n", "\r", UnicodeScalar.BackslashF, " ", "/", "=", ">", nullScalar, "\"", "'", UnicodeScalar.LessThan].sorted()
-    static let attributeValueUnquoted = ["\t", "\n", "\r", UnicodeScalar.BackslashF, " ", UnicodeScalar.Ampersand, ">", nullScalar, "\"", "'", UnicodeScalar.LessThan, "=", "`"].sorted()
+    static let attributeValueUnquotedSorted = ["\t", "\n", "\r", UnicodeScalar.BackslashF, " ", UnicodeScalar.Ampersand, ">", nullScalar, "\"", "'", UnicodeScalar.LessThan, "=", "`"].sorted()
     
     static let replacementChar: UnicodeScalar = Tokeniser.REPLACEMENT_CHAR
     static let replacementStr: String = String(Tokeniser.REPLACEMENT_CHAR)
@@ -137,7 +137,7 @@ enum TokeniserState: TokeniserStateProtocol {
                 t.emit(Token.EOF())
                 break
             default:
-                let data = r.consume(toAny: [UnicodeScalar.Ampersand, UnicodeScalar.LessThan, TokeniserStateVars.nullScalar])
+                let data = r.consumeData()
                 t.emit(data)
                 break
             }
@@ -146,10 +146,10 @@ enum TokeniserState: TokeniserStateProtocol {
             try TokeniserState.readCharRef(t, .Rcdata)
             break
         case .Rawtext:
-            try TokeniserState.readData(t, r, self, .RawtextLessthanSign)
+            try TokeniserState.readRawData(t, r, self, .RawtextLessthanSign)
             break
         case .ScriptData:
-            try TokeniserState.readData(t, r, self, .ScriptDataLessthanSign)
+            try TokeniserState.readRawData(t, r, self, .ScriptDataLessthanSign)
             break
         case .PLAINTEXT:
             switch (r.current) {
@@ -177,6 +177,7 @@ enum TokeniserState: TokeniserStateProtocol {
                 t.advanceTransition(newState: .EndTagOpen)
                 break
             case "?":
+                t.createBogusCommentPending()
                 t.advanceTransition(newState: .BogusComment)
                 break
             default:
@@ -204,6 +205,7 @@ enum TokeniserState: TokeniserStateProtocol {
                 t.advanceTransition(newState: .Data)
             } else {
                 t.error(state: self)
+                t.createBogusCommentPending()
                 t.advanceTransition(newState: .BogusComment)
             }
             break
@@ -665,7 +667,7 @@ enum TokeniserState: TokeniserStateProtocol {
             }
             break
         case .AttributeName:
-            let name = r.consume(toAny: TokeniserStateVars.attributeNameCharsSorted)
+            let name = r.consume(toAnySorted: TokeniserStateVars.attributeNameCharsSorted)
             
             t.tagPending?.append(attributeName: name)
             
@@ -832,7 +834,7 @@ enum TokeniserState: TokeniserStateProtocol {
             }
             break
         case .AttributeValue_singleQuoted:
-            let value = r.consume(toAny: TokeniserStateVars.attributeSingleValueCharsSorted)
+            let value = r.consume(toAnySorted: TokeniserStateVars.attributeSingleValueCharsSorted)
             if (value.unicodeScalars.count > 0) {
                 t.tagPending?.append(attributeValue: value)
             } else {
@@ -867,7 +869,7 @@ enum TokeniserState: TokeniserStateProtocol {
             }
             break
         case .AttributeValue_unquoted:
-            let value = r.consume(toAny: TokeniserStateVars.attributeValueUnquoted)
+            let value = r.consume(toAnySorted: TokeniserStateVars.attributeValueUnquotedSorted)
             if (value.unicodeScalars.count > 0) {
                 t.tagPending?.append(attributeValue: value)
             }
@@ -952,12 +954,13 @@ enum TokeniserState: TokeniserStateProtocol {
             // todo: handle bogus comment starting from eof. when does that trigger?
             // rewind to capture character that lead us here
             r.unconsume()
-            let comment: Token.Comment = Token.Comment()
-            comment.bogus = true
-            comment.data.append(r.consume(to: ">"))
+            t.commentPending.data.append(r.consume(to: ">"))
             // todo: replace nullChar with replaceChar
-            t.emit(comment)
-            t.advanceTransition(newState: .Data)
+            let next = r.consume()
+            if next == ">" || next == TokeniserStateVars.eof {
+                t.emitCommentPending()
+                t.transition(newState: .Data)
+            }
             break
         case .MarkupDeclarationOpen:
             if (r.matchesConsume(sequence: "--")) {
@@ -972,6 +975,7 @@ enum TokeniserState: TokeniserStateProtocol {
                 t.transition(newState: .CdataSection)
             } else {
                 t.error(state: self)
+                t.createBogusCommentPending()
                 t.advanceTransition(newState: .BogusComment) // advance so self character gets in bogus comment data's rewind
             }
             break
@@ -1612,7 +1616,7 @@ enum TokeniserState: TokeniserStateProtocol {
         }
     }
     
-    private static func readData(_ t: Tokeniser, _ r: CharacterReader, _ current: TokeniserState, _ advance: TokeniserState)throws {
+    private static func readRawData(_ t: Tokeniser, _ r: CharacterReader, _ current: TokeniserState, _ advance: TokeniserState)throws {
         switch (r.current) {
         case UnicodeScalar.LessThan:
             t.advanceTransition(newState: advance)
@@ -1626,7 +1630,7 @@ enum TokeniserState: TokeniserStateProtocol {
             t.emit(Token.EOF())
             break
         default:
-            let data = r.consume(toAny: [UnicodeScalar.LessThan, TokeniserStateVars.nullScalar])
+            let data = r.consumeRawData()
             t.emit(data)
             break
         }

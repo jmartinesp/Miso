@@ -28,6 +28,8 @@ open class Document: Element {
         }
     }
     
+    public var parser: Parser?
+    
     public var errors: ParseErrorList = ParseErrorList.noTracking()
     
     public init(baseUri: String?) {

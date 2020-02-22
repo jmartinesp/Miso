@@ -10,13 +10,14 @@ import Foundation
 
 open class TreeBuilder {
     
+    weak var parser: Parser?
+    
     var characterReader: CharacterReader!
     var tokeniser: Tokeniser!
     var document: Document!
     var stack: [Element]!
     var baseUri: String?
     var currentToken: Token?
-    var errors: ParseErrorList!
     var settings: ParseSettings!
     
     var start = Token.StartTag()
@@ -24,20 +25,21 @@ open class TreeBuilder {
     
     var defaultSettings: ParseSettings { fatalError("\(#function) in \(self.self) must be overriden") }
     
-    func initializeParse(input: String, baseUri: String?, errors: ParseErrorList, settings: ParseSettings) {
+    func initializeParse(input: String, baseUri: String?, parser: Parser) {
         self.document = Document(baseUri: baseUri)
-        self.settings = settings
+        self.document.parser = parser
+        self.parser = parser
+        self.settings = parser.settings
         self.characterReader = CharacterReader(input: input)
-        self.errors = errors
-        self.tokeniser = Tokeniser(reader: self.characterReader, errors: errors)
+        self.tokeniser = Tokeniser(reader: self.characterReader, errors: parser.errors)
         self.stack = []
         self.baseUri = baseUri
     }
     
-    func parse(input: String, baseUri: String?, errors: ParseErrorList, settings: ParseSettings) -> Document {
-        initializeParse(input: input, baseUri: baseUri, errors: errors, settings: settings)
+    func parse(input: String, baseUri: String?, parser: Parser) -> Document {
+        initializeParse(input: input, baseUri: baseUri, parser: parser)
         runParser()
-        document.errors = errors
+        document.errors = parser.errors
         return document
     }
     

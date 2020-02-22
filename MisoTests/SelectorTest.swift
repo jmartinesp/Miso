@@ -139,6 +139,43 @@ class SelectorTest: XCTestCase {
         XCTAssertEqual("2", byContains.last?.id)
     }
     
+    func testWildcardNamespacedXmlTag() {
+        let document = Miso.parse(html: "<div><Abc:Def id=1>Hello</Abc:Def></div> <Abc:Def class=bold id=2>There</abc:def>", baseUri: nil, parser: .xmlParser)
+        
+        let byTag = document.select("*|Def")
+        XCTAssertEqual(2, byTag.count)
+        XCTAssertEqual("1", byTag[0].id)
+        XCTAssertEqual("2", byTag[1].id)
+        
+        let byAttr = document.select(".bold")
+        XCTAssertEqual(1, byAttr.count)
+        XCTAssertEqual("2", byAttr[0].id)
+        
+        let byTagAttr = document.select("*|Def.bold")
+        XCTAssertEqual(1, byTagAttr.count)
+        XCTAssertEqual("2", byTagAttr[0].id)
+        
+        let byContains = document.select("*|Def:contains(e)")
+        XCTAssertEqual(2, byContains.count)
+        XCTAssertEqual("1", byContains[0].id)
+        XCTAssertEqual("2", byContains[1].id)
+    }
+    
+    func testWildCardNamespacedCaseVariations() {
+        let document = Miso.parse(html: "<One:Two>One</One:Two><three:four>Two</three:four>", baseUri: nil, parser: .xmlParser)
+        let els1 = document.select("One|Two")
+        let els2 = document.select("one|two")
+        let els3 = document.select("Three|Four")
+        let els4 = document.select("three|four")
+        
+        XCTAssertEqual(els1, els2)
+        XCTAssertEqual(els3, els4)
+        XCTAssertEqual("One", els1.text)
+        XCTAssertEqual(1, els1.count)
+        XCTAssertEqual("Two", els3.text)
+        XCTAssertEqual(1, els3.count)
+    }
+    
     func testByAttributeStarting() {
         let doc = Miso.parse(html: "<div id=1 data-name=jsoup>Hello</div><p data-val=5 id=2>There</p><p id=3>No</p>")
         var withData = doc.select("[^data-]")

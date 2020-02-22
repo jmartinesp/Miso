@@ -49,12 +49,25 @@ open class Token: CustomStringConvertible {
             }
         }
         private(set) var normalizedName: String?
+        private(set) var hasAttributes = false
         var pendingAttributeName: String?
         var pendingAttributeValue: String?
         var hasEmptyAttributeValue = false
         var hasPendingAttributeValue = false
         var selfClosing = false
-        var attributes = Attributes()
+        private lazy var _attributes: Attributes = { () -> Attributes in
+            hasAttributes = true
+            return Attributes()
+        }()
+        var attributes: Attributes {
+            set {
+                hasAttributes = true
+                _attributes = newValue
+            }
+            get {
+                _attributes
+            }
+        }
         
         override var type: TokenType { fatalError() }
         
@@ -67,7 +80,9 @@ open class Token: CustomStringConvertible {
             hasEmptyAttributeValue = false
             hasPendingAttributeValue = false
             selfClosing = false
-            attributes = Attributes()
+            if hasAttributes {
+                attributes = Attributes()
+            }
             return self
         }
         
@@ -123,21 +138,6 @@ open class Token: CustomStringConvertible {
     final class StartTag: Tag {
         
         override var type: TokenType { return .StartTag }
-        
-        override init() {
-            super.init()
-            
-            attributes = Attributes()
-        }
-        
-        @discardableResult
-        override func reset() -> Token {
-            super.reset()
-            
-            attributes = Attributes()
-            
-            return self
-        }
         
         @discardableResult
         func nameAttr(name: String, attributes: Attributes) -> StartTag {

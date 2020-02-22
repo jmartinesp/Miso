@@ -15,14 +15,22 @@ class ConnectionTest: XCTestCase {
     func testAsynchronousConnection() {
         let expectation = XCTestExpectation()
         
-        request(expectation: expectation)
+        request(expectation: expectation, followRedirects: true)
         
         wait(for: [expectation], timeout: 10)
     }
     
     private func request(expectation: XCTestExpectation) {
         let connection = HTTPConnection(.GET, url: URL(string: "https://google.com")!)
-        connection.request { response in
+        connection.request(parse: false) { _ in
+            expectation.fulfill()
+        }
+    }
+    
+    private func request(expectation: XCTestExpectation, followRedirects: Bool) {
+        let connection = HTTPConnection(.GET, url: URL(string: "https://google.com")!)
+            .followRedirects(followRedirects)
+        connection.request(parse: false) { _ in
             expectation.fulfill()
         }
     }

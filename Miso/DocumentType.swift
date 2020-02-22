@@ -28,7 +28,7 @@ public class DocumentType: Node {
      * @param baseUri the doctype's base URI
      */
     public init(name: String, publicId: String, systemId: String, baseUri: String?) {
-        super.init(baseUri: baseUri, attributes: Attributes())
+        super.init(baseUri: baseUri)
         
         attr(DocumentType.NAME, setValue: name)
         attr(DocumentType.PUBLIC_ID, setValue: publicId)
@@ -41,7 +41,7 @@ public class DocumentType: Node {
     }
     
     public init(name: String, pubSysKey: String?, publicId: String, systemId: String, baseUri: String?) {
-        super.init(baseUri: baseUri, attributes: Attributes())
+        super.init(baseUri: baseUri)
         
         attr(DocumentType.NAME, setValue: name)
         attr(DocumentType.PUBLIC_ID, setValue: publicId)

@@ -903,10 +903,22 @@ class HTMLParserTest: XCTestCase {
                         "<script type=\"text/javascript\">console.log('bar');</script>", body.body?.html)
     }
     
-    func testTestHtmlLowerCase() {
+    func testHtmlLowerCaseAttributesOfVoidTags() {
         let html = "<!doctype HTML><DIV ID=1>One</DIV>"
         let doc = Miso.parse(html: html)
         XCTAssertEqual("<!doctype html> <html> <head></head> <body> <div id=\"1\"> One </div> </body> </html>", doc.outerHTML.normalizedWhitespace())
+    }
+    
+    func testHtmlLowerCaseOfVoidTags() {
+        let html = "<!doctype HTML><IMG ALT=One></DIV>"
+        let doc = Miso.parse(html: html)
+        XCTAssertEqual("<!doctype html> <html> <head></head> <body> <img alt=\"One\"> </body> </html>", doc.outerHTML.normalizedWhitespace())
+    }
+    
+    func testTestHtmlLowerCase() {
+        let html = "<form NAME=one>"
+        let doc = Miso.parse(html: html)
+        XCTAssertEqual("<form name=\"one\"></form>", doc.body?.html.normalizedWhitespace())
     }
     
     func testCanPreserveTagCase() {

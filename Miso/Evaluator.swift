@@ -25,7 +25,7 @@ public class Evaluator {
         let tagName: String
         
         func matches(root: Element?, and element: Element) -> Bool {
-            return element.tagName.lowercased() == tagName.lowercased()
+            return element.tag.normalizedName == tagName.lowercased()
         }
         
         var description: String {
@@ -38,7 +38,7 @@ public class Evaluator {
         let tagName: String
         
         func matches(root: Element?, and element: Element) -> Bool {
-            return element.tagName.lowercased().hasSuffix(tagName.lowercased())
+            return element.tag.normalizedName.hasSuffix(tagName.lowercased())
         }
         
         var description: String {

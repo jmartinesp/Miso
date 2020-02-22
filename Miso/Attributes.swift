@@ -93,7 +93,7 @@ public class Attributes: OrderedDictionary<String, Attribute>, Equatable {
     }
     
     public func put(string: String, forKey key: String) {
-        let attribute = Attribute(tag: key , value: string)
+        let attribute = Attribute(tag: key, value: string)
         self[key] = attribute
     }
     
@@ -129,12 +129,21 @@ public class Attributes: OrderedDictionary<String, Attribute>, Equatable {
     }
     
     func findLowercasedKey(key: String) -> String? {
-        let lowercasedKey = (key).lowercased()
-        return self.keys.first { ($0).lowercased() == lowercasedKey }
+        let lowercasedKey = key.lowercased()
+        return self.keys.first { $0.lowercased() == lowercasedKey }
+    }
+    
+    func findLowercasedValue(value: String) -> Attribute? {
+        let lowercasedValue = value.lowercased()
+        return self.values.first { $0.value.lowercased() == lowercasedValue }
     }
     
     public func hasKeyIgnoreCase(key: String) -> Bool {
         return self.findLowercasedKey(key: key) != nil
+    }
+    
+    public func hasValueIgnoreCase(value: String) -> Bool {
+        return self.findLowercasedValue(value: value) != nil
     }
     
     func html(withAccumulated accumulated: StringBuilder, outputSettings: OutputSettings) {

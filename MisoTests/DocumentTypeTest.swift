@@ -45,12 +45,14 @@ class DocumentTypeTest: XCTestCase {
     }
     
     private func htmlOutput(for html: String) -> String {
-        let documentType = Miso.parse(html: html).childNodes.first!
+        let document = Miso.parse(html: html)
+        let documentType = document.childNodes.first!
         return documentType.outerHTML
     }
     
     private func xmlOutput(for xml: String) -> String {
-        let documentType = Miso.parse(html: xml, baseUri: nil, parser: Parser.xmlParser).childNodes.first!
+        let document = Miso.parse(html: xml, baseUri: nil, parser: Parser.xmlParser)
+        let documentType = document.childNodes.first!
         return documentType.outerHTML
     }
     

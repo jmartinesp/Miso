@@ -21,7 +21,7 @@ public class Comment: Node {
      @param baseUri base URI
      */
     public init(data: String, baseUri: String?) {
-        super.init(baseUri: baseUri, attributes: Attributes())
+        super.init(baseUri: baseUri)
         
         attributes.put(string: data, forKey: Comment.COMMENT_KEY)
     }
@@ -37,6 +37,26 @@ public class Comment: Node {
         set {
             attributes.put(string: newValue, forKey: Comment.COMMENT_KEY)
         }
+    }
+    
+    var isXMLDeclaration: Bool {
+        return data.count > 1 && (data.starts(with: "!") || data.starts(with: "?"))
+    }
+    
+    func asXMLDeclaration() -> XmlDeclaration? {
+        guard isXMLDeclaration else { return nil }
+        
+        let startIndex = data.index(after: data.startIndex)
+        let endIndex = data.index(data.endIndex, offsetBy: -1)
+        let validData = data[startIndex..<endIndex]
+        let document = Miso.parse(html: "<" + validData + ">", baseUri: baseUri, parser: Parser.xmlParser)
+        guard let element = document.children.first else { return nil }
+        let parseSettings = document.parser?.settings ?? ParseSettings.htmlDefault
+        let declaration = XmlDeclaration(name: parseSettings.normalize(tagName: element.tagName),
+                                         baseUri: baseUri,
+                                         isProcessingInstruction: data.hasPrefix("!"))
+        declaration.attributes.append(dictionary: element.attributes)
+        return declaration
     }
     
     public override func outerHTMLHead(accum: StringBuilder, depth: Int, outputSettings: OutputSettings) {

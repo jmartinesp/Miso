@@ -13,7 +13,7 @@ public class FormElement: Element {
 
     public private(set) var elements = [Element]()
 
-    public override init(tag: Tag, baseUri: String?, attributes: Attributes) {
+    public override init(tag: Tag, baseUri: String?, attributes: Attributes?) {
         super.init(tag: tag, baseUri: baseUri, attributes: attributes)
     }
 

@@ -76,10 +76,7 @@ class AttributeParseText: XCTestCase {
         
         XCTAssertEqual(3, attributes?.count)
         
-        // Assuming the list order always follows the parsed html
-        XCTAssertFalse(attributes?.orderedValues[0] is BooleanAttribute)
-        XCTAssert(attributes?.orderedValues[1] is BooleanAttribute)
-        XCTAssertFalse(attributes?.orderedValues[2] is BooleanAttribute)
+        XCTAssertEqual(html, element?.outerHTML)
     }
     
     func testDropsSlashFromAttributeName() {
