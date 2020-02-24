@@ -20,7 +20,6 @@ public class CharacterReader: CustomStringConvertible {
     public static let hexadecimalCharacterSet = CharacterSet(charactersIn: "0123456789abcdefABCDEF")
         
     let rawInput: String
-    let rawInputLowercased: String
     
     public var input: String.UnicodeScalarView
     
@@ -35,7 +34,6 @@ public class CharacterReader: CustomStringConvertible {
     
     public init(input: String) {
         self.rawInput = input
-        self.rawInputLowercased = input.lowercased()
         self.input = input.unicodeScalars
         self.index = self.input.startIndex
         self.markIndex = self.index
@@ -105,9 +103,14 @@ public class CharacterReader: CustomStringConvertible {
         return true
     }
     
+    func nextIndex(of character: UnicodeScalar) -> String.UnicodeScalarView.Index? {
+        return input[index...].firstIndex(of: character)
+    }
+    
     func nextIndex(ofCharacters characters: String.UnicodeScalarView) -> String.UnicodeScalarView.Index? {
+        guard count >= characters.count else { return nil }
         let upperLimit = input.index(input.endIndex, offsetBy: -characters.count)
-        guard !isEmpty && !characters.isEmpty && upperLimit > index else { return nil }
+        guard !isEmpty && !characters.isEmpty && upperLimit >= index else { return nil }
         
         var i = index
         while i <= upperLimit {
@@ -288,38 +291,34 @@ public class CharacterReader: CustomStringConvertible {
     }
     
     func matches(string: String) -> Bool {
-        let length = string.unicodeScalars.count
-
-        //if length == 1 { return matches(char: string.unicodeScalars.first!) }
-        
-        guard count >= length, input.index(input.endIndex, offsetBy: -length) >= index else { return false }
-        
-        return rangeEquals(index..<input.index(index, offsetBy: length), scalar: string.unicodeScalars)
+        return matches(string)
     }
     
     func matchesIgnoreCase(string: String) -> Bool {
-        let length = string.unicodeScalars.count
-        
-        guard count >= length, input.index(input.endIndex, offsetBy: -length) >= index else { return false }
-
-        let lowercasedString = string.lowercased().unicodeScalars
-
-        let substring = rawInputLowercased.unicodeScalars
-        
-        var indexA = index
-        var indexB = lowercasedString.startIndex
-        for _ in 0..<length {
-            if substring[indexA] != lowercasedString[indexB] {
-                return false
-            }
-            indexA = substring.index(after: indexA)
-            indexB = lowercasedString.index(after: indexB)
-        }
-        return true
+        return matches(string, ignoreCase: true)
     }
         
     func matches(any characters: [UnicodeScalar]) -> Bool {
         return characters.contains(current)
+    }
+    
+    private func matches(_ sequence: String, ignoreCase: Bool = false, consume: Bool = false) -> Bool {
+        guard count >= sequence.count, input.index(input.startIndex, offsetBy: sequence.count) <= input.endIndex else { return false }
+        var current = index
+        let scalars = sequence.unicodeScalars
+        for scalar in scalars {
+            guard current < input.endIndex else { return false }
+            if ignoreCase {
+                guard input[current].uppercased == scalar.uppercased else { return false }
+            } else {
+                guard input[current] == scalar else { return false }
+            }
+            current = input.index(after: current)
+        }
+        if consume {
+            index = current
+        }
+        return true
     }
     
     func matchesLetter() -> Bool {
@@ -342,16 +341,31 @@ public class CharacterReader: CustomStringConvertible {
     }
     
     func matchesConsumeIgnoreCase(sequence: String) -> Bool {
-        if matchesIgnoreCase(string: sequence) {
-            index = input.index(index, offsetBy: sequence.unicodeScalars.count)
-            return true
-        } else {
-            return false
-        }
+        return matches(sequence, ignoreCase: true, consume: true)
     }
     
     func containsIgnoreCase(sequence: String) -> Bool {
-        return rawInputLowercased.contains(sequence.lowercased())
+        let scalars = sequence.unicodeScalars
+        let length = scalars.count
+        guard count >= length, input.index(input.endIndex, offsetBy: -length) >= index else { return false }
+        
+        var i = index
+        while i < input.endIndex {
+            var indexA = i
+            var indexB = scalars.startIndex
+            var matches = true
+            for _ in 0..<length {
+                guard input[indexA].uppercased == scalars[indexB].uppercased else {
+                    matches = false
+                    break
+                }
+                indexA = input.index(after: indexA)
+                indexB = scalars.index(after: indexB)
+            }
+            if matches { return true }
+            i = input.index(after: i)
+        }
+        return false
     }
     
     public var description: String {
@@ -376,4 +390,12 @@ extension String.UnicodeScalarView {
         let scalarIndex = self.index(self.startIndex, offsetBy: index)
         return self[scalarIndex]
     }
+}
+
+extension UnicodeScalar {
+    
+    var uppercased: UnicodeScalar {
+        return String(self).uppercased().unicodeScalars[0]
+    }
+    
 }
