@@ -136,7 +136,8 @@ public class Evaluator {
         let attrStart: String
         
         func matches(root: Element?, and element: Element) -> Bool {
-            return !element.attributes.keys.filter { $0.hasPrefix(self.attrStart.lowercased()) }.isEmpty
+            guard let attributes = element.attributes else { return false }
+            return !attributes.keys.filter { $0.hasPrefix(self.attrStart.lowercased()) }.isEmpty
         }
         
         var description: String {
@@ -147,7 +148,7 @@ public class Evaluator {
     class HasAttributeWithValue: AttributeKeyPair {
         
         override func matches(root: Element?, and element: Element) -> Bool {
-            return element.attributes.get(byTag: key)?.value.lowercased() == self.value
+            return element.attributes?.get(byTag: key)?.value.lowercased() == self.value
         }
         
         override var description: String {
@@ -158,7 +159,7 @@ public class Evaluator {
     class HasAttributeWithValueNot: AttributeKeyPair {
         
         override func matches(root: Element?, and element: Element) -> Bool {
-            return element.attributes.get(byTag: key)?.value.lowercased() != self.value
+            return element.attributes?.get(byTag: key)?.value.lowercased() != self.value
         }
         
         override var description: String {
@@ -170,7 +171,7 @@ public class Evaluator {
     class HasAttributeWithValueStartingWith: AttributeKeyPair {
         
         override func matches(root: Element?, and element: Element) -> Bool {
-            if let value = element.attributes.get(byTag: key)?.value.lowercased() {
+            if let value = element.attributes?.get(byTag: key)?.value.lowercased() {
                 return value.hasPrefix(self.value)
             }
             return false
@@ -185,7 +186,7 @@ public class Evaluator {
     class HasAttributeWithValueEndingWith: AttributeKeyPair {
         
         override func matches(root: Element?, and element: Element) -> Bool {
-            if let value = element.attributes.get(byTag: key)?.value.lowercased() {
+            if let value = element.attributes?.get(byTag: key)?.value.lowercased() {
                 return value.hasSuffix(self.value.lowercased())
             }
             return false
@@ -200,7 +201,7 @@ public class Evaluator {
     class HasAttributeWithValueContaining: AttributeKeyPair {
         
         override func matches(root: Element?, and element: Element) -> Bool {
-            if let value = element.attributes.get(byTag: key)?.value.lowercased() {
+            if let value = element.attributes?.get(byTag: key)?.value.lowercased() {
                 return value.contains(self.value)
             }
             return false
@@ -222,7 +223,7 @@ public class Evaluator {
                 return false
             }
             
-            if let value = element.attributes.get(byTag: key.trimmingCharacters(in: .whitespacesAndNewlines).lowercased())?.value {
+            if let value = element.attributes?.get(byTag: key.trimmingCharacters(in: .whitespacesAndNewlines).lowercased())?.value {
                 return regex.numberOfMatches(in: value, options: [], range: NSRange(location: 0, length: value.unicodeScalars.count)) > 0
             }
             

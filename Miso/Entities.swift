@@ -23,7 +23,7 @@ public class Entities {
         /** Complete HTML entities. */
         public static let full = EscapeMode(characters: Entities.full, id: 2)
         
-        public static let codeDelimiters: [UnicodeScalar] = [",", ";"]
+        public static let codeDelimiters: Set<UnicodeScalar> = Set([",", ";"])
         
         let value: Int
         
@@ -39,17 +39,17 @@ public class Entities {
             let reader = CharacterReader(input: characters)
             
             while !reader.isEmpty {
-                let name = reader.consume(to: "=")
+                let name = reader.consume(toScalar: "=")
                 // Skip '='
                 reader.advance()
                 let codePoint1 = Int(reader.consume(toAny: EscapeMode.codeDelimiters), radix: codepointRadix) ?? 0
                 let codeDelimiter = reader.consume()
                 
                 let codePoint2: Int? = codeDelimiter == "," ?
-                    (Int(reader.consume(to: ";"), radix: codepointRadix) ?? 0) :
+                    (Int(reader.consume(toScalar: ";"), radix: codepointRadix) ?? 0) :
                     nil
                 
-                _ = reader.consume(to: "\n")
+                _ = reader.consume(toScalar: "\n")
                 // Skip '\n'
                 reader.advance()
                 
@@ -61,7 +61,7 @@ public class Entities {
                 
                 // If several codepoints match a name, add it to multipoints
                 if codePoint2 != nil {
-                    let string = StringBuilder().appendCodePoint(codePoint1).appendCodePoint(codePoint2!).stringValue
+                    let string = String([UnicodeScalar(codePoint1)!, UnicodeScalar(codePoint2!)!])
                     multipoints[name] = string
                 }
             }

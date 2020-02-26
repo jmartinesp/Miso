@@ -23,12 +23,12 @@ public class XmlDeclaration: Node {
     }
     
     public var wholeDeclaration: String {
-        return attributes.html.trimmingCharacters(in: .whitespacesAndNewlines)
+        return attributes?.html.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
     }
     
     public override func outerHTMLHead(accum: StringBuilder, depth: Int, outputSettings: OutputSettings) {
         accum.append("<").append(isProcessingInstruction ? "!" : "?").append(name).append(" ")
-        attributes.html(withAccumulated: accum, outputSettings: outputSettings)
+        attributes?.html(withAccumulated: accum, outputSettings: outputSettings)
         accum.append(isProcessingInstruction ? "!" : "?").append(">")
     }
     

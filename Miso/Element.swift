@@ -61,23 +61,23 @@ open class Element: Node {
     }
     
     open var id: String? {
-        return hasAttributes ? attributes["id"]?.value : nil
+        return attributes?["id"]?.value
     }
     
     @discardableResult
     open func attr(_ name: String, setValue value: Bool) -> Element {
-        attributes.put(bool: value, forKey: name)
+        ensureAttributes().put(bool: value, forKey: name)
         return self
     }
     
     @discardableResult
     open override func attr(_ name: String, setValue value: String) -> Element {
-        attributes.put(string: value, forKey: name)
+        ensureAttributes().put(string: value, forKey: name)
         return self
     }
     
-    open var dataset: Attributes.DataSet {
-        return attributes.dataset
+    open var dataset: Attributes.DataSet? {
+        return attributes?.dataset
     }
     
     open var parentElement: Element? {
@@ -492,7 +492,7 @@ open class Element: Node {
     open var classNames: OrderedSet<String> {
         get {
             let set = OrderedSet<String>()
-            (attributes.get(byTag: "class")?.value
+            (attributes?.get(byTag: "class")?.value
                 .normalizedWhitespace(stripLeading: true)
                 .trimmingCharacters(in: .whitespaces)
                 .components(separatedBy: " ") ?? [])
@@ -508,7 +508,7 @@ open class Element: Node {
     }
     
     open func hasClass(_ className: String) -> Bool {
-        guard hasAttributes, let classAttr = attributes.get(byTag: "class", ignoreCase: true)?.value else { return false }
+        guard let classAttr = attributes?.get(byTag: "class", ignoreCase: true)?.value else { return false }
         
         guard !classAttr.isEmpty && classAttr.unicodeScalars.count >= className.unicodeScalars.count else { return false }
         
@@ -583,7 +583,7 @@ open class Element: Node {
         
         accum.append("<").append(tagName)
         
-        if !attributes.isEmpty {
+        if let attributes = self.attributes, !attributes.isEmpty {
             accum.append(" ")
             attributes.html(withAccumulated: accum, outputSettings: outputSettings)
         }

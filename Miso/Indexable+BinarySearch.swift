@@ -1,5 +1,13 @@
 import Foundation
 
+extension Optional where Wrapped: Sequence {
+    
+    var isNilOrEmpty: Bool {
+        return self == nil || self?.underestimatedCount == 0
+    }
+    
+}
+
 extension Collection {
     
     func binarySearch(test: (Self.Element) -> Bool) -> Self.Index? {
@@ -30,21 +38,22 @@ extension Collection {
 extension Collection where Element: Comparable {
     
     func binarySearch(value: Element) -> Self.Index? {
-        var searchRange = startIndex..<endIndex
+        var start = startIndex
+        var end = endIndex
         
-        var count = distance(from: startIndex, to: endIndex)
+        var count = distance(from: start, to: end)
         while count > 0 {
-            let testIndex = index(searchRange.lowerBound, offsetBy: count/2)
+            let testIndex = index(start, offsetBy: count/2)
             
-            guard value != self[testIndex] else { return testIndex }
-            
-            if value < self[testIndex] {
-                searchRange = searchRange.lowerBound..<testIndex
+            if value == self[testIndex] {
+                return testIndex
+            } else if value < self[testIndex] {
+                end = testIndex
             } else {
-                searchRange = index(after: testIndex)..<searchRange.upperBound
+                start = index(after: testIndex)
             }
             
-            count = distance(from: searchRange.lowerBound, to: searchRange.upperBound)
+            count = distance(from: start, to: end)
         }
         
         return nil

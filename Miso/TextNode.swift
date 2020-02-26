@@ -18,7 +18,7 @@ open class TextNode: Node {
         self._text = text
         super.init(baseUri: baseUri)
         
-        attributes.put(string: text, forKey: TextNode.TEXT_KEY)
+        attr(TextNode.TEXT_KEY, setValue: text)
     }
     
     override open var nodeName: String { return "#text" }
@@ -29,7 +29,7 @@ open class TextNode: Node {
         }
         set {
             self._text = newValue
-            attributes.put(string: newValue, forKey: TextNode.TEXT_KEY)
+            attr(TextNode.TEXT_KEY, setValue: newValue)
         }
     }
     
@@ -38,7 +38,7 @@ open class TextNode: Node {
     }
     
     open var wholeText: String {
-        let attributeText = attributes[TextNode.TEXT_KEY]?.value
+        let attributeText = attributes?[TextNode.TEXT_KEY]?.value
         return attributeText ?? self.text
     }
     

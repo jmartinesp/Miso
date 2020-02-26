@@ -29,7 +29,7 @@ open class TokenQueue {
     }
     
     open func peek() -> UnicodeScalar {
-        return isEmpty ? UnicodeScalar(0) : queue[pos]
+        return isEmpty ? Self.zero : queue[pos]
     }
     
     open func add(first char: UnicodeScalar) {

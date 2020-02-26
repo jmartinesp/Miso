@@ -23,7 +23,7 @@ public class Comment: Node {
     public init(data: String, baseUri: String?) {
         super.init(baseUri: baseUri)
         
-        attributes.put(string: data, forKey: Comment.COMMENT_KEY)
+        ensureAttributes().put(string: data, forKey: Comment.COMMENT_KEY)
     }
     
     public override var nodeName: String {
@@ -32,10 +32,10 @@ public class Comment: Node {
     
     public var data: String {
         get {
-            return attributes.get(byTag: Comment.COMMENT_KEY)!.value
+            return attributes?.get(byTag: Comment.COMMENT_KEY)?.value ?? ""
         }
         set {
-            attributes.put(string: newValue, forKey: Comment.COMMENT_KEY)
+            attr(Comment.COMMENT_KEY, setValue: newValue)
         }
     }
     
@@ -55,7 +55,9 @@ public class Comment: Node {
         let declaration = XmlDeclaration(name: parseSettings.normalize(tagName: element.tagName),
                                          baseUri: baseUri,
                                          isProcessingInstruction: data.hasPrefix("!"))
-        declaration.attributes.append(dictionary: element.attributes)
+        if let attributes = element.attributes {
+            declaration.ensureAttributes().append(dictionary: attributes)
+        }
         return declaration
     }
     

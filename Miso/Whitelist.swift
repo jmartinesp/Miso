@@ -378,11 +378,11 @@ open class Whitelist {
 
         // might be an enforced attribute?
         if self.enforcedAttributes[tagName] != nil {
-            let expect: Attributes = getEnforcedAttributes(forTag: tag)
+            let expect = getEnforcedAttributes(forTag: tag)
             let attrKey = attr.tag
 
-            if expect.hasKeyIgnoreCase(key: attrKey) {
-                return expect.get(byTag: attrKey, ignoreCase: true)?.value == attr.value
+            if expect?.hasKeyIgnoreCase(key: attrKey) == true {
+                return expect?.get(byTag: attrKey, ignoreCase: true)?.value == attr.value
             }
         }
 
@@ -429,13 +429,13 @@ open class Whitelist {
         }
     }
 
-    func getEnforcedAttributes(forTag tag: String) -> Attributes {
+    func getEnforcedAttributes(forTag tag: String) -> Attributes? {
+        guard let keyVals = enforcedAttributes[tag] else { return nil }
+        
         let attrs = Attributes()
 
-        if let keyVals = enforcedAttributes[tag] {
-            for (key, val) in keyVals {
-                attrs.put(string: val.value, forKey: key.value)
-            }
+        for (key, val) in keyVals {
+            attrs.put(string: val.value, forKey: key.value)
         }
 
         return attrs

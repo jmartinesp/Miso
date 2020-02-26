@@ -10,7 +10,7 @@ import Foundation
 
 public class QueryParser {
     
-    static let combinators: [UnicodeScalar] = [",", ">", "+", "~", " "]
+    static let combinators = [",", ">", "+", "~", " "]
     static let AttributeEvals: [String] = ["=", "!=", "^=", "$=", "*=", "~="]
     
     var tokenQueue: TokenQueue

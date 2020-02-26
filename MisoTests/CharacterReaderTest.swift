@@ -75,7 +75,7 @@ class CharacterReaderTest: XCTestCase {
         
         XCTAssertEqual(nil, reader.nextIndex(ofCharacter: "x"))
         XCTAssertEqual(input.index(input.startIndex, offsetBy: 3), reader.nextIndex(ofCharacter: "h"))
-        let pulled = reader.consume(to: "h")
+        let pulled = reader.consume(toScalar: "h" as UnicodeScalar)
         XCTAssertEqual("bla", pulled)
         reader.consume()
         
@@ -107,12 +107,12 @@ class CharacterReaderTest: XCTestCase {
         
         let T = "T".unicodeScalars[0]
         
-        XCTAssertEqual("One ", reader.consume(to: T))
-        XCTAssertEqual("", reader.consume(to: T))
+        XCTAssertEqual("One ", reader.consume(toScalar: T))
+        XCTAssertEqual("", reader.consume(toScalar: T))
         XCTAssertEqual("T", reader.consume())
-        XCTAssertEqual("wo ", reader.consume(to: T))
+        XCTAssertEqual("wo ", reader.consume(toScalar: T))
         XCTAssertEqual("T", reader.consume())
-        XCTAssertEqual("hree", reader.consume(to: T))
+        XCTAssertEqual("hree", reader.consume(toScalar: T))
     }
     
     func testConsumeToString() {
@@ -198,7 +198,7 @@ class CharacterReaderTest: XCTestCase {
     }
     
     func testMatchesAny() {
-        let scan: [UnicodeScalar] = [" ", "\n", "\t"]
+        let scan: Set<UnicodeScalar> = Set([" ", "\n", "\t"])
         let reader = CharacterReader(input: "One\nTwo\tThree")
         
         XCTAssertFalse(reader.matches(any: scan))

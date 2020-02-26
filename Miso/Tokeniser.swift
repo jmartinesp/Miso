@@ -10,7 +10,8 @@ import Foundation
 
 final class Tokeniser {
     public static let REPLACEMENT_CHAR: UnicodeScalar = "\u{FFFD}"
-    public static let NOT_CHAR_REFS: [UnicodeScalar] = ["\t", "\n", "\r", "\u{000C}", " ", "<", "&"]
+    public static let NOT_CHAR_REFS: Set<UnicodeScalar> = Set(["\t", "\n", "\r", "\u{000C}", " ", "<", "&"])
+    static let AFTER_ATTR_CHARS: Set<UnicodeScalar> = Set(["=", "-", "_"])
     
     private let reader: CharacterReader // html input
     private let errors: ParseErrorList // errors found while tokenising
@@ -82,7 +83,7 @@ final class Tokeniser {
                 selfClosingFlagAcknowledged = false
             }
         } else if let endTag = token as? Token.EndTag {
-            if !endTag.attributes.isEmpty {
+            if !endTag.attributes.isNilOrEmpty {
                 error(message: "Attributes incorrectly present on end tag")
             }
         }
@@ -130,7 +131,7 @@ final class Tokeniser {
         var codeRef = codePointHolder
         reader.mark()
         
-        if reader.matchesConsume(sequence: "#") {  // numbered
+        if reader.matchesConsume(scalar: "#") {  // numbered
             let hexScalars = [UnicodeScalar("X"), UnicodeScalar("x")]
             let isHexMode = hexScalars.contains(reader.current)
             
@@ -142,7 +143,7 @@ final class Tokeniser {
                 return []
             }
             
-            if !reader.matchesConsume(sequence: ";") {
+            if !reader.matchesConsume(scalar: ";") {
                 characterReferenceError(message: "missing semicolon")
             }
             
@@ -164,25 +165,24 @@ final class Tokeniser {
         } else { // named
             // get as many letters as possible, and look for matching entities
             let nameRef = reader.consumeLetterThenDigitSequence()
-            let looksLegit = reader.matches(char: ";")
             // found if a base named entity without a ;, or an extended entity with the ;.
-            let found = Entities.isBaseNamedEntity(nameRef) || (Entities.isNamedEntity(nameRef) && looksLegit)
+            let found = Entities.isBaseNamedEntity(nameRef) || (Entities.isNamedEntity(nameRef) && reader.matches(char: ";"))
             
             if !found {
                 reader.rewindToMark()
-                if looksLegit { // named with semicolon
+//                if looksLegit { // named with semicolon
                     characterReferenceError(message: "invalid named reference '\(nameRef)'")
-                }
+//                }
                 return []
             }
             
-            if inAttributes && (reader.matchesLetter() || reader.matchesDigit() || reader.matches(any: ["=", "-", "_"])) {
+            if inAttributes && (reader.matchesLetter() || reader.matchesDigit() || reader.matches(any: Self.AFTER_ATTR_CHARS)) {
                 // don't want that to match
                 reader.rewindToMark()
                 return []
             }
             
-            if !reader.matchesConsume(sequence: ";") {
+            if !reader.matchesConsume(scalar: ";") {
                 characterReferenceError(message: "missing semicolon")
             }
             
@@ -260,7 +260,7 @@ final class Tokeniser {
         let accum = StringBuilder()
         
         while !reader.isEmpty {
-            accum += reader.consume(to: "&")
+            accum += reader.consume(toScalar: "&")
             if reader.matches(char: "&") {
                 reader.consume()
                 

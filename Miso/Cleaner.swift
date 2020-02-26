@@ -64,7 +64,7 @@ open class Cleaner {
         let numDiscarded = copySafeNodes(from: dirty.body!, to: clean.body!)
 
         // because we only look at the body, but we start from a shell, make sure there's nothing in the head
-        return numDiscarded == 0 && dirty.head!.childNodes.count == 0
+        return numDiscarded == 0 && dirty.head!.childNodes.isEmpty
     }
 
     open func isValid(bodyHtml: String) -> Bool {
@@ -90,21 +90,26 @@ open class Cleaner {
 
     private func createSafeElement(_ element: Element) -> ElementMeta {
         let sourceTag = element.tagName
-        let destAttrs = Attributes()
-        let dest = Element(tag: Tag.valueOf(tagName: sourceTag), baseUri: element.baseUri, attributes: destAttrs)
+        let dest = Element(tag: Tag.valueOf(tagName: sourceTag), baseUri: element.baseUri)
         var numDiscarded = 0
 
-        let sourceAttrs = element.attributes
-        for (key, attribute) in sourceAttrs {
-            if whitelist.isSafeAttribute(attribute, in: element, forTag: sourceTag) {
-                destAttrs.put(string: attribute.value, forKey: key)
-            } else {
-                numDiscarded += 1
+        if let sourceAttrs = element.attributes {
+            let destAttrs = Attributes()
+            for (key, attribute) in sourceAttrs {
+                if whitelist.isSafeAttribute(attribute, in: element, forTag: sourceTag) {
+                    destAttrs.put(string: attribute.value, forKey: key)
+                } else {
+                    numDiscarded += 1
+                }
             }
+            dest.attributes = destAttrs
         }
 
-        let enforcedAttrs = whitelist.getEnforcedAttributes(forTag: sourceTag)
-        destAttrs.append(dictionary: enforcedAttrs)
+        if let enforcedAttrs = whitelist.getEnforcedAttributes(forTag: sourceTag) {
+            for (key, value) in enforcedAttrs {
+                dest.attr(key, setValue: value.value)
+            }
+        }
 
         return ElementMeta(element: dest, numDiscarded: numDiscarded)
     }

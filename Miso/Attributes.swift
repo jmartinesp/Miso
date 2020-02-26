@@ -10,10 +10,10 @@ import Foundation
 
 open class Attribute: CustomStringConvertible, Equatable, Hashable {
     
-    public static let BOOL_ATTRIBUTES = ["allowfullscreen", "async", "autofocus", "checked", "compact", "declare", "default", "defer", "disabled",
+    public static let BOOL_ATTRIBUTES = Set(["allowfullscreen", "async", "autofocus", "checked", "compact", "declare", "default", "defer", "disabled",
                                          "formnovalidate", "hidden", "inert", "ismap", "itemscope", "multiple", "muted", "nohref", "noresize",
                                          "noshade", "novalidate", "nowrap", "open", "readonly", "required", "reversed", "seamless", "selected",
-                                         "sortable", "truespeed", "typemustmatch"]
+                                         "sortable", "truespeed", "typemustmatch"])
     
     public let tag: String
     public var value: String
@@ -182,7 +182,7 @@ public class Attributes: OrderedDictionary<String, Attribute>, Equatable {
     
     public struct DataSet {
         
-        weak var attributes: Attributes?
+        var attributes: Attributes
         
         init(attributes: Attributes) {
             self.attributes = attributes
@@ -191,30 +191,30 @@ public class Attributes: OrderedDictionary<String, Attribute>, Equatable {
         subscript (key: String) -> String? {
             set {
                 if newValue != nil {
-                    self.attributes?["data-"+key] = Attribute(tag: "data-"+key, value: newValue!)
+                    self.attributes["data-"+key] = Attribute(tag: "data-"+key, value: newValue!)
                 } else {
-                    self.attributes?["data-"+key] = nil
+                    self.attributes["data-"+key] = nil
                 }
             }
             get {
-                return self.attributes?["data-"+key]?.value
+                return self.attributes["data-"+key]?.value
             }
         }
         
-        public var keys: Dictionary<String, Attribute>.Keys? {
-            return self.attributes?.keys
+        public var keys: Dictionary<String, Attribute>.Keys {
+            return self.attributes.keys
         }
         
-        public var values: Dictionary<String, Attribute>.Values? {
-            return self.attributes?.values
+        public var values: Dictionary<String, Attribute>.Values {
+            return self.attributes.values
         }
         
-        public var isEmpty: Bool { return self.attributes?.isEmpty ?? true }
+        public var isEmpty: Bool { return self.attributes.isEmpty }
         
         public var count: Int {
-            return self.attributes?.keys.filter({(key: String) -> Bool in
+            return self.attributes.keys.filter({(key: String) -> Bool in
                 key.hasPrefix("data-") && key.unicodeScalars.count > "data-".unicodeScalars.count
-            }).count ?? 0
+            }).count
         }
         
     }

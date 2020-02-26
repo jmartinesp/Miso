@@ -14,14 +14,14 @@ open class DataNode: Node {
     
     public init(data: String, baseUri: String?) {
         super.init(baseUri: baseUri)
-        self.attributes.put(string: data, forKey: DataNode.DATA_KEY)
+        attr(DataNode.DATA_KEY, setValue: data)
     }
     
     open override var nodeName: String { return "#data" }
     
     open var wholeData: String {
-        get { return attributes.get(byTag: DataNode.DATA_KEY)!.value }
-        set { self.attributes.put(string: newValue, forKey: DataNode.DATA_KEY) }
+        get { return attributes?.get(byTag: DataNode.DATA_KEY)?.value ?? "" }
+        set { self.attr(DataNode.DATA_KEY, setValue: newValue) }
     }
     
     open override func outerHTMLHead(accum: StringBuilder, depth: Int, outputSettings: OutputSettings) {

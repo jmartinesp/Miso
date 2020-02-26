@@ -356,9 +356,11 @@ enum HTMLTreeBuilderState: String, CustomStringConvertible {
                         treeBuilder.error(self)
                         // merge attributes onto real html
                         let html: Element = treeBuilder.stack[0]
-                        for attribute in startTag.attributes {
-                            if (!html.has(attr: attribute.key)) {
-                                html.attributes[attribute.key] = attribute.value
+                        if let attributes = startTag.attributes {
+                            for attribute in attributes {
+                                if !html.has(attr: attribute.key) {
+                                    html.ensureAttributes()[attribute.key] = attribute.value
+                                }
                             }
                         }
                     } else if Constants.InBodyStartToHead.contains(name) {
@@ -372,9 +374,11 @@ enum HTMLTreeBuilderState: String, CustomStringConvertible {
                         } else {
                             treeBuilder.framesetOk = false
                             let body: Element = stack[1]
-                            for attribute: Attribute in startTag.attributes.values {
-                                if (!body.has(attr: attribute.tag)) {
-                                    body.attr(attribute.tag, setValue: attribute.value)
+                            if let attributes = startTag.attributes?.values {
+                                for attribute: Attribute in attributes {
+                                    if (!body.has(attr: attribute.tag)) {
+                                        body.attr(attribute.tag, setValue: attribute.value)
+                                    }
                                 }
                             }
                         }
@@ -512,23 +516,25 @@ enum HTMLTreeBuilderState: String, CustomStringConvertible {
                         
                         treeBuilder.tokeniser.selfClosingFlagAcknowledged = true
                         treeBuilder.process(startTag: "form")
-                        if (startTag.attributes.keys.contains("action")) {
+                        if (startTag.attributes?.keys.contains("action") == true) {
                             if let form: Element = treeBuilder.formElement {
-                                form.attr("action", setValue: startTag.attributes["action"]!.value)
+                                form.attr("action", setValue: startTag.attributes!["action"]!.value)
                             }
                         }
                         treeBuilder.process(startTag: "hr")
                         treeBuilder.process(startTag: "label")
                         // hope you like english.
-                        let prompt: String = startTag.attributes["prompt"]?.value ?? "This is a searchable index. Enter search keywords: "
+                        let prompt: String = startTag.attributes?["prompt"]?.value ?? "This is a searchable index. Enter search keywords: "
                         
                         treeBuilder.process(token: build(Token.Character()) { $0.data = prompt })
                         
                         // input
                         let inputAttribs: Attributes = Attributes()
-                        for attr in startTag.attributes {
-                            if (!Constants.InBodyStartInputAttribs.contains(attr.key)) {
-                                inputAttribs[attr.key] = attr.value
+                        if let attributes = startTag.attributes {
+                            for attr in attributes {
+                                if (!Constants.InBodyStartInputAttribs.contains(attr.key)) {
+                                    inputAttribs[attr.key] = attr.value
+                                }
                             }
                         }
                         inputAttribs.put(string: "isindex", forKey: "name")
@@ -696,7 +702,9 @@ enum HTMLTreeBuilderState: String, CustomStringConvertible {
                             }
                             
                             let adopter: Element = Element(tag: formatEl!.tag, baseUri: treeBuilder.baseUri)
-                            adopter.attributes.append(dictionary: formatEl!.attributes)
+                            if let attributes = formatEl?.attributes {
+                                adopter.ensureAttributes().append(dictionary: attributes)
+                            }
                             var childNodes: [Node] = furthestBlock!.childNodes
                             for childNode: Node in childNodes {
                                 adopter.append(childNode: childNode) // append will reparent. thus the clone to avoid concurrent mod.
@@ -898,7 +906,7 @@ enum HTMLTreeBuilderState: String, CustomStringConvertible {
                     } else if (["style", "script"].contains(name)) {
                         return treeBuilder.process(token: token, state: .InHead)
                     } else if (name == "input") {
-                        if (startTag.attributes.get(byTag: "type")?.value.lowercased() != "hidden") {
+                        if (startTag.attributes?.get(byTag: "type")?.value.lowercased() != "hidden") {
                             return anythingElse(token, treeBuilder)
                         } else {
                             treeBuilder.insert(empty: startTag)

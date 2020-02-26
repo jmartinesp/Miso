@@ -18,17 +18,7 @@ open class Node: Equatable, Hashable, CustomStringConvertible, CustomDebugString
     
     public weak var parentNode: Node?
     public var childNodes = [Node]()
-    private(set) var hasAttributes = false
-    private lazy var _attributes: Attributes = { Attributes() }()
-    public var attributes: Attributes {
-        set {
-            hasAttributes = true
-            _attributes = newValue
-        }
-        get {
-            return _attributes
-        }
-    }
+    public var attributes: Attributes?
     private var _baseUri: String?
     var baseUri: String? {
         get {
@@ -64,10 +54,17 @@ open class Node: Equatable, Hashable, CustomStringConvertible, CustomDebugString
     open func xpath(_ xPathSelector: String) -> Nodes {
         return XPathSelector.select(using: xPathSelector, from: self)
     }
+    
+    func ensureAttributes() -> Attributes {
+        guard let attributes = self.attributes else {
+            self.attributes = Attributes()
+            return self.attributes!
+        }
+        return attributes
+    }
 
     open func attr(_ name: String) -> String? {
-        
-        if let value = attributes.get(byTag: name)?.value {
+        if let value = attributes?.get(byTag: name)?.value {
             return value
         } else if name.lowercased().hasPrefix("abs:") {
             return self.absUrl(forAttributeKey: name.replacingOccurrences(of: "abs:", with: ""))
@@ -78,26 +75,24 @@ open class Node: Equatable, Hashable, CustomStringConvertible, CustomDebugString
     
     @discardableResult
     open func attr(_ name: String, setValue value: String) -> Node {
-        attributes.put(string: value, forKey: name)
+        ensureAttributes().put(string: value, forKey: name)
         return self
     }
     
     open func has(attr name: String) -> Bool {
         if name.hasPrefix("abs:") {
             let name = name.replacingOccurrences(of: "abs:", with: "")
-            if attributes.hasKeyIgnoreCase(key: name) && self.absUrl(forAttributeKey: name) != nil {
+            if attributes?.hasKeyIgnoreCase(key: name) == true && self.absUrl(forAttributeKey: name) != nil {
                 return true
             }
         }
         
-        return attributes.hasKeyIgnoreCase(key: name)
+        return attributes?.hasKeyIgnoreCase(key: name) == true
     }
     
     @discardableResult
     open func removeAttr(_ name: String) -> Node {
-        guard has(attr: name) else { return self }
-        
-        attributes[name] = nil
+        attributes?[name] = nil
         
         return self
     }

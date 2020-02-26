@@ -366,8 +366,8 @@ class ElementTest: XCTestCase {
         XCTAssertEqual("", div.attr("true"))
         
         let attributes = div.attributes
-        XCTAssertEqual(1, attributes.count)
-        XCTAssert(attributes.values.first is BooleanAttribute)
+        XCTAssertEqual(1, attributes?.count)
+        XCTAssert(attributes?.values.first is BooleanAttribute)
         
         XCTAssertFalse(div.has(attr: "false"))
         
@@ -546,7 +546,7 @@ class ElementTest: XCTestCase {
         XCTAssertEqual(nil, dataset?[""]) // data- is not a data attribute
         
         let p = doc.select("p").first
-        XCTAssertEqual(0, p?.dataset.count)
+        XCTAssertEqual(0, p?.dataset?.count)
         
     }
     

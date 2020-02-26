@@ -58,15 +58,15 @@ open class TreeBuilder {
     @discardableResult
     func process(startTag name: String, attributes: Attributes? = nil) -> Bool {
         if currentToken != nil && currentToken! === start {
-            if attributes != nil {
-                return process(token: Token.StartTag().nameAttr(name: name, attributes: attributes!))
+            if let attributes = attributes {
+                return process(token: Token.StartTag().nameAttr(name: name, attributes: attributes))
             } else {
                 return process(token: build(Token.StartTag()) { $0.tagName = name })
             }
         }
         start.reset()
-        if attributes != nil {
-            start.nameAttr(name: name, attributes: attributes!)
+        if let attributes = attributes {
+            start.nameAttr(name: name, attributes: attributes)
         } else {
             start.tagName = name
         }

@@ -17,21 +17,21 @@ class AttributeParseText: XCTestCase {
         
         let element = Miso.parse(html: html).elements(byTag: "a")[0]
         let attributes = element.attributes
-        XCTAssertEqual(7, attributes.count)
-        XCTAssertEqual("123", attributes.get(byTag: "id")?.value)
-        XCTAssertEqual("baz = 'bar'", attributes.get(byTag: "class")?.value)
-        XCTAssertEqual("border: 2px", attributes.get(byTag: "style")?.value)
-        XCTAssertEqual("", attributes.get(byTag: "qux")?.value)
-        XCTAssertEqual("", attributes.get(byTag: "zim")?.value)
-        XCTAssertEqual("12", attributes.get(byTag: "foo")?.value)
-        XCTAssertEqual("18", attributes.get(byTag: "mux")?.value)
+        XCTAssertEqual(7, attributes?.count)
+        XCTAssertEqual("123", attributes?.get(byTag: "id")?.value)
+        XCTAssertEqual("baz = 'bar'", attributes?.get(byTag: "class")?.value)
+        XCTAssertEqual("border: 2px", attributes?.get(byTag: "style")?.value)
+        XCTAssertEqual("", attributes?.get(byTag: "qux")?.value)
+        XCTAssertEqual("", attributes?.get(byTag: "zim")?.value)
+        XCTAssertEqual("12", attributes?.get(byTag: "foo")?.value)
+        XCTAssertEqual("18", attributes?.get(byTag: "mux")?.value)
     }
     
     func testHandlesNewLinesAndReturns() {
         let html = "<a\r\nfoo='bar\r\nqux'\r\nbar\r\n=\r\ntwo>One</a>"
         let element = Miso.parse(html: html).elements(byTag: "a").first
         
-        XCTAssertEqual(2, element?.attributes.count)
+        XCTAssertEqual(2, element?.attributes?.count)
         XCTAssertEqual("bar\r\nqux", element?.attr("foo"))
         XCTAssertEqual("two", element?.attr("bar"))
     }
@@ -40,7 +40,7 @@ class AttributeParseText: XCTestCase {
         let html = "<a />"
         let element = Miso.parse(html: html).elements(byTag: "a").first
         let attributes = element?.attributes
-        XCTAssertEqual(0, attributes?.count)
+        XCTAssertNil(attributes)
     }
     
     func testCanStartWithEq() {

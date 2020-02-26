@@ -49,25 +49,12 @@ open class Token: CustomStringConvertible {
             }
         }
         private(set) var normalizedName: String?
-        private(set) var hasAttributes = false
         var pendingAttributeName: String?
         var pendingAttributeValue: String?
         var hasEmptyAttributeValue = false
         var hasPendingAttributeValue = false
         var selfClosing = false
-        private lazy var _attributes: Attributes = { () -> Attributes in
-            hasAttributes = true
-            return Attributes()
-        }()
-        var attributes: Attributes {
-            set {
-                hasAttributes = true
-                _attributes = newValue
-            }
-            get {
-                _attributes
-            }
-        }
+        var attributes: Attributes?
         
         override var type: TokenType { fatalError() }
         
@@ -80,10 +67,16 @@ open class Token: CustomStringConvertible {
             hasEmptyAttributeValue = false
             hasPendingAttributeValue = false
             selfClosing = false
-            if hasAttributes {
-                attributes = Attributes()
-            }
+            attributes = nil
             return self
+        }
+        
+        func ensureAttributes() -> Attributes {
+            guard let attributes = self.attributes else {
+                self.attributes = Attributes()
+                return self.attributes!
+            }
+            return attributes
         }
         
         func newAttribute() {
@@ -101,7 +94,7 @@ open class Token: CustomStringConvertible {
                         attribute = BooleanAttribute(tag: trimmedName)
                     }
                     
-                    attributes[trimmedName] = attribute
+                    ensureAttributes()[trimmedName] = attribute
                 }
                 
                 pendingAttributeName = nil
@@ -147,10 +140,10 @@ open class Token: CustomStringConvertible {
         }
         
         override var description: String {
-            if attributes.isEmpty {
+            if attributes.isNilOrEmpty {
                 return "<\(tagName ?? "null")>"
             } else {
-                return "<\(tagName ?? "null") \(attributes.html)>"
+                return "<\(tagName ?? "null") \(attributes!.html)>"
             }
         }
     }

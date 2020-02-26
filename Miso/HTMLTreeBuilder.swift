@@ -161,7 +161,7 @@ class HTMLTreeBuilder: TreeBuilder, CustomStringConvertible {
             return element
         }
         
-        let attributes = startTag.hasAttributes ? settings.normalize(attributes: startTag.attributes) : nil
+        let attributes = startTag.attributes != nil ? settings.normalize(attributes: startTag.attributes!) : nil
         let element = Element(tag: Tag.valueOf(tagName: startTag.tagName ?? "", settings: settings),
                               baseUri: baseUri, attributes: attributes)
         insert(element)
@@ -185,7 +185,8 @@ class HTMLTreeBuilder: TreeBuilder, CustomStringConvertible {
     @discardableResult
     func insert(empty startTag: Token.StartTag) -> Element {
         let tag = Tag.valueOf(tagName: startTag.tagName ?? "", settings: settings)
-        let element = Element(tag: tag, baseUri: baseUri, attributes: settings.normalize(attributes: startTag.attributes))
+        let attributes = startTag.attributes != nil ? settings.normalize(attributes: startTag.attributes!) : nil
+        let element = Element(tag: tag, baseUri: baseUri, attributes: attributes)
         insert(node: element)
         
         if startTag.selfClosing {
@@ -204,7 +205,8 @@ class HTMLTreeBuilder: TreeBuilder, CustomStringConvertible {
     @discardableResult
     func insert(form startTag: Token.StartTag, onStack: Bool) -> Element {
         let tag = Tag.valueOf(tagName: startTag.tagName ?? "", settings: settings)
-        let formElement = FormElement(tag: tag, baseUri: baseUri, attributes: settings.normalize(attributes: startTag.attributes))
+        let attributes = startTag.attributes != nil ? settings.normalize(attributes: startTag.attributes!) : nil
+        let formElement = FormElement(tag: tag, baseUri: baseUri, attributes: attributes)
         self.formElement = formElement
         
         insert(node: formElement)
@@ -572,7 +574,9 @@ class HTMLTreeBuilder: TreeBuilder, CustomStringConvertible {
             skip = false // can only skip increment from 4.
             let newElement = insert(startTag: entry!.nodeName) // todo: avoid fostering here?
             // newEl.namespace(entry.namespace()); // todo: namespaces
-            newElement.attributes.append(dictionary: entry!.attributes)
+            if let attributes = entry!.attributes {
+                newElement.ensureAttributes().append(dictionary: attributes)
+            }
             
             // 10. replace entry with new entry
             formattingElements[pos] = newElement
