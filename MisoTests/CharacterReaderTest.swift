@@ -12,13 +12,14 @@ import XCTest
 class CharacterReaderTest: XCTestCase {
     
     func testConsume() {
-        let reader = CharacterReader(input: "one")
-        XCTAssertEqual(0, reader.pos)
+        let input = "one"
+        let reader = CharacterReader(input: input)
+        XCTAssertEqual(input.startIndex, reader.index)
         XCTAssertEqual("o", reader.current)
         XCTAssertEqual("o", reader.consume())
-        XCTAssertEqual(1, reader.pos)
+        XCTAssertEqual(input.index(after: input.startIndex), reader.index)
         XCTAssertEqual("n", reader.current)
-        XCTAssertEqual(1, reader.pos)
+        XCTAssertEqual(input.index(after: input.startIndex), reader.index)
         XCTAssertEqual("n", reader.consume())
         XCTAssertEqual("e", reader.consume())
         

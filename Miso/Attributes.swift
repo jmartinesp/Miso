@@ -41,8 +41,8 @@ open class Attribute: CustomStringConvertible, Equatable, Hashable {
     }
     
     private func shouldCollapseAttribute(settings: OutputSettings) -> Bool {
-        return (value.isEmpty || value.lowercased() == tag.lowercased())
-            && settings.syntax == .html && isBoolAttribute
+        return settings.syntax == .html && isBoolAttribute &&
+            (value.isEmpty || value.caseInsensitiveCompare(tag) == .orderedSame)
     }
     
     open var isBoolAttribute: Bool {
@@ -129,8 +129,8 @@ public class Attributes: OrderedDictionary<String, Attribute>, Equatable {
     }
     
     func findLowercasedKey(key: String) -> String? {
-        let lowercasedKey = key.lowercased()
-        return self.keys.first { $0.lowercased() == lowercasedKey }
+        return self.keys.first { $0.caseInsensitiveCompare(key) == .orderedSame }
+        //qreturn self.keys.first { $0.lowercased() == lowercasedKey }
     }
     
     func findLowercasedValue(value: String) -> Attribute? {

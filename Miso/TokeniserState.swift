@@ -101,21 +101,16 @@ enum TokeniserState: TokeniserStateProtocol {
             switch (r.current) {
             case UnicodeScalar.Ampersand:
                 t.advanceTransition(newState: .CharacterReferenceInData)
-                break
             case UnicodeScalar.LessThan:
                 t.advanceTransition(newState: .TagOpen)
-                break
             case TokeniserStateVars.nullScalar:
                 t.error(state: self) // NOT replacement character (oddly?)
                 t.emit(r.consume())
-                break
             case TokeniserStateVars.eof:
                 t.emit(Token.EOF())
-                break
             default:
                 let data: String = r.consumeData()
                 t.emit(data)
-                break
             }
             break
         case .CharacterReferenceInData:
@@ -1617,7 +1612,7 @@ enum TokeniserState: TokeniserStateProtocol {
         }
     }
     
-    private static func readRawData(_ t: Tokeniser, _ r: CharacterReader, _ current: TokeniserState, _ advance: TokeniserState)throws {
+    private static func readRawData(_ t: Tokeniser, _ r: CharacterReader, _ current: TokeniserState, _ advance: TokeniserState) {
         switch (r.current) {
         case UnicodeScalar.LessThan:
             t.advanceTransition(newState: advance)
@@ -1637,7 +1632,7 @@ enum TokeniserState: TokeniserStateProtocol {
         }
     }
     
-    private static func readCharRef(_ t: Tokeniser, _ advance: TokeniserState)throws {
+    private static func readCharRef(_ t: Tokeniser, _ advance: TokeniserState) {
         let c = t.consumeCharacterReference(additionalAllowedCharacter: nil, inAttributes: false)
         if (c.isEmpty) {
             t.emit(UnicodeScalar.Ampersand)

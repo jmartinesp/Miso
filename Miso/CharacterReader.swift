@@ -23,7 +23,6 @@ public class CharacterReader: CustomStringConvertible {
     
     public var input: String.UnicodeScalarView
     
-    var pos: Int { return input.distance(from: input.startIndex, to: index) }
     var markIndex: String.UnicodeScalarView.Index
     var index: String.UnicodeScalarView.Index
     
@@ -387,7 +386,7 @@ public class CharacterReader: CustomStringConvertible {
     }
     
     func containsIgnoreCase(sequence: String) -> Bool {
-        return rawInputLowercased.contains(sequence.lowercased())
+        return rawInputLowercased.localizedCaseInsensitiveContains(sequence)
     }
     
     public var description: String {

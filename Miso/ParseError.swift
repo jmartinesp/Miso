@@ -10,16 +10,14 @@ import Foundation
 
 open class ParseError: LocalizedError {
     
-    public let pos: Int
     public let errorMessage: String
     
-    public init(pos: Int, message: String) {
-        self.pos = pos
+    public init(message: String) {
         self.errorMessage = message
     }
     
     public var errorDescription: String? {
-        return "\(pos): \(errorMessage)"
+        return "\(errorMessage)"
     }
     
 }

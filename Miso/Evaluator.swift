@@ -25,7 +25,7 @@ public class Evaluator {
         let tagName: String
         
         func matches(root: Element?, and element: Element) -> Bool {
-            return element.tag.normalizedName == tagName.lowercased()
+            return element.tag.normalizedName.caseInsensitiveCompare(tagName) == .orderedSame
         }
         
         var description: String {
@@ -55,7 +55,7 @@ public class Evaluator {
         let id: String
         
         func matches(root: Element?, and element: Element) -> Bool {
-            return element.id?.lowercased() == id.lowercased()
+            return element.id?.caseInsensitiveCompare(id) == .orderedSame
         }
         
         var description: String {

@@ -674,11 +674,11 @@ class HTMLParserTest: XCTestCase {
         
         let errors = parser.errors
         XCTAssertEqual(5, errors.count)
-        XCTAssertEqual("20: Attributes incorrectly present on end tag", errors[0].localizedDescription)
-        XCTAssertEqual("35: Unexpected token [Doctype] when in state [InBody]", errors[1].localizedDescription)
-        XCTAssertEqual("36: Invalid character reference: invalid named reference 'arrgh'", errors[2].localizedDescription)
-        XCTAssertEqual("50: Self closing flag not acknowledged", errors[3].localizedDescription)
-        XCTAssertEqual("60: Unexpectedly reached end of file (EOF) in input state [TagName]", errors[4].localizedDescription)
+        XCTAssertEqual("Attributes incorrectly present on end tag", errors[0].localizedDescription)
+        XCTAssertEqual("Unexpected token [Doctype] when in state [InBody]", errors[1].localizedDescription)
+        XCTAssertEqual("Invalid character reference: invalid named reference 'arrgh'", errors[2].localizedDescription)
+        XCTAssertEqual("Self closing flag not acknowledged", errors[3].localizedDescription)
+        XCTAssertEqual("Unexpectedly reached end of file (EOF) in input state [TagName]", errors[4].localizedDescription)
 #endif
     }
         
@@ -690,9 +690,9 @@ class HTMLParserTest: XCTestCase {
         
         let errors = parser.errors
         XCTAssertEqual(3, errors.count)
-        XCTAssertEqual("20: Attributes incorrectly present on end tag", errors[0].localizedDescription)
-        XCTAssertEqual("35: Unexpected token [Doctype] when in state [InBody]", errors[1].localizedDescription)
-        XCTAssertEqual("36: Invalid character reference: invalid named reference 'arrgh'", errors[2].localizedDescription)
+        XCTAssertEqual("Attributes incorrectly present on end tag", errors[0].localizedDescription)
+        XCTAssertEqual("Unexpected token [Doctype] when in state [InBody]", errors[1].localizedDescription)
+        XCTAssertEqual("Invalid character reference: invalid named reference 'arrgh'", errors[2].localizedDescription)
 #endif
     }
     

@@ -77,7 +77,7 @@ final class Tokeniser {
         isEmitPending = true
         
         if let startTag = token as? Token.StartTag {
-            lastStartTag = startTag.tagName
+            lastStartTag = startTag.normalizedName
             
             if startTag.selfClosing {
                 selfClosingFlagAcknowledged = false
@@ -237,7 +237,7 @@ final class Tokeniser {
     }
     
     var isAppropriateEndTagToken: Bool {
-        return lastStartTag != nil && tagPending?.tagName?.lowercased() == lastStartTag?.lowercased()
+        return lastStartTag != nil && tagPending?.normalizedName == lastStartTag
     }
     
     var appropriateEndTagName: String? {
@@ -280,25 +280,25 @@ final class Tokeniser {
     
     func error(state: TokeniserState) {
         if errors.canAddError {
-            errors.append(ParseError(pos: reader.pos, message: "Unexpected character '\(reader.current.string)' in input state [\(state)]"))
+            errors.append(ParseError(message: "Unexpected character '\(reader.current.string)' in input state [\(state)]"))
         }
     }
     
     func eofError(state: TokeniserState) {
         if (errors.canAddError) {
-            errors.append(ParseError(pos: reader.pos, message: "Unexpectedly reached end of file (EOF) in input state [\(state)]"))
+            errors.append(ParseError(message: "Unexpectedly reached end of file (EOF) in input state [\(state)]"))
         }
     }
     
     private func characterReferenceError(message: String) {
         if errors.canAddError {
-            errors.append(ParseError(pos: reader.pos, message: "Invalid character reference: \(message)"))
+            errors.append(ParseError(message: "Invalid character reference: \(message)"))
         }
     }
     
     private func error(message: String) {
         if errors.canAddError {
-            errors.append(ParseError(pos: reader.pos, message: message))
+            errors.append(ParseError(message: message))
         }
     }
     

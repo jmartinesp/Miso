@@ -57,7 +57,10 @@ open class HTTPResponseParser: ResponseParserProtocol {
                 decodingCharset = encoding
             }
         }
-        
+        let start = Date()
+        defer {
+            print("Elapsed: \(Date().timeIntervalSince(start))s")
+        }
         // Can parse String
         if let htmlData = String(data: data!, encoding: decodingCharset) {
             let document = request.parser.parseInput(html: htmlData, baseUri: rawRequest.url.absoluteString)
