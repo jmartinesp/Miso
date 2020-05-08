@@ -530,7 +530,7 @@ public class HTTPConnection: Connection, CustomStringConvertible {
                 var bodyContents = ""
                 if needsMultipart {
                     let boundary = randomBoundary()
-                    headers[HTTPConnection.CONTENT_TYPE] = HTTPConnection.MULTIPART_FORM_DATA + "; boundary=" + boundary
+                    nioRequest.headers.add(name: HTTPConnection.CONTENT_TYPE, value: HTTPConnection.MULTIPART_FORM_DATA + "; boundary=" + boundary)
                     bodyContents += params.map { (pair: (key: String, value: String)) -> String in
                         let key = pair.key.addingPercentEncoding(withAllowedCharacters: .alphanumerics)!
                         var base = "--\(boundary)\r\nContent-Disposition: form-data; name=\"\(key)\""
@@ -547,8 +547,8 @@ public class HTTPConnection: Connection, CustomStringConvertible {
                     // URL-Encoded
                     var allowedCharset = CharacterSet.urlQueryAllowed
                     allowedCharset.remove(charactersIn: "!;/?:@&=+$, ")
-                    if headers[HTTPConnection.CONTENT_TYPE] == nil {
-                        headers[HTTPConnection.CONTENT_TYPE] = HTTPConnection.FORM_URL_ENCODED + "; charset=" + postDataEncoding.displayName
+                    if !nioRequest.headers.contains(name: HTTPConnection.CONTENT_TYPE) {
+                        nioRequest.headers.add(name: HTTPConnection.CONTENT_TYPE, value: HTTPConnection.FORM_URL_ENCODED + "; charset=" + postDataEncoding.displayName)
                     }
                     bodyContents = params.map { (pair: (key: String, value: String)) -> String in
                         let key = pair.key.addingPercentEncoding(withAllowedCharacters: allowedCharset)!
@@ -576,13 +576,13 @@ public class HTTPConnection: Connection, CustomStringConvertible {
             }
             
             // User-Agent
-            if !headers.keys.contains(HTTPConnection.USER_AGENT) {
+            if !nioRequest.headers.contains(name: HTTPConnection.USER_AGENT) {
                 nioRequest.headers.remove(name: HTTPConnection.USER_AGENT)
                 nioRequest.headers.add(name: HTTPConnection.USER_AGENT, value: HTTPConnection.DEFAULT_USER_AGENT)
             }
                                     
             // Cookies
-            if !headers.keys.contains(HTTPConnection.COOKIE) {
+            if !nioRequest.headers.contains(name: HTTPConnection.COOKIE) {
                 let cookieStorage = HTTPCookieStorage.shared
                 for cookie in cookies {
                     if let cookie = HTTPCookie(properties: [.name: cookie.key, .value: cookie.value]) {
@@ -592,8 +592,10 @@ public class HTTPConnection: Connection, CustomStringConvertible {
             
                 if let matchingCookies = cookieStorage.cookies(for: url) {
                     let cookieHeader = matchingCookies.map { "\($0.name)=\($0.value)" }.joined("; ")
-                    nioRequest.headers.remove(name: HTTPConnection.COOKIE)
-                    nioRequest.headers.add(name: HTTPConnection.COOKIE, value: cookieHeader)
+                    if !cookieHeader.isEmpty {
+                        nioRequest.headers.remove(name: HTTPConnection.COOKIE)
+                        nioRequest.headers.add(name: HTTPConnection.COOKIE, value: cookieHeader)
+                    }
                 }
             }
             
